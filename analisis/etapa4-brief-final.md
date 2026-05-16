@@ -83,17 +83,27 @@ Integración con plataformas de contenido, publicación automática, workspaces 
 
 ## 6. Stack Técnico
 
-| Capa | Tecnología |
-|------|-----------|
-| Frontend | React (Vite) |
-| Backend | NestJS (TypeScript) |
-| Base de datos + Auth | Supabase (MongoDB + OAuth + Storage) |
-| IA narrativa | Claude API (claude-sonnet-4-6) |
-| Generación de imágenes | Replicate — Flux Schnell |
-| Text-to-Speech | ElevenLabs API |
-| Ensamblado de video | FFmpeg serverless (Modal) |
-| Pagos | Stripe |
-| Deploy | Vercel (frontend) + Railway (backend) |
+# Stack Final Recomendado
+
+| Capa | Tecnología | Motivo |
+|---|---|---|
+| Frontend | React + Vite | rápido, simple, moderno |
+| UI | TailwindCSS + shadcn/ui | velocidad de desarrollo |
+| Backend API | NestJS (TypeScript) | arquitectura sólida y escalable |
+| Base de datos | PostgreSQL | relacional y excelente para SaaS |
+| Backend-as-a-Service | Supabase | auth + DB + storage |
+| Auth | Supabase Auth (Google OAuth) | login instantáneo |
+| Storage | Supabase Storage | imágenes/audio/video |
+| Queue | Redis + BullMQ | procesamiento async |
+| IA narrativa | Claude + Gemini Flash híbrido | calidad + control de costos |
+| Generación imágenes | Replicate + Flux Schnell | rapidez MVP |
+| Text-to-Speech | ElevenLabs | mejor calidad inicial |
+| Render de video | Modal + FFmpeg | workers serverless |
+| Deploy frontend | Vercel | deploy inmediato |
+| Deploy backend | Railway | simple para NestJS |
+| Analytics producto | PostHog | métricas MVP |
+| Error tracking | Sentry | observabilidad |
+| Billing | Stripe | suscripciones |
 
 ---
 
