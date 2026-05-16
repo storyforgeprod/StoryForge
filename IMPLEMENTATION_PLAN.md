@@ -36,7 +36,7 @@ Este documento define **cómo** se va a construir StoryForge, cuándo, en qué o
 | **1.1** | Crear repositorio GitHub/ADO con estructura base (React + NestJS) | DevOps | 2h | ⏳ | Setup |
 | **1.2** | Configurar Supabase: DB, Storage, Auth (Google OAuth) | Backend | 3h | ⏳ | Setup |
 | **1.3** | Configurar variables de entorno y secrets | Backend | 1h | ⏳ | Setup |
-| **1.4** | Setup de CI/CD: Vercel (frontend) + Railway (backend) | DevOps | 3h | ⏳ | Setup |
+| **1.4** | Setup de CI/CD: Render (frontend y backend) | DevOps | 3h | ⏳ | Setup |
 | **1.5** | Implementar Historia 3.1: Setup del proyecto (5 SP) | Backend | 5h | ⏳ | Feature |
 | **1.6** | Endpoint POST `/generate/script` — Integración Claude | Backend | 5h | ⏳ | Feature |
 | **1.7** | Testing local del endpoint `/generate/script` | Backend | 2h | ⏳ | Testing |
