@@ -87,7 +87,7 @@ Integración con plataformas de contenido, publicación automática, workspaces 
 |------|-----------|
 | Frontend | React (Vite) |
 | Backend | NestJS (TypeScript) |
-| Base de datos + Auth | Supabase (PostgreSQL + OAuth + Storage) |
+| Base de datos + Auth | Supabase (MongoDB + OAuth + Storage) |
 | IA narrativa | Claude API (claude-sonnet-4-6) |
 | Generación de imágenes | Replicate — Flux Schnell |
 | Text-to-Speech | ElevenLabs API |
