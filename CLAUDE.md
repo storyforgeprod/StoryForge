@@ -2,31 +2,68 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
-## Project Overview
+## 🚀 Project Overview
 
-StoryForge is a product in early definition stage. The repository currently contains a set of Claude Code slash commands that implement a multi-agent product discovery pipeline.
+**StoryForge** is a SaaS MVP that converts long-form story text (webtoons, manhwas, web novels) into short-form narrated videos (YouTube Shorts format) in <5 minutes, powered by AI.
 
-## Azure DevOps
+**Status:** MVP Implementation Phase (Weeks 1-6)  
+**Tech Stack:** React + Vite + NestJS + Supabase + Claude + Replicate + ElevenLabs + FFmpeg  
+**Target Launch:** Week 6 (staging ready for validation)
 
-Remote repository: `https://dev.azure.com/ia-aplicada-grupo-04/StoryForge`
-Credentials are stored in Windows Credential Manager for `dev.azure.com`.
+## 🔑 Azure DevOps
 
-## Custom Slash Commands
+**Remote Repository:**
+```
+https://dev.azure.com/ia-aplicada-grupo-04/StoryForge
+```
 
-Located in `.claude/commands/`. These agents form a sequential pipeline for product discovery and documentation:
+**PAT Token (Configured):**
+```
+✅ Configured in Windows Credential Manager
+✅ Workspace: ia-aplicada-grupo-04
+✅ Project: StoryForge
+```
 
-| Command | Role | Input | Output |
-|---|---|---|---|
-| `/product-analyst` | Senior Product Researcher | Raw idea from user | Blind spots + clarification questions |
-| `/product-strategist` | VP of Product / PLG Strategist | Output from analyst | JTBD, North Star Metric, risk matrix |
-| `/product-architect` | Senior TPM | Output from strategist | MVP scope (MoSCoW), epics, user stories, tech stack |
-| `/product-writer` | Technical Writer / PM | Output from strategist + architect | Full Product Brief + Azure DevOps-ready backlog |
-| `/product-pipeline` | Pipeline Orchestrator | Raw idea from user | Runs all 4 stages sequentially with user confirmation between each |
+**Backlog Management:**
+- Épicas, Historias y Criterios de Aceptación listos en ADO
+- Sincronización bidireccional: GitHub ↔ Azure DevOps
+- Weekly burn-down charts y velocity tracking
 
-### Pipeline usage
+## 📚 Essential Documentation
 
-**Option A — Manual:** Run the commands in order, passing the output of each agent as input to the next.
+**Start here:**
+1. [QUICK_START.md](QUICK_START.md) — Setup local en 10 minutos
+2. [IMPLEMENTATION_PLAN.md](IMPLEMENTATION_PLAN.md) — Hoja de ruta de 6 semanas con rastreamiento
+3. [STACK_INIT.md](STACK_INIT.md) — Tech stack, versiones, estructura de directorios
+4. [DEVELOPMENT_GUIDELINES.md](DEVELOPMENT_GUIDELINES.md) — Convenciones, patrones, testing
+5. [AZURE_DEVOPS_CONFIG.md](AZURE_DEVOPS_CONFIG.md) — Setup y manejo del backlog
+6. [MCP_INTEGRATION.md](MCP_INTEGRATION.md) — Integración con Claude para acelerar dev
+7. [OPTIONAL_COMPONENTS.md](OPTIONAL_COMPONENTS.md) — Qué puede sacarse/modificarse
 
-**Option B — Automated:** Use `/product-pipeline` to run all 4 stages in a single session. The orchestrator presents the output of each stage, waits for explicit user confirmation ("sí / continuar / ok"), incorporates any feedback, then passes the result automatically to the next stage.
+**Reference Files:**
+- `etapa4-brief-final.md` — Product Brief (JTBD, North Star Metric, exit criteria)
+- `backlog-azure-devops.md` — 3 épicas, 9 historias, 66 story points
 
-The `/product-writer` final output (Stage 4) includes epics and user stories formatted for direct import into Azure DevOps as work items (Epic → User Story → Acceptance Criteria).
+## 🎯 Custom Slash Commands (Legacy — Fase de Discovery)
+
+Located in `.claude/commands/`. These agents remain available for future product discovery:
+
+| Command | Role | Phase |
+|---|---|---|
+| `/product-analyst` | Research + validation | Pre-MVP ✅ Complete |
+| `/product-strategist` | Strategy + metrics | Pre-MVP ✅ Complete |
+| `/product-architect` | Technical planning | Pre-MVP ✅ Complete |
+| `/product-writer` | Documentation | Pre-MVP ✅ Complete |
+| `/product-pipeline` | Orchestrator | Pre-MVP ✅ Complete |
+
+**Status:** Discovery phase COMPLETE. Now in Implementation phase.
+
+## 🤖 Current Development Mode
+
+**Using MCP for Development Acceleration:**
+- Claude can access project structure, API schema, DB schema
+- Automatic tests execution and validation
+- Code generation following guidelines + ADO story refs
+- Deploy automation to Render/Vercel
+
+See [MCP_INTEGRATION.md](MCP_INTEGRATION.md) for details.
