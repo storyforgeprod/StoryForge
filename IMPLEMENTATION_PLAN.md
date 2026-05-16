@@ -53,7 +53,7 @@ Este documento define **cómo** se va a construir StoryForge, cuándo, en qué o
 | **2.4** | Rate limiting y manejo de errores en endpoints | Backend | 3h | ⏳ | Feature |
 | **2.5** | Testing E2E local: texto → guión → imágenes → audio | Backend | 3h | ⏳ | Testing |
 | **2.6** | Documentación de API (Swagger/OpenAPI) | Backend | 2h | ⏳ | Documentation |
-| **2.7** | Deploy Stage 1 a Railway | DevOps | 1h | ⏳ | Deploy |
+| **2.7** | Deploy Stage 1 a Render | DevOps | 1h | ⏳ | Deploy |
 
 **Hito:** Todos los endpoints de IA funcionando y testeados.
 
