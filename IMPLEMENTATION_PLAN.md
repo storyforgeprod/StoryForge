@@ -31,59 +31,98 @@ Este plan es vinculante a:
 
 **REGLA FUNDAMENTAL:** Cada archivo que se use, se cree, se modifique o incida en el desarrollo debe estar documentado en este archivo (IMPLEMENTATION_PLAN.md).
 
-### Qué Documentar Aquí
+### 📂 Estructura de Documentación
+
+```
+StoryForge/
+├── 📌 CORE DOCUMENTATION (Root level)
+│   ├── IMPLEMENTATION_PLAN.md ← Plan maestro + decisiones arquitectónicas
+│   ├── PROGRESS.md ← Tracking semanal
+│   ├── HANDOFF.md ← Setup + contexto técnico
+│   ├── DEVELOPMENT_GUIDELINES.md ← Convenciones de código
+│   ├── OPTIONAL_COMPONENTS.md ← Features removibles
+│   ├── STACK_INIT.md ← Stack autorizado
+│   ├── README.md ← Overview
+│   └── QUICK_START.md ← Setup rápido (10 min)
+│
+└── 📚 instructions/ ← TODA DOCUMENTACIÓN DE DESARROLLO va aquí
+    ├── 🎯 TASK DOCUMENTATION
+    │   ├── TASK_2_3_PLAN.md ← Arquitectura detallada
+    │   ├── TASK_2_3_RUN_NOW.md ← Quick start (6 pasos)
+    │   ├── TASK_2_2_PLAN.md ← Testing options
+    │   ├── TASK_2_2_RUN_NOW.md ← Testing execution
+    │   ├── TASK_2_1_VERIFIED.md ← Verification report
+    │   └── ... (más tasks conforme se completen)
+    │
+    ├── 📋 SESSION DOCUMENTATION
+    │   ├── SESSION_COMPLETION_2026_05_17.md ← Session recap
+    │   ├── SESSION_SUMMARY_2026_05_16.md ← Day summary
+    │   ├── EXECUTIVE_SUMMARY.md ← Executive overview
+    │   └── ... (nuevo archivo por cada sesión)
+    │
+    └── 📖 REFERENCE GUIDES
+        ├── START_HERE.md ← Entry point para próximo dev
+        ├── NEXT_STEPS_TASK_2_3.md ← Navigation
+        └── ... (guías de continuación)
+```
+
+### Qué Documentar Aquí (IMPLEMENTATION_PLAN.md)
 
 Cualquier cosa que afecte decisiones futuras o continuidad del proyecto:
-- ✅ **Nuevas opciones o decisiones** (ej: "Elegimos Opción A en Task 2.2")
-- ✅ **Archivos creados** (referencia a su propósito en este plan)
+- ✅ **Nuevas opciones o decisiones** (ej: "Elegimos async pattern para Task 2.3")
+- ✅ **Archivos creados** (referencia + ubicación, ej: "instructions/TASK_2_3_PLAN.md")
 - ✅ **Cambios a la arquitectura** (actualizar PHASE que corresponde)
 - ✅ **Problemas encontrados + soluciones** (para evitar repetirlos)
 - ✅ **Bloqueos o dependencias** (qué espera qué)
 - ✅ **Actualizaciones a tareas** (cambios de estimación, prioridad, etc.)
 - ✅ **Decisiones técnicas** (siempre vinculadas a STACK_INIT.md)
 
+**NO documentar aquí:** Pasos ejecutables, código de ejemplo, testing detallado → Eso va en `instructions/TASK_X_*.md`
+
 ### Archivos Clave Este Proyecto (Referencias)
 
-| Archivo | Propósito | Cuándo Revisar |
-|---------|-----------|-----------------|
-| **[STACK_INIT.md](STACK_INIT.md)** | Stack autorizado (tecnologías, versiones) | Antes de agregar dependencies |
-| **[PROGRESS.md](PROGRESS.md)** | Seguimiento semanal (qué se hizo) | Cada sesión de desarrollo |
-| **[HANDOFF.md](HANDOFF.md)** | Contexto + setup para próximo dev | Fin de cada sesión |
-| **[DEVELOPMENT_GUIDELINES.md](DEVELOPMENT_GUIDELINES.md)** | Convenciones de código, patrones | Antes de escribir código |
-| **[OPTIONAL_COMPONENTS.md](OPTIONAL_COMPONENTS.md)** | Features opcionales / removibles | Al planificar nueva feature |
-| **[IMPLEMENTATION_PLAN.md](IMPLEMENTATION_PLAN.md)** | ← **AQUÍ AHORA** — Plan maestro + decisiones | Toda decisión arquitectónica |
+| Archivo | Propósito | Ubicación | Cuándo Revisar |
+|---------|-----------|-----------|-----------------|
+| **[STACK_INIT.md](STACK_INIT.md)** | Stack autorizado (tecnologías, versiones) | Root | Antes de agregar dependencies |
+| **[PROGRESS.md](PROGRESS.md)** | Seguimiento semanal (qué se hizo) | Root | Cada sesión de desarrollo |
+| **[HANDOFF.md](HANDOFF.md)** | Contexto + setup para próximo dev | Root | Fin de cada sesión |
+| **[DEVELOPMENT_GUIDELINES.md](DEVELOPMENT_GUIDELINES.md)** | Convenciones de código, patrones | Root | Antes de escribir código |
+| **[OPTIONAL_COMPONENTS.md](OPTIONAL_COMPONENTS.md)** | Features opcionales / removibles | Root | Al planificar nueva feature |
+| **[IMPLEMENTATION_PLAN.md](IMPLEMENTATION_PLAN.md)** | ← **AQUÍ AHORA** — Plan maestro + decisiones | Root | Toda decisión arquitectónica |
+| **[instructions/TASK_X_PLAN.md](instructions/)** | Arquitectura detallada de task | instructions/ | Al planificar task |
+| **[instructions/TASK_X_RUN_NOW.md](instructions/)** | Quick start ejecutable | instructions/ | Al implementar task |
+| **[instructions/SESSION_COMPLETION_*.md](instructions/)** | Recap de sesión | instructions/ | Fin de cada sesión |
 
 ### Flujo de Actualización
 
-**Cuando hagas cambios:**
-1. Modifica el código / crea archivo
-2. **ACTUALIZA IMPLEMENTATION_PLAN.md** con:
+**Cuando hagas cambios o completes una task:**
+
+1. **Ejecuta el trabajo** (código, testing, etc.)
+2. **Documenta en la TASK:**
+   - Crea `instructions/TASK_X_RUN_NOW.md` con pasos ejecutables
+   - Crea `instructions/TASK_X_PLAN.md` con arquitectura
+3. **Documenta en IMPLEMENTATION_PLAN.md** (AQUÍ) con:
    - Qué se cambió y por qué
-   - Referencia al archivo nuevo/modificado
+   - Referencia al archivo nuevo en `instructions/`
    - Cualquier impacto en fases futuras
-3. Actualiza PROGRESS.md
-4. Actualiza HANDOFF.md
+4. **Actualiza PROGRESS.md** con avance semanal
+5. **Actualiza HANDOFF.md** con cambios clave
 
 **Ejemplo:**
 ```markdown
-### Task 2.2 Completado ✅
-- Ejecuté: Validación de estructura sin API key (npm build EXIT 0 + code inspection)
-- Resultado: GenerateService correctly implements Job creation before API, update after success
-- Cambios: Ninguno al código (testing validó estructura)
-- Siguiente: Task 2.3 - Queue processor (CRITICAL BLOCKER)
-- Archivos afectados: Ninguno, solo validation via npm build
-- Decisión: Full E2E testing deferred to Task 6.6 (staging) — structure validated, logic sound
-
-### Task 2.3 EN PROGRESO 🔄
-- Status: Iniciado 17 mayo 2026
-- Descripción: Implementar Bull Queue Processor para async job execution
-- Criticidad: ⭐⭐⭐ Desbloqueador para Tasks 2.4, 2.5, 2.6
-- Cambios esperados:
-  - Crear: backend/src/generate/generate.queue.processor.ts (processor implementation)
-  - Modificar: backend/src/generate/generate.service.ts (refactor a async pattern)
-  - Modificar: backend/src/generate/generate.module.ts (register processor)
-  - Modificar: backend/src/main.ts (initialize processor on bootstrap)
-- Plan detallado en: [TASK_2_3_PLAN.md](TASK_2_3_PLAN.md)
+### Task 2.3 Completado ✅ (21 mayo 2026)
+- **Status:** ✅ COMPLETED
+- **Descripción:** Implementé Bull Queue Processor para async job execution
+- **Archivos creados en instructions/:**
+  - `instructions/TASK_2_3_PLAN.md` — Arquitectura completa + testing
+  - `instructions/TASK_2_3_RUN_NOW.md` — Quick start (6 pasos)
+- **Cambios en código:**
+  - Crear: `backend/src/generate/generate.queue.processor.ts`
+  - Modificar: `backend/src/generate/generate.service.ts` (async pattern)
+  - Modificar: `backend/src/generate/generate.module.ts` (register)
+  - Modificar: `backend/src/main.ts` (initialize)
+- **Resultado:** ✅ npm build EXIT 0 | Local testing passed
+- **Siguiente:** Task 2.4 - Images endpoint (mismo processor pattern)
 ```
 
 ---

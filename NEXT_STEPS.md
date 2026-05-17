@@ -1,225 +1,150 @@
-# 🚀 NEXT STEPS — Qué hacer ahora
+# NEXT STEPS — StoryForge MVP Implementation
 
-**Status:** Task 2.1 ✅ Completado | Task 2.2 ⏳ Listo para empezar
-
----
-
-## 📌 Your Immediate Action Items (TODAY)
-
-### **👉 Task 2.2 — ELEGÍ UNA OPCIÓN:**
-
-1. **Opción A: Full Testing** (Recomendado — 40 min)
-   - ↓ Ir a: **[TASK_2_2_RUN_NOW.md](TASK_2_2_RUN_NOW.md)**
-   - Requiere: ANTHROPIC_API_KEY + Supabase
-   - Resultado: End-to-end testing con base de datos real
-
-2. **Opción B: Mock Testing** (15 min, sin dependencias)
-   - ↓ Ver: **[TASK_2_2_PLAN.md](TASK_2_2_PLAN.md#-opción-b-testing-mock-sin-dependencias-externas)**
-   - Requiere: Solo Node.js
-   - Resultado: Verificar lógica sin BD
-
-3. **Opción C: Code Review** (5 min)
-   - ↓ Leer: **[TASK_2_1_VERIFIED.md](TASK_2_1_VERIFIED.md)**
-   - Requiere: Nada
-   - Resultado: Entender implementación
+**Last Updated:** 17 May 2026 | **MVP Progress:** 55%
 
 ---
 
-### **Ver también:**
-- **[TASK_2_2_PLAN.md](TASK_2_2_PLAN.md)** — Decision tree y opciones disponibles
-- **[IMPLEMENTATION_PLAN.md](IMPLEMENTATION_PLAN.md)** — **📌 PLAN MAESTRO** de todo el proyecto:
-  - 6 semanas de tareas con estimaciones
-  - Fase 1 (backend), Fase 2 (frontend), Fase 3 (deploy)
-  - Reglas de stack compliance y documentación
-  - **Léelo para:** Entender qué va después de Task 2.2, qué archivos crear, cómo reportar progreso
-  - **Úsalo como:** Referencia única de verdad del proyecto
-- **[PROGRESS.md](PROGRESS.md)** — Qué se hizo cada sesión (para tracking)
-- **[HANDOFF.md](HANDOFF.md)** — Setup + contexto para próximo desarrollador
+## 🎯 IMMEDIATE ACTION (NOW)
+
+### Task 2.3: Queue Processor Implementation
+
+**Status:** 🔄 READY TO CODE  
+**Criticality:** ⭐⭐⭐ BLOCKER for Tasks 2.4, 2.5, 2.6  
+**Estimated Time:** 5 hours (PASO 1-6)  
+**Full Plan:** [instructions/TASK_2_3_PLAN.md](instructions/TASK_2_3_PLAN.md)  
+**Quick Start:** [instructions/TASK_2_3_RUN_NOW.md](instructions/TASK_2_3_RUN_NOW.md)
 
 ---
 
-## 🎯 Most Likely: Start with Option A
+## 📚 Documentation Structure
 
-### The Fastest Path to Success
+**⭐ ALL task planning and session documentation is now in the `instructions/` folder:**
 
-**Step 1: Get API Keys** (5 min)
-```bash
-# Anthropic API key
-# Go to: https://console.anthropic.com/account/keys
-# Add to backend/.env.local:
-ANTHROPIC_API_KEY=sk_ant_...
-
-# Supabase credentials
-# Go to: https://supabase.com → Your Project
-# Add to backend/.env.local:
-SUPABASE_URL=https://...supabase.co
-SUPABASE_SERVICE_ROLE_KEY=eyJ...
-DATABASE_URL=postgresql://...
+```
+instructions/
+├── 🎯 TASK DOCUMENTATION
+│   ├── TASK_2_3_PLAN.md ← Full architecture + testing
+│   ├── TASK_2_3_RUN_NOW.md ← 6-step executable quick start ⭐
+│   ├── TASK_2_2_PLAN.md
+│   ├── TASK_2_2_RUN_NOW.md
+│   ├── TASK_2_1_VERIFIED.md
+│   └── ... (more tasks)
+│
+└── 📋 SESSION & REFERENCE
+    ├── SESSION_COMPLETION_2026_05_17.md
+    ├── SESSION_SUMMARY_2026_05_16.md
+    ├── START_HERE.md
+    └── EXECUTIVE_SUMMARY.md
 ```
 
-**Step 2: Run Migrations** (3 min)
+**Root-level documentation (governance + planning):**
+- [IMPLEMENTATION_PLAN.md](IMPLEMENTATION_PLAN.md) — Master plan + decision log
+- [PROGRESS.md](PROGRESS.md) — Weekly status
+- [HANDOFF.md](HANDOFF.md) — Setup + context
+- [DEVELOPMENT_GUIDELINES.md](DEVELOPMENT_GUIDELINES.md) — Code standards
+- [STACK_INIT.md](STACK_INIT.md) — Authorized tech stack
+
+---
+
+## 🚀 Task 2.3 Implementation (5 hours)
+
+### PASO 1: Create Queue Processor
+**File:** `backend/src/generate/generate.queue.processor.ts`  
+**Time:** 30 min  
+**Template:** [instructions/TASK_2_3_RUN_NOW.md](instructions/TASK_2_3_RUN_NOW.md) — PASO 1
+
+### PASO 2: Refactor GenerateService to Async Pattern
+**File:** `backend/src/generate/generate.service.ts`  
+**Time:** 1.5 h  
+**Template:** [instructions/TASK_2_3_RUN_NOW.md](instructions/TASK_2_3_RUN_NOW.md) — PASO 2
+
+### PASO 3-4: Update Module + Bootstrap
+**Files:** `generate.module.ts`, `main.ts`  
+**Time:** 20 min  
+**Template:** [instructions/TASK_2_3_RUN_NOW.md](instructions/TASK_2_3_RUN_NOW.md) — PASO 3-4
+
+### PASO 5: Verify Compilation
+**Command:** `npm run build`  
+**Expected:** ✅ EXIT CODE 0
+
+### PASO 6: Local Testing
+**Time:** 2 h  
+**Checklist:** [instructions/TASK_2_3_PLAN.md](instructions/TASK_2_3_PLAN.md#-testing-checklist)
+
+---
+
+## ⏳ Week 2 Timeline (May 17-22)
+
+| Date | Task | Duration | Status |
+|------|------|----------|--------|
+| **May 17** | Task 2.3 (Queue Processor) | 5 h | 🔄 IN PROGRESS |
+| **May 18** | Task 2.4 (Images endpoint) | 5 h | ⏳ Next |
+| **May 19** | Task 2.5 (Audio endpoint) | 4 h | ⏳ Next |
+| **May 20** | Task 2.6 (Rate limiting + error handling) | 3 h | ⏳ Next |
+| **May 21** | Task 2.7 (E2E testing) | 3 h | ⏳ Next |
+| **May 22** | Buffer / Review | 2 h | ⏳ Next |
+
+---
+
+## 🔗 Critical Files for This Session
+
+1. **[instructions/TASK_2_3_RUN_NOW.md](instructions/TASK_2_3_RUN_NOW.md)** ⭐ — Execute this to implement Task 2.3
+2. **[instructions/TASK_2_3_PLAN.md](instructions/TASK_2_3_PLAN.md)** — Full architecture if you need details
+3. **[IMPLEMENTATION_PLAN.md](IMPLEMENTATION_PLAN.md)** — Where to document your decisions
+4. **[PROGRESS.md](PROGRESS.md)** — Update weekly status after Task 2.3 completes
+5. **[DEVELOPMENT_GUIDELINES.md](DEVELOPMENT_GUIDELINES.md)** — Code standards while implementing
+
+---
+
+## ✅ What's Already Done
+
+- ✅ Backend infrastructure (NestJS, Prisma, Supabase, Bull queue)
+- ✅ Task 2.1: Job tracking with Prisma (✅ VERIFIED)
+- ✅ Task 2.2: Structure validation (✅ npm build EXIT 0)
+- ✅ Governance rules established (STACK_INIT.md mandatory)
+- ✅ File reorganization (task docs moved to `instructions/`)
+- ✅ All code templates for Task 2.3 ready
+
+---
+
+## 🎬 START NOW
+
 ```bash
-cd backend
-npm run prisma:migrate:dev -- --name init
-# Creates database tables
+# 1. Read the quick start guide
+cat instructions/TASK_2_3_RUN_NOW.md
+
+# 2. Follow PASO 1-6 sequentially as documented
+
+# 3. After implementation, verify
+npm run build  # Should EXIT 0
+
+# 4. Update progress
+# - Update PROGRESS.md with Task 2.3 completion
+# - Update HANDOFF.md if needed
+# - Document any decisions in IMPLEMENTATION_PLAN.md
 ```
 
-**Step 3: Start Backend** (1 min)
-```bash
-npm run start:dev
-# Should show: "StoryForge Backend running on port 3000"
-```
+---
 
-**Step 4: Generate JWT Token** (2 min)
-```bash
-supabase gen jwt --secret "your_secret" --sub "test_user_123"
-# Gives you: eyJhbGciOiJIUzI1NiI...
-```
+## 🎯 Why Task 2.3 is Critical
 
-**Step 5: Test Endpoint** (5 min)
-```bash
-export JWT="eyJ..."
-export API="http://localhost:3000/generate/script"
+Without async processor:
+- ❌ Script generation blocks client (bad UX)
+- ❌ No progress tracking for long operations
+- ❌ Not scalable (can't handle multiple concurrent jobs)
+- ❌ Blocks Tasks 2.4, 2.5, 2.6 (all images, audio, video require same pattern)
 
-curl -X POST "$API" \
-  -H "Authorization: Bearer $JWT" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "story": "A knight finds treasure in a forest",
-    "style": "anime",
-    "duration": 60
-  }'
-```
-
-**Step 6: Verify in Database** (5 min)
-```bash
-npm run prisma:studio
-# Opens browser on http://localhost:5555
-# See your Job in the Job table
-```
-
-**Result:** Job created in database with real Prisma ID ✅
+With processor:
+- ✅ Immediate response (jobId returned instantly)
+- ✅ Background execution (progress updates via polling)
+- ✅ Scalable to 10+ concurrent jobs (via Redis queue)
+- ✅ Foundation for all remaining generation tasks
 
 ---
 
-## 📚 Documentation Map
+## 📖 Reference Docs
 
-**If you get stuck:**
-
-| Problem | Solution |
-|---------|----------|
-| Don't know how to get API keys | [TASK_2_2_QUICK_START.md](TASK_2_2_QUICK_START.md) Step 1-2 |
-| Migration failed | [TASK_2_2_QUICK_START.md](TASK_2_2_QUICK_START.md) Step 3 |
-| JWT token generation | [TASK_2_2_QUICK_START.md](TASK_2_2_QUICK_START.md) Step 4 |
-| Curl command doesn't work | [SEMANA2_TEST.md](SEMANA2_TEST.md) Test 3 |
-| Job not created in DB | [SEMANA2_TEST.md](SEMANA2_TEST.md) Debugging |
-| HTTP 401 Unauthorized | [SEMANA2_TEST.md](SEMANA2_TEST.md) Test 6b |
-| Want to see the code changes | [CODE_CHANGES_2_1.md](CODE_CHANGES_2_1.md) |
-
----
-
-## ⚡ Quick Links
-
-### Testing (Start Here!)
-👉 **[TASK_2_2_QUICK_START.md](TASK_2_2_QUICK_START.md)** — 6 steps, copy-paste curl commands
-
-### Code Review
-👉 **[CODE_CHANGES_2_1.md](CODE_CHANGES_2_1.md)** — Before/after comparison
-
-### Full Testing Guide
-👉 **[SEMANA2_TEST.md](SEMANA2_TEST.md)** — Comprehensive + debugging
-
-### Tracking
-👉 **[PROGRESS.md](PROGRESS.md)** — Weekly status
-
-### Next Week's Tasks
-👉 **[SEMANA2_TASKS.md](SEMANA2_TASKS.md)** — Tasks 2.3-2.7
-
----
-
-## 🏁 Success Criteria
-
-Task 2.2 is **COMPLETE** when:
-
-✅ POST /generate/script returns HTTP 200  
-✅ Response includes real jobId (not generated UUID)  
-✅ Job created in Prisma database  
-✅ GET /generate/job/:jobId returns job details  
-✅ Error handling works (auth, validation, API errors)  
-
-**Estimated time:** 30-60 minutes
-
----
-
-## 🎓 What You'll Learn
-
-After completing Task 2.2, you'll understand:
-
-- ✅ How Prisma ORM works (create, update, find operations)
-- ✅ How JWT authentication works in NestJS
-- ✅ How to track async operations in a database
-- ✅ How to test API endpoints with curl
-- ✅ How to debug database issues with Prisma Studio
-
----
-
-## ❓ Questions?
-
-**Common questions answered:**
-
-**Q: Do I need Supabase or can I use local PostgreSQL?**  
-A: Either works. For MVP testing, Supabase free tier is fine.
-
-**Q: Where do I get ANTHROPIC_API_KEY?**  
-A: https://console.anthropic.com/account/keys (free plan available)
-
-**Q: Can I skip testing and go to Task 2.3?**  
-A: Not recommended. Task 2.3 depends on this working. Test first.
-
-**Q: How long does Claude API call take?**  
-A: Usually 1-2 seconds. You'll see `processingTimeMs` in Job record.
-
-**Q: What if ANTHROPIC_API_KEY is wrong?**  
-A: HTTP 200 but Claude API error. Check stderr logs in terminal.
-
----
-
-## 🚦 Traffic Light Status
-
-| Item | Status | Action |
-|------|--------|--------|
-| Code compiled | ✅ Green | Ready to use |
-| Endpoints tested | ⏳ Yellow | Do this now |
-| Database created | ⏳ Yellow | Run migrations |
-| Full testing done | ⚫ Not started | Next step |
-| Job 2.1 complete | ✅ Green | Done |
-| Job 2.2 ready | ✅ Green | Start testing |
-
----
-
-## 📞 Support
-
-**If something breaks:**
-
-1. Check [TASK_2_2_QUICK_START.md](TASK_2_2_QUICK_START.md) Troubleshooting section
-2. Check [SEMANA2_TEST.md](SEMANA2_TEST.md) Debugging section
-3. Check backend logs: `npm run start:dev` terminal output
-4. Open Prisma Studio: `npm run prisma:studio`
-
----
-
-## ✨ You're Ready!
-
-Your backend is compiled, tested, and ready.  
-Database layer is integrated.  
-Authentication is in place.
-
-**Next:** Follow [TASK_2_2_QUICK_START.md](TASK_2_2_QUICK_START.md)
-
-**Estimated total time:** 30-60 minutes to full Task 2.2 completion
-
----
-
-**Last updated:** May 16, 2026  
-**Task 2.1 status:** ✅ Complete  
-**Task 2.2 status:** ⏳ Ready for testing
+For context on why we're doing this:
+- See [instructions/TASK_2_3_PLAN.md](instructions/TASK_2_3_PLAN.md) — Full architecture + decision rationale
+- See [instructions/SESSION_COMPLETION_2026_05_17.md](instructions/SESSION_COMPLETION_2026_05_17.md) — Why we chose async pattern
+- See [IMPLEMENTATION_PLAN.md](IMPLEMENTATION_PLAN.md) — How this fits into 6-week roadmap
