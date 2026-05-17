@@ -210,6 +210,8 @@ Deploy automático a Render/Vercel en push a `develop`
 | [AZURE_DEVOPS_CONFIG.md](AZURE_DEVOPS_CONFIG.md) | Backlog + ADO | PMs |
 | [MCP_INTEGRATION.md](MCP_INTEGRATION.md) | AI-assisted dev | Developers |
 | [OPTIONAL_COMPONENTS.md](OPTIONAL_COMPONENTS.md) | Decisiones reversibles | Leads |
+| [PROGRESS.md](PROGRESS.md) | Tracking semanal | Everyone |
+| [HANDOFF.md](HANDOFF.md) | Para siguiente dev | Onboarding |
 | [etapa4-brief-final.md](analisis/etapa4-brief-final.md) | Product Brief | Everyone |
 | [backlog-azure-devops.md](analisis/backlog-azure-devops.md) | Stories detalladas | PMs |
 

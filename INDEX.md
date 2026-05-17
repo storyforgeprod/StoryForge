@@ -90,7 +90,16 @@ git clone https://dev.azure.com/ia-aplicada-grupo-04/StoryForge
 
 ---
 
-## 📂 Estructura de Directorios
+## � Tracking & Handoffs
+
+| Archivo | Para Quién | Qué Contiene |
+|---------|-----------|------------|
+| [PROGRESS.md](PROGRESS.md) | Everyone | Semana actual: qué se completó, qué falta |
+| [HANDOFF.md](HANDOFF.md) | Siguiente dev | Info para retomar: status, próximo step, checklist |
+
+---
+
+## �📂 Estructura de Directorios
 
 ```
 StoryForge/

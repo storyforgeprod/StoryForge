@@ -1,69 +1,69 @@
 # CLAUDE.md
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+Guidance: Claude Code (claude.ai/code) working in this repository.
 
 ## 🚀 Project Overview
 
-**StoryForge** is a SaaS MVP that converts long-form story text (webtoons, manhwas, web novels) into short-form narrated videos (YouTube Shorts format) in <5 minutes, powered by AI.
+**StoryForge:** SaaS MVP converts long-form story text (webtoons, manhwas, web novels) → short-form narrated videos (YouTube Shorts, <5 min). AI-powered.
 
-**Status:** MVP Implementation Phase (Weeks 1-6)  
-**Tech Stack:** React + Vite + NestJS + Supabase + Claude + Replicate + ElevenLabs + FFmpeg  
-**Target Launch:** Week 6 (staging ready for validation)
+**Status:** MVP Implementation (Weeks 1-6)  
+**Tech:** React + Vite + NestJS + Supabase + Claude + Replicate + ElevenLabs + FFmpeg  
+**Launch:** Week 6 (staging ready for validation)
 
 ## 🔑 Azure DevOps
 
-**Remote Repository:**
+**Repo:**
 ```
 https://dev.azure.com/ia-aplicada-grupo-04/StoryForge
 ```
 
-**PAT Token (Configured):**
+**PAT Token:**
 ```
-✅ Configured in Windows Credential Manager
+✅ Windows Credential Manager
 ✅ Workspace: ia-aplicada-grupo-04
 ✅ Project: StoryForge
 ```
 
-**Backlog Management:**
-- Épicas, Historias y Criterios de Aceptación listos en ADO
-- Sincronización bidireccional: GitHub ↔ Azure DevOps
-- Weekly burn-down charts y velocity tracking
+**Backlog:**
+- Épicas, Historias, Criterios de Aceptación ready in ADO
+- Bidirectional sync: GitHub ↔ Azure DevOps
+- Weekly burn-downs + velocity tracking
 
-## 📚 Essential Documentation
+## 📚 Documentation
 
-**Start here:**
-1. [QUICK_START.md](QUICK_START.md) — Setup local en 10 minutos
-2. [IMPLEMENTATION_PLAN.md](IMPLEMENTATION_PLAN.md) — Hoja de ruta de 6 semanas con rastreamiento
-3. [STACK_INIT.md](STACK_INIT.md) — Tech stack, versiones, estructura de directorios
-4. [DEVELOPMENT_GUIDELINES.md](DEVELOPMENT_GUIDELINES.md) — Convenciones, patrones, testing
-5. [AZURE_DEVOPS_CONFIG.md](AZURE_DEVOPS_CONFIG.md) — Setup y manejo del backlog
-6. [MCP_INTEGRATION.md](MCP_INTEGRATION.md) — Integración con Claude para acelerar dev
-7. [OPTIONAL_COMPONENTS.md](OPTIONAL_COMPONENTS.md) — Qué puede sacarse/modificarse
+**Start:**
+1. [QUICK_START.md](QUICK_START.md) — 10 min local setup
+2. [IMPLEMENTATION_PLAN.md](IMPLEMENTATION_PLAN.md) — 6-week roadmap + tracking
+3. [STACK_INIT.md](STACK_INIT.md) — Tech stack, versions, directory structure
+4. [DEVELOPMENT_GUIDELINES.md](DEVELOPMENT_GUIDELINES.md) — Conventions, patterns, testing
+5. [AZURE_DEVOPS_CONFIG.md](AZURE_DEVOPS_CONFIG.md) — ADO setup + backlog
+6. [MCP_INTEGRATION.md](MCP_INTEGRATION.md) — Claude MCP integration for dev
+7. [OPTIONAL_COMPONENTS.md](OPTIONAL_COMPONENTS.md) — Removable/modifiable components
 
-**Reference Files:**
+**Reference:**
 - `etapa4-brief-final.md` — Product Brief (JTBD, North Star Metric, exit criteria)
 - `backlog-azure-devops.md` — 3 épicas, 9 historias, 66 story points
 
-## 🎯 Custom Slash Commands (Legacy — Fase de Discovery)
+## 🎯 Custom Slash Commands (Legacy)
 
-Located in `.claude/commands/`. These agents remain available for future product discovery:
+Located `.claude/commands/`. Available for future product discovery:
 
 | Command | Role | Phase |
 |---|---|---|
-| `/product-analyst` | Research + validation | Pre-MVP ✅ Complete |
-| `/product-strategist` | Strategy + metrics | Pre-MVP ✅ Complete |
-| `/product-architect` | Technical planning | Pre-MVP ✅ Complete |
-| `/product-writer` | Documentation | Pre-MVP ✅ Complete |
-| `/product-pipeline` | Orchestrator | Pre-MVP ✅ Complete |
+| `/product-analyst` | Research + validation | Pre-MVP ✅ |
+| `/product-strategist` | Strategy + metrics | Pre-MVP ✅ |
+| `/product-architect` | Technical planning | Pre-MVP ✅ |
+| `/product-writer` | Documentation | Pre-MVP ✅ |
+| `/product-pipeline` | Orchestrator | Pre-MVP ✅ |
 
-**Status:** Discovery phase COMPLETE. Now in Implementation phase.
+**Status:** Discovery ✅ COMPLETE. Implementation now.
 
-## 🤖 Current Development Mode
+## 🤖 Development Mode
 
-**Using MCP for Development Acceleration:**
-- Claude can access project structure, API schema, DB schema
-- Automatic tests execution and validation
+**MCP for Dev Acceleration:**
+- Claude accesses: project structure, API schema, DB schema
+- Auto test execution + validation
 - Code generation following guidelines + ADO story refs
-- Deploy automation to Render/Vercel
+- Deploy automation Render/Vercel
 
-See [MCP_INTEGRATION.md](MCP_INTEGRATION.md) for details.
+See [MCP_INTEGRATION.md](MCP_INTEGRATION.md).

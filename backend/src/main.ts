@@ -1,0 +1,58 @@
+import { NestFactory } from '@nestjs/core';
+import { ValidationPipe } from '@nestjs/common';
+import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
+import * as Sentry from '@sentry/node';
+import { AppModule } from './app.module';
+import { LoggerService } from './common/logger/logger.service';
+
+async function bootstrap() {
+  const app = await NestFactory.create(AppModule, {
+    logger: new LoggerService(),
+  });
+
+  // CORS configuration
+  app.enableCors({
+    origin: process.env.CORS_ORIGIN || 'http://localhost:5173',
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+  });
+
+  // Global validation pipe
+  app.useGlobalPipes(
+    new ValidationPipe({
+      whitelist: true,
+      forbidNonWhitelisted: true,
+      transform: true,
+      transformOptions: { enableImplicitConversion: true },
+    }),
+  );
+
+  // Sentry integration
+  if (process.env.SENTRY_DSN) {
+    Sentry.init({
+      dsn: process.env.SENTRY_DSN,
+      environment: process.env.SENTRY_ENVIRONMENT || 'development',
+      tracesSampleRate: parseFloat(process.env.SENTRY_TRACES_SAMPLE_RATE || '1.0'),
+    });
+  }
+
+  // Swagger documentation
+  const config = new DocumentBuilder()
+    .setTitle('StoryForge API')
+    .setDescription('Convert stories to short-form videos')
+    .setVersion('0.0.1')
+    .addBearerAuth()
+    .build();
+  const document = SwaggerModule.createDocument(app, config);
+  SwaggerModule.setup('api', app, document);
+
+  const port = process.env.PORT || 3000;
+  await app.listen(port);
+  console.log(`✅ StoryForge Backend running on port ${port}`);
+  console.log(`📚 API Docs: http://localhost:${port}/api`);
+}
+
+bootstrap().catch((err) => {
+  console.error('❌ Bootstrap failed:', err);
+  process.exit(1);
+});

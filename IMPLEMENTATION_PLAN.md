@@ -13,9 +13,9 @@ Este documento define **cómo** se va a construir StoryForge, cuándo, en qué o
 
 | Fase | Duración | Objetivo | Status |
 |------|----------|----------|--------|
-| **Fase 1: Setup + Pipeline de IA** | Semanas 1-2 | Backend + Integración de APIs | ⏳ Planificación |
-| **Fase 2: UI + Ensamblado de Video** | Semanas 3-4 | Frontend React + Render serverless | ⏳ Planificación |
-| **Fase 3: Estabilización + Deploy** | Semanas 5-6 | Testing + Deploy a staging | ⏳ Planificación |
+| **Fase 1: Setup + Pipeline de IA** | Semanas 1-2 | Backend + Integración de APIs | 🔄 Semana 1 (Iniciando HOY) |
+| **Fase 2: UI + Ensamblado de Video** | Semanas 3-4 | Frontend React + Render serverless | ⏳ Pendiente |
+| **Fase 3: Estabilización + Deploy** | Semanas 5-6 | Testing + Deploy a staging | ⏳ Pendiente |
 | **Validación MVP** | Semana 7+ | Medición de exit criteria | ⏳ Futuro |
 
 ---
