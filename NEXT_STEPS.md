@@ -1,21 +1,19 @@
 # NEXT STEPS — StoryForge MVP Implementation
 
-**Last Updated:** 17 May 2026 00:35 UTC | **MVP Progress:** 58% (Task 2.3 ✅)
+**Last Updated:** 17 May 2026 01:15 UTC | **MVP Progress:** 63% (Task 2.4 ✅)
 
 ---
 
 ## 🎯 IMMEDIATE ACTION (NOW)
 
-### Task 2.4: Replicate Images Endpoint
+### Task 2.5: ElevenLabs Audio Endpoint
 
 **Status:** ⏳ READY TO CODE  
 **Criticality:** ⭐⭐ REQUIRED for Week 2  
-**Estimated Time:** 5 hours (PASO 1-6)  
-**Full Plan:** [instructions/TASK_2_4_PLAN.md](instructions/TASK_2_4_PLAN.md)  
-**Quick Start:** [instructions/TASK_2_4_RUN_NOW.md](instructions/TASK_2_4_RUN_NOW.md)  
-**Depends On:** ✅ Task 2.3 (Queue Processor) COMPLETED
+**Estimated Time:** 4 hours (PASO 1-5)  
+**Depends On:** ✅ Task 2.4 (Images endpoint) COMPLETED
 
-**What:** Implement POST `/generate/images` using Replicate Flux model. Reuses async queue processor pattern from Task 2.3.
+**What:** Implement POST `/generate/audio` using ElevenLabs voice synthesis. Narrate the script with AI voice.
 
 ---
 

@@ -8,6 +8,8 @@ export interface GenerationJobData {
   projectId: string | null;
   type: 'script' | 'images' | 'audio' | 'video';
   story?: string; // For script generation
+  scriptId?: string; // For images/audio/video (references script job)
+  imageDescription?: string; // Optional custom description for images
   _startTime?: number; // For measuring processing time
 }
 

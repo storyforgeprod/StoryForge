@@ -10,6 +10,7 @@ interface GenerationJobData {
   projectId: string | null;
   type: 'script' | 'images' | 'audio' | 'video';
   story?: string;
+  scriptId?: string;
   _startTime: number;
 }
 
@@ -45,6 +46,11 @@ export class GenerateQueueProcessor {
       if (type === 'script') {
         result = await this.generateService.generateScriptContent(userId, {
           story: story || '',
+        });
+      } else if (type === 'images') {
+        result = await this.generateService.generateImageContent(userId, {
+          jobId,
+          scriptId: job.data.scriptId || '',
         });
       } else {
         throw new Error(`Type ${type} not yet implemented`);

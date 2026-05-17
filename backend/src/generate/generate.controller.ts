@@ -2,6 +2,7 @@ import { Controller, Post, Body, HttpCode, HttpStatus, UseGuards, Get, Param } f
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
 import { GenerateService } from './generate.service';
 import { GenerateScriptDto, GenerateScriptResponseDto } from './dto/generate-script.dto';
+import { GenerateImagesDto, GenerateImagesResponseDto } from './dto/generate-images.dto';
 import { JwtAuthGuard } from '../common/auth/jwt.guard';
 import { CurrentUser } from '../common/auth/current-user.decorator';
 
@@ -60,12 +61,11 @@ export class GenerateController {
     status: 202,
     description: 'Image generation job queued',
   })
-  async generateImages(@Body() dto: any) {
-    // TODO: Implement
-    return {
-      jobId: 'job_pending',
-      status: 'queued',
-    };
+  async generateImages(
+    @Body() dto: GenerateImagesDto,
+    @CurrentUser() user: any,
+  ): Promise<GenerateImagesResponseDto> {
+    return this.generateService.generateImages(user.userId, dto);
   }
 
   @Post('audio')

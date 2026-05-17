@@ -1,6 +1,6 @@
 # 🤝 HANDOFF.md — Info para Siguiente Dev/Agente
 
-**Actualizado:** 17 de mayo de 2026 | **Status:** Week 2 Progress (Task 2.1-2.3 COMPLETED)  
+**Actualizado:** 17 de mayo de 2026, 01:15 UTC | **Status:** Week 2 Progress (Task 2.1-2.4 COMPLETED)  
 **Para:** Siguiente dev que retome | **Duración esperada:** 5 min lectura
 
 ---
@@ -9,11 +9,12 @@
 
 **Mayo 15:** Documentación completada. Repo con docs listos, NO hay código aún.  
 **Mayo 16:** Semana 1 Setup completado: Backend NestJS boilerplate deployable.  
-**Mayo 17:** Semana 2 Tasks 2.1-2.3 COMPLETADAS:
+**Mayo 17:** Semana 2 Tasks 2.1-2.4 COMPLETADAS:
   - 2.1: Prisma integration for job tracking ✅
   - 2.2: Structure validation via npm build ✅
   - 2.3: Bull queue processor for async execution ✅
-**Hoy:** Backend async pipeline completo.
+  - 2.4: Replicate images endpoint (POST /generate/images) ✅
+**Hoy:** Backend async pipeline completo con script + image generation.
 
 ---
 
@@ -30,17 +31,19 @@
 ✅ Task 2.1: Prisma integration + Job tracking
 ✅ Task 2.2: Structure validation + testing approach
 ✅ Task 2.3: Bull queue processor + async pattern
+✅ Task 2.4: Replicate images endpoint + GenerateImagesDto
 ✅ npm run build: Successful (EXIT CODE 0)
-✅ TypeScript: All types fixed (projectId nullable, status includes 'pending')
+✅ TypeScript: All types fixed (projectId nullable, status includes 'pending', DTO class/interface)
 ✅ Architecture: GenerateService async → queues job → returns immediately
 
-🏗️ ASYNC JOB PIPELINE COMPLETE
+🏗️ ASYNC JOB PIPELINE COMPLETE (Script + Images)
    Client POST /script → Server creates Job(pending) → Returns jobId immediately
-   Background: Queue processor executes Claude API → updates Job with result
+   Client POST /images (with scriptId) → Server creates Job(pending) → Returns jobId immediately
+   Background: Queue processor executes Claude API (script) or Replicate (images) → updates Job with result
    Client can poll GET /job/:jobId to track progress
 
-Próximo: Task 2.4 (Replicate images endpoint) — same async processor pattern
-Timeline: ~5 hours remaining for Week 2 (Tasks 2.4-2.7)
+Próximo: Task 2.5 (ElevenLabs audio endpoint) — same async processor pattern
+Timeline: ~4 hours remaining for Week 2 (Tasks 2.5-2.7)
 ```
 
 ### 3. Documentación Clave

@@ -1,6 +1,6 @@
 # 📊 PROGRESS.md — Seguimiento de Desarrollo
 
-**Actualizado:** 17 de mayo de 2026, 00:30 UTC | **Fase Actual:** Week 2 (Backend Generation Pipeline — Task 2.3 COMPLETADA)
+**Actualizado:** 17 de mayo de 2026, 01:15 UTC | **Fase Actual:** Week 2 (Backend Generation Pipeline \u2014 Task 2.4 COMPLETADA)
 
 ---
 
@@ -127,10 +127,28 @@
   - Client: Can poll GET /job/:jobId to track progress
 - [x] **Status:** ✅ COMPLETED — Foundation for Tasks 2.4, 2.5, 2.6
 
-#### ⏳ Task 2.4: POST `/generate/images` (Replicate API) — NEXT
-- ⏳ Implement images endpoint using Replicate (Flux model)
-- ⏳ Reuse async processor pattern from Task 2.3
-- ⏳ Estimated: ~5 hours
+#### ✅ Task 2.4: POST `/generate/images` (Replicate API) — COMPLETADA ✅
+- [x] Created ReplicateService in `backend/src/integrations/replicate.service.ts`
+- [x] Implemented `generateImage()` method calling Replicate Flux model
+- [x] Created `GenerateImagesDto` with scriptId validation
+- [x] Extended GenerateQueueProcessor to handle type='images'
+- [x] Added `generateImages()` endpoint handler in GenerateService
+- [x] Added `generateImageContent()` helper for processor (calls Claude + Replicate)
+- [x] Added `_buildImagePrompt()` helper to generate image descriptions from scripts
+- [x] Updated queue.service.ts interface with scriptId field
+- [x] Updated generate.module.ts to inject ReplicateService
+- [x] Created integrations/ folder with service stubs (ElevenLabs, Video)
+- [x] npm build EXIT CODE 0 ✅
+- [x] **Result:** Async images endpoint complete, reuses queue processor pattern
+  - Client: POST /images {scriptId} → returns jobId immediately
+  - Background: Queue processor → Claude generates image prompt → Replicate generates image
+  - Client: Poll GET /job/:jobId for progress and image URLs in result
+- [x] **Status:** ✅ COMPLETED — Foundation for Task 2.5
+
+#### ⏳ Task 2.5: POST `/generate/audio` (ElevenLabs API) — NEXT
+- ⏳ Implement audio endpoint using ElevenLabs (voice synthesis)
+- ⏳ Reuse same async processor pattern
+- ⏳ Estimated: ~4 hours
 
 ---
 
@@ -245,12 +263,12 @@
 
 ```
 Semana 1:  ✅ 100% (Backend infrastructure)
-Semana 2:  ✅ 58% (Task 2.1 ✅ + Task 2.2 ✅ + Task 2.3 ✅ | Tasks 2.4-2.7 pending)
+Semana 2:  ✅ 63% (Task 2.1 ✅ + Task 2.2 ✅ + Task 2.3 ✅ + Task 2.4 ✅ | Tasks 2.5-2.7 pending)
 Semana 3:  ⏳ 0% (Frontend)
 Semana 4:  ⏳ 0% (Video assembly)
 Semana 5-6: ⏳ 0% (Stabilization + Deploy)
 
-TOTAL MVP: 52% → 58% ✅ (On track for Week 6 launch)
+TOTAL MVP: 58% → **63%** ✅ (On track for Week 6 launch)
 ```
 
 ---
