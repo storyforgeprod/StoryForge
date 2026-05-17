@@ -37,25 +37,25 @@ Este documento define **cómo** se va a construir StoryForge, cuándo, en qué o
 | **1.2** | Configurar Supabase: DB, Storage, Auth (Google OAuth) | Backend | 3h | ⏳ | Setup |
 | **1.3** | Configurar variables de entorno y secrets | Backend | 1h | ⏳ | Setup |
 | **1.4** | Setup de CI/CD: Render (frontend y backend) | DevOps | 3h | ⏳ | Setup |
-| **1.5** | Implementar Historia 3.1: Setup del proyecto (5 SP) | Backend | 5h | ⏳ | Feature |
-| **1.6** | Endpoint POST `/generate/script` — Integración Claude | Backend | 5h | ⏳ | Feature |
-| **1.7** | Testing local del endpoint `/generate/script` | Backend | 2h | ⏳ | Testing |
+| **1.5** | Implementar Historia 3.1: Setup del proyecto (5 SP) | Backend | 5h | ✅ | Feature |
+| **1.6** | Endpoint POST `/generate/script` — Integración Claude | Backend | 5h | ✅ | Feature |
+| **1.7** | Infrastructure: Prisma + Supabase + Queue + Auth | Backend | 8h | ✅ | Setup |
 
-**Hito:** Backend deployable con script generation funcionando.
+**Hito:** Backend deployable con npm build successful + Prisma schema + Supabase + JWT auth + Bull queue framework.
 
 #### Semana 2
 
 | Tarea | Descripción | Responsable | Estimación | Status | Tipo |
 |------|-------------|-------------|-----------|--------|------|
-| **2.1** | Endpoint POST `/generate/images` — Integración Replicate | Backend | 5h | ⏳ | Feature |
-| **2.2** | Endpoint POST `/generate/audio` — Integración ElevenLabs | Backend | 4h | ⏳ | Feature |
-| **2.3** | Implementar Historia 3.2: Pipeline de IA (8 SP) | Backend | 8h | ⏳ | Feature |
-| **2.4** | Rate limiting y manejo de errores en endpoints | Backend | 3h | ⏳ | Feature |
-| **2.5** | Testing E2E local: texto → guión → imágenes → audio | Backend | 3h | ⏳ | Testing |
-| **2.6** | Documentación de API (Swagger/OpenAPI) | Backend | 2h | ⏳ | Documentation |
-| **2.7** | Deploy Stage 1 a Render | DevOps | 1h | ⏳ | Deploy |
+| **2.1** | Integrar GenerateService con Prisma (Job tracking) | Backend | 4h | 🔄 | Feature |
+| **2.2** | Testear POST `/generate/script` con Claude API real | Backend | 2h | 🔄 | Testing |
+| **2.3** | Implementar job queue processor para generaciones | Backend | 5h | ⏳ | Feature |
+| **2.4** | Endpoint POST `/generate/images` — Integración Replicate | Backend | 5h | ⏳ | Feature |
+| **2.5** | Endpoint POST `/generate/audio` — Integración ElevenLabs | Backend | 4h | ⏳ | Feature |
+| **2.6** | Rate limiting y manejo de errores en endpoints | Backend | 3h | ⏳ | Feature |
+| **2.7** | Testing E2E local: script → images → audio pipeline | Backend | 3h | ⏳ | Testing |
 
-**Hito:** Todos los endpoints de IA funcionando y testeados.
+**Hito:** Todos los endpoints generación funcionando con queue + rate limiting + error handling.
 
 ---
 

@@ -212,6 +212,7 @@ Deploy automático a Render/Vercel en push a `develop`
 | [OPTIONAL_COMPONENTS.md](OPTIONAL_COMPONENTS.md) | Decisiones reversibles | Leads |
 | [PROGRESS.md](PROGRESS.md) | Tracking semanal | Everyone |
 | [HANDOFF.md](HANDOFF.md) | Para siguiente dev | Onboarding |
+| [SEMANA2_TASKS.md](SEMANA2_TASKS.md) | Detalles Semana 2 | Developers |
 | [etapa4-brief-final.md](analisis/etapa4-brief-final.md) | Product Brief | Everyone |
 | [backlog-azure-devops.md](analisis/backlog-azure-devops.md) | Stories detalladas | PMs |
 

@@ -1,0 +1,147 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// Users authenticated via Supabase Auth
+model User {
+  id                String     @id @default(cuid())
+  supabaseId        String     @unique // From Supabase Auth
+  email             String     @unique
+  name              String?
+  avatar            String?
+  
+  // Subscription/Quota
+  monthlyQuota      Int        @default(100) // # of generations per month
+  quotaUsed         Int        @default(0)
+  quotaResetDate    DateTime   @default(now())
+  
+  // Relations
+  projects          Project[]
+  jobs              Job[]
+  
+  // Metadata
+  createdAt         DateTime   @default(now())
+  updatedAt         DateTime   @updatedAt
+  
+  @@index([supabaseId])
+  @@index([email])
+}
+
+// Story projects
+model Project {
+  id                String     @id @default(cuid())
+  userId            String
+  user              User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  title             String
+  description       String?
+  storyText         String     @db.Text // Original story
+  
+  // Metadata
+  style             String     @default("anime") // anime, manga, webtoon, novel
+  duration          Int        @default(60) // seconds
+  status            String     @default("draft") // draft, processing, completed, failed
+  
+  // Relations
+  jobs              Job[]
+  outputs           Output[]
+  
+  // Timestamps
+  createdAt         DateTime   @default(now())
+  updatedAt         DateTime   @updatedAt
+  
+  @@index([userId])
+  @@index([status])
+}
+
+// Generation jobs (async processing)
+model Job {
+  id                String     @id @default(cuid())
+  userId            String
+  user              User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  projectId         String
+  project           Project    @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  
+  // Job tracking
+  type              String     // "script", "images", "audio", "video"
+  status            String     @default("pending") // pending, processing, completed, failed
+  progress          Int        @default(0) // 0-100
+  
+  // Results
+  result            String?    @db.Text // JSON with generated content
+  error             String?    // Error message if failed
+  
+  // Metadata
+  startedAt         DateTime?
+  completedAt       DateTime?
+  processingTimeMs  Int?
+  
+  // Queue info
+  retriesLeft       Int        @default(3)
+  nextRetryAt       DateTime?
+  
+  createdAt         DateTime   @default(now())
+  updatedAt         DateTime   @updatedAt
+  
+  @@index([userId])
+  @@index([projectId])
+  @@index([status])
+  @@index([type])
+  @@index([createdAt])
+}
+
+// Generated outputs (final videos/assets)
+model Output {
+  id                String     @id @default(cuid())
+  projectId         String
+  project           Project    @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  
+  // Content
+  script            String?    @db.Text
+  images            String[]   @default([]) // URLs to images in Supabase Storage
+  audioUrl          String?    // URL to audio file in Supabase Storage
+  videoUrl          String?    // URL to final video in Supabase Storage
+  
+  // Video metadata
+  duration          Int? // seconds
+  format            String     @default("mp4") // mp4, webm, etc
+  resolution        String     @default("1080x1920") // vertical for shorts
+  
+  // Public sharing
+  isPublic          Boolean    @default(false)
+  downloadCount     Int        @default(0)
+  
+  // Timestamps
+  createdAt         DateTime   @default(now())
+  updatedAt         DateTime   @updatedAt
+  
+  @@index([projectId])
+  @@index([isPublic])
+  @@index([createdAt])
+}
+
+// Optional: Event logging for analytics
+model Event {
+  id                String     @id @default(cuid())
+  userId            String?
+  projectId         String?
+  
+  // Event data
+  type              String     // "generation_started", "generation_completed", "video_downloaded", etc
+  metadata          String?    @db.Text // JSON with additional context
+  
+  createdAt         DateTime   @default(now())
+  
+  @@index([userId])
+  @@index([type])
+  @@index([createdAt])
+}
