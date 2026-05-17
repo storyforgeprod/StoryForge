@@ -64,6 +64,6 @@ Located in `.claude/commands/`. These agents remain available for future product
 - Claude can access project structure, API schema, DB schema
 - Automatic tests execution and validation
 - Code generation following guidelines + ADO story refs
-- Deploy automation to Render/Vercel
+- Deploy automation to Render
 
 See [MCP_INTEGRATION.md](MCP_INTEGRATION.md) for details.

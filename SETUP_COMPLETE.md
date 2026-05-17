@@ -219,7 +219,7 @@ Se ha completado la **configuración inicial del proyecto MVP** con:
 ✓ Endpoints /generate/script, /images, /audio testeados localmente
 
 ### Semana 3-4 (UI + Video)
-✓ Frontend funcional en Vercel (staging)
+✓ Frontend funcional en Render (staging)
 ✓ Flujo completo: texto → video → descarga
 
 ### Semana 5-6 (Deploy)
@@ -332,7 +332,7 @@ Para Architects:
 1. ✅ **React + Vite** para frontend (fast, simple)
 2. ✅ **NestJS** para backend (scalable, typed)
 3. ✅ **Supabase** para DB (managed PostgreSQL + Auth)
-4. ✅ **Vercel + Render** para deploy (friction-free)
+4. ✅ **Render** para deploy (friction-free)
 5. ✅ **MCP** para AI-assisted dev (acelerar coding)
 
 ### Componentes Opcionales Post-MVP

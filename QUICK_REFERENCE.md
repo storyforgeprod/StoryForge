@@ -219,7 +219,7 @@ npm run test -- Button.test.tsx
 
 ```bash
 # Staging
-git push origin staging      # Auto-deploy a Vercel + Render
+git push origin staging      # Auto-deploy a Render
 
 # Production
 git push origin main        # Auto-deploy a prod
@@ -231,7 +231,7 @@ git push origin main        # Auto-deploy a prod
 # Backend: Render dashboard
 # 1. Manual Deployment → Select branch → Deploy
 
-# Frontend: Vercel dashboard
+# Frontend: Render dashboard
 # 1. Deployments → Redeploy
 ```
 

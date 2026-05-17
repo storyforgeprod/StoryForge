@@ -140,7 +140,7 @@ Backlog Completo para Azure DevOps (Épicas + Historias de Usuario)
 - [ ] Repositorio configurado con React + Vite y NestJS.
 - [ ] Supabase conectado con PostgreSQL y Storage.
 - [ ] Variables de entorno documentadas para todas las APIs externas.
-- [ ] Pipeline básico de CI/CD funcionando en Vercel y Railway.
+- [ ] Pipeline básico de CI/CD funcionando en Render.
 
 ---
 

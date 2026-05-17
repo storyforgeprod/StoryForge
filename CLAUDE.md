@@ -64,7 +64,7 @@ Located `.claude/commands/`. Available for future product discovery:
 - Claude accesses: project structure, API schema, DB schema
 - Auto test execution + validation
 - Code generation following guidelines + ADO story refs
-- Deploy automation Render/Vercel
+- Deploy automation Render
 
 See [MCP_INTEGRATION.md](MCP_INTEGRATION.md).
 

@@ -106,7 +106,7 @@ VITE_SUPABASE_ANON_KEY=xxxxx
 
 # API Backend
 VITE_API_URL=http://localhost:3000  # Dev
-# VITE_API_URL=https://backend.render.com  # Prod
+# VITE_API_URL=https://backend.onrender.com  # Prod
 
 # Sentry
 VITE_SENTRY_DSN=https://xxxxx@sentry.io/xxxxx

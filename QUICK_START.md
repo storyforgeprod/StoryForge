@@ -167,13 +167,13 @@ curl https://storyforge-backend-staging.onrender.com/health
 # 1. Push a GitHub (rama staging o main)
 git push origin staging
 
-# 2. En Vercel dashboard
+# 2. En Render dashboard
 - Importar repo GitHub
 - Settings → Environment variables → Agregar todas de .env.local
 - Deploy
 
 # 3. Verificar
-https://storyforge-staging.vercel.app
+https://storyforge-staging.onrender.com
 ```
 
 ---

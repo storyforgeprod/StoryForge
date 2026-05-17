@@ -16,7 +16,7 @@ Este plan es vinculante a:
 - **Frontend:** React 18+ | Vite 5+ | TailwindCSS 3+ | shadcn/ui | TypeScript 5+
 - **Bases de datos:** Supabase PostgreSQL | Supabase Storage | Redis (Upstash)
 - **Servicios de IA:** Claude (Anthropic) | Replicate (Flux) | ElevenLabs (TTS) | FFmpeg (video)
-- **Deploy:** Vercel (frontend) | Render (backend) | GitHub Actions CI/CD
+- **Deploy:** Render (frontend) | Render (backend) | GitHub Actions CI/CD
 
 **Si hay necesidad de agregar/cambiar una tecnología:**
 1. Justificar en el backlog de Azure DevOps

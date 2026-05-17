@@ -82,7 +82,7 @@ API Gateway (NestJS backend)
     ↓
 Storage & Database (Supabase PostgreSQL + Storage)
     ↓
-Deployed to: Vercel (FE) + Render (BE)
+Deployed to: Render (BE + FE)
 ```
 
 **Key Technologies:**
@@ -90,8 +90,8 @@ Deployed to: Vercel (FE) + Render (BE)
 - **Backend:** NestJS + Prisma + Supabase
 - **Queue:** Redis + BullMQ (async processing)
 - **AI Services:** Claude (Anthropic) + Replicate + ElevenLabs
-- **Deploy:** Vercel (frontend) + Render (backend)
-- **Observability:** Sentry + PostHog + Vercel Analytics
+- **Deploy:** Render (backend + frontend)
+- **Observability:** Sentry + PostHog + Render Analytics
 
 ---
 
@@ -171,7 +171,7 @@ git push origin feature/1-1-script-analysis
 - Actualizar status en ADO
 
 ### 7. Verificar en Staging
-Deploy automático a Render/Vercel en push a `develop`
+Deploy automático a Render en push a `develop`
 
 ---
 

@@ -136,7 +136,7 @@ StoryForge/
 │
 ├── .github/
 │   └── workflows/
-│       ├── frontend-deploy.yml      ← CI/CD Vercel
+│       ├── frontend-deploy.yml      ← CI/CD Render
 │       └── backend-deploy.yml       ← CI/CD Render
 │
 └── docker-compose.yml               ← Dev local con Docker (opcional)
@@ -206,7 +206,7 @@ StoryForge/
 - ❌ **NO cambiar** DB principal (PostgreSQL via Supabase)
 - ❌ **NO cambiar** backend framework (NestJS)
 - ✅ **SÍ se puede** cambiar storage (Supabase ↔ S3)
-- ✅ **SÍ se puede** cambiar deploy targets (Vercel/Render)
+- ✅ **SÍ se puede** cambiar deploy targets (Render)
 - ✅ **SÍ se puede** cambiar IA providers (Claude ↔ OpenAI)
 
 ---
@@ -226,7 +226,7 @@ StoryForge/
    ↓
 6. Code review (1 dev mínimo)
    ↓
-7. Auto-deploy a staging (Vercel + Render)
+7. Auto-deploy a staging (Render)
    ↓
 8. Verify en staging
    ↓
@@ -266,7 +266,7 @@ StoryForge/
 - [ ] Documentar aprendizajes > DEVELOPMENT_GUIDELINES.md
 
 ### Lead Técnico
-- [ ] Performance metrics (Vercel + Render)
+- [ ] Performance metrics (Render)
 - [ ] Sentry: ¿nuevos errores?
 - [ ] PostHog: ¿métricas de uso?
 - [ ] PRs revieweadas dentro de 24h?
@@ -278,7 +278,6 @@ StoryForge/
 - **NestJS Docs:** https://docs.nestjs.com/
 - **React Docs:** https://react.dev/reference
 - **Supabase Docs:** https://supabase.com/docs
-- **Vercel Docs:** https://vercel.com/docs
 - **Render Docs:** https://render.com/docs
 - **TypeScript Handbook:** https://www.typescriptlang.org/docs/
 
