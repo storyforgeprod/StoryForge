@@ -1,18 +1,21 @@
 # NEXT STEPS — StoryForge MVP Implementation
 
-**Last Updated:** 17 May 2026 | **MVP Progress:** 55%
+**Last Updated:** 17 May 2026 00:35 UTC | **MVP Progress:** 58% (Task 2.3 ✅)
 
 ---
 
 ## 🎯 IMMEDIATE ACTION (NOW)
 
-### Task 2.3: Queue Processor Implementation
+### Task 2.4: Replicate Images Endpoint
 
-**Status:** 🔄 READY TO CODE  
-**Criticality:** ⭐⭐⭐ BLOCKER for Tasks 2.4, 2.5, 2.6  
+**Status:** ⏳ READY TO CODE  
+**Criticality:** ⭐⭐ REQUIRED for Week 2  
 **Estimated Time:** 5 hours (PASO 1-6)  
-**Full Plan:** [instructions/TASK_2_3_PLAN.md](instructions/TASK_2_3_PLAN.md)  
-**Quick Start:** [instructions/TASK_2_3_RUN_NOW.md](instructions/TASK_2_3_RUN_NOW.md)
+**Full Plan:** [instructions/TASK_2_4_PLAN.md](instructions/TASK_2_4_PLAN.md)  
+**Quick Start:** [instructions/TASK_2_4_RUN_NOW.md](instructions/TASK_2_4_RUN_NOW.md)  
+**Depends On:** ✅ Task 2.3 (Queue Processor) COMPLETED
+
+**What:** Implement POST `/generate/images` using Replicate Flux model. Reuses async queue processor pattern from Task 2.3.
 
 ---
 

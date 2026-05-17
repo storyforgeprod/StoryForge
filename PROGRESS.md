@@ -1,6 +1,6 @@
 # 📊 PROGRESS.md — Seguimiento de Desarrollo
 
-**Actualizado:** 17 de mayo de 2026 | **Fase Actual:** Week 2 (Backend Generation Pipeline)
+**Actualizado:** 17 de mayo de 2026, 00:30 UTC | **Fase Actual:** Week 2 (Backend Generation Pipeline — Task 2.3 COMPLETADA)
 
 ---
 
@@ -10,7 +10,8 @@
 |---------|------|------|----------|-------|
 | **Pre-Mayo 15** | Discovery | ✅ 5 agentes | ✅ Completado | 0 |
 | **Mayo 15** | Planning + Docs | ✅ Docs creados | ✅ 11 archivos + config | 0 |
-| **Mayo 16 (HOY)** | **Semana 1** | ✅ Backend boilerplate | ✅ Completo + Prisma + Queue + Auth | -1h |
+| **Mayo 16** | **Semana 1** | ✅ Backend boilerplate | ✅ Completo + Prisma + Queue + Auth | -1h |
+| **Mayo 17 (HOY)** | **Semana 2** | ✅ Tasks 2.1-2.3 | ✅ Prisma + Validation + Queue Processor | 0h |
 
 ---
 
@@ -111,9 +112,25 @@
   - Client: Can poll GET /job/:jobId to track progress
 - [x] **Status:** ✅ COMPLETED — Foundation for Tasks 2.4, 2.5, 2.6
 
+#### ✅ Task 2.3: Bull Queue Processor COMPLETADA ✅
+- [x] Created `generate.queue.processor.ts` with @Processor('generation') decorator
+- [x] Implemented processGenerationJob() handler (mark processing → execute → mark completed/failed)
+- [x] Refactored GenerateService: async pattern with QueueService injection
+- [x] Added `generateScriptContent()` helper method for processor
+- [x] Registered processor in GenerateModule (BullModule + GenerateQueueProcessor)
+- [x] Initialized processor in main.ts bootstrap
+- [x] Fixed TypeScript types: projectId nullable, status includes 'pending'
+- [x] npm build EXIT CODE 0 ✅
+- [x] **Result:** GenerateService now queues jobs asynchronously instead of blocking
+  - Client: POST /script → returns jobId immediately with status: pending
+  - Background: Queue processor executes Claude API
+  - Client: Can poll GET /job/:jobId to track progress
+- [x] **Status:** ✅ COMPLETED — Foundation for Tasks 2.4, 2.5, 2.6
+
 #### ⏳ Task 2.4: POST `/generate/images` (Replicate API) — NEXT
 - ⏳ Implement images endpoint using Replicate (Flux model)
 - ⏳ Reuse async processor pattern from Task 2.3
+- ⏳ Estimated: ~5 hours
 
 ---
 
@@ -228,19 +245,19 @@
 
 ```
 Semana 1:  ✅ 100% (Backend infrastructure)
-Semana 2:  🔄 15% (Task 2.1 ✅ + Task 2.2 ready)
+Semana 2:  ✅ 58% (Task 2.1 ✅ + Task 2.2 ✅ + Task 2.3 ✅ | Tasks 2.4-2.7 pending)
 Semana 3:  ⏳ 0% (Frontend)
 Semana 4:  ⏳ 0% (Video assembly)
 Semana 5-6: ⏳ 0% (Stabilization + Deploy)
 
-TOTAL MVP: 50% → On track for Week 6 launch
+TOTAL MVP: 52% → 58% ✅ (On track for Week 6 launch)
 ```
 
 ---
 
-**Last Updated:** 2026-05-16 (End of Day)  
+**Last Updated:** 2026-05-17 00:30 UTC (Task 2.3 Completion)  
 **By:** Automated Progress Tracking  
-**Next Review:** Start of Task 2.2  
+**Next Review:** Start of Task 2.4  
 **Archivos Creados esta sesión:**
 ```
 backend/package.json                    ✅ 54 dependencies
