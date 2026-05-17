@@ -1,10 +1,12 @@
 import { Injectable, BadRequestException, NotFoundException, ForbiddenException } from '@nestjs/common';
 import { GenerateScriptDto, GenerateScriptResponseDto } from './dto/generate-script.dto';
 import { GenerateImagesDto, GenerateImagesResponseDto, ImageGenerationResult } from './dto/generate-images.dto';
+import { GenerateAudioDto, GenerateAudioResponseDto, AudioGenerationResult } from './dto/generate-audio.dto';
 import { Anthropic } from '@anthropic-ai/sdk';
 import { PrismaService } from '../common/prisma/prisma.service';
 import { QueueService } from '../common/queue/queue.service';
 import { ReplicateService } from '../integrations/replicate.service';
+import { ElevenLabsService } from '../integrations/elevenlabs.service';
 
 @Injectable()
 export class GenerateService {
@@ -14,6 +16,7 @@ export class GenerateService {
     private prisma: PrismaService,
     private queue: QueueService,
     private replicateService: ReplicateService,
+    private elevenLabsService: ElevenLabsService,
   ) {
     this.client = new Anthropic({
       apiKey: process.env.ANTHROPIC_API_KEY,
@@ -297,5 +300,130 @@ Respond with ONLY the visual description, no explanations.`,
     });
 
     return this._extractTextFromResponse(message);
+  }
+
+  /**
+   * Generate audio narration from script
+   * Creates Job (pending) + adds to queue, returns immediately
+   * Queue processor handles ElevenLabs API call asynchronously
+   */
+  async generateAudio(
+    userId: string,
+    dto: GenerateAudioDto,
+  ): Promise<GenerateAudioResponseDto> {
+    // 1. Validate input
+    if (!dto.scriptId || dto.scriptId.trim().length === 0) {
+      throw new BadRequestException('scriptId is required');
+    }
+
+    // 2. Verify script job exists and belongs to user
+    const scriptJob = await this.prisma.job.findUnique({
+      where: { id: dto.scriptId },
+    });
+
+    if (!scriptJob) {
+      throw new NotFoundException('Script job not found');
+    }
+
+    if (scriptJob.userId !== userId) {
+      throw new ForbiddenException('Unauthorized access to this script');
+    }
+
+    if (scriptJob.status !== 'completed') {
+      throw new BadRequestException(
+        `Script job must be completed first (current: ${scriptJob.status})`,
+      );
+    }
+
+    // 3. Create Audio Job
+    let audioJob;
+    try {
+      audioJob = await this.prisma.job.create({
+        data: {
+          userId,
+          projectId: scriptJob.projectId,
+          type: 'audio',
+          status: 'pending',
+          progress: 0,
+        },
+      });
+    } catch (error) {
+      console.error('Failed to create audio job:', error);
+      throw new BadRequestException('Failed to create audio generation job');
+    }
+
+    // 4. Queue audio generation job
+    try {
+      await this.queue.addGenerationJob({
+        jobId: audioJob.id,
+        userId,
+        projectId: scriptJob.projectId,
+        type: 'audio',
+        scriptId: dto.scriptId,
+        voiceId: dto.voiceId,
+        _startTime: Date.now(),
+      });
+    } catch (error) {
+      console.error('Failed to queue audio job:', error);
+      await this.prisma.job.update({
+        where: { id: audioJob.id },
+        data: {
+          status: 'failed',
+          error: 'Failed to queue audio generation job',
+        },
+      });
+      throw new BadRequestException('Failed to queue audio generation job');
+    }
+
+    // 5. Return immediately
+    return {
+      jobId: audioJob.id,
+      status: 'pending',
+      message: 'Audio generation queued',
+      createdAt: audioJob.createdAt,
+    };
+  }
+
+  /**
+   * Generate audio content (used by queue processor)
+   * This is the actual async logic that calls ElevenLabs API
+   */
+  async generateAudioContent(
+    userId: string,
+    data: { jobId: string; scriptId: string; voiceId?: string },
+  ): Promise<AudioGenerationResult> {
+    // 1. Fetch the script job result
+    const scriptJob = await this.prisma.job.findUnique({
+      where: { id: data.scriptId },
+    });
+
+    if (!scriptJob || !scriptJob.result) {
+      throw new BadRequestException('Script job not found or incomplete');
+    }
+
+    // 2. Parse script text
+    let scriptText: string;
+    try {
+      const parsed = JSON.parse(scriptJob.result);
+      scriptText = parsed.script || scriptJob.result;
+    } catch {
+      scriptText = scriptJob.result;
+    }
+
+    // 3. Generate audio via ElevenLabs
+    const audioUrl = await this.elevenLabsService.generateAudio(scriptText, {
+      voiceId: data.voiceId,
+    });
+
+    // 4. Calculate audio length (rough estimate: 150 words per minute)
+    const wordCount = scriptText.split(' ').length;
+    const audioLength = Math.ceil((wordCount / 150) * 60);
+
+    return {
+      audioUrl,
+      audioLength,
+      textUsed: scriptText.substring(0, 100),
+      generatedAt: new Date(),
+    };
   }
 }

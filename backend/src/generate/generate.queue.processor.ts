@@ -11,6 +11,8 @@ interface GenerationJobData {
   type: 'script' | 'images' | 'audio' | 'video';
   story?: string;
   scriptId?: string;
+  imageDescription?: string;
+  voiceId?: string;
   _startTime: number;
 }
 
@@ -51,6 +53,12 @@ export class GenerateQueueProcessor {
         result = await this.generateService.generateImageContent(userId, {
           jobId,
           scriptId: job.data.scriptId || '',
+        });
+      } else if (type === 'audio') {
+        result = await this.generateService.generateAudioContent(userId, {
+          jobId,
+          scriptId: job.data.scriptId || '',
+          voiceId: job.data.voiceId,
         });
       } else {
         throw new Error(`Type ${type} not yet implemented`);

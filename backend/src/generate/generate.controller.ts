@@ -3,6 +3,7 @@ import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagg
 import { GenerateService } from './generate.service';
 import { GenerateScriptDto, GenerateScriptResponseDto } from './dto/generate-script.dto';
 import { GenerateImagesDto, GenerateImagesResponseDto } from './dto/generate-images.dto';
+import { GenerateAudioDto, GenerateAudioResponseDto } from './dto/generate-audio.dto';
 import { JwtAuthGuard } from '../common/auth/jwt.guard';
 import { CurrentUser } from '../common/auth/current-user.decorator';
 
@@ -78,12 +79,11 @@ export class GenerateController {
     status: 202,
     description: 'Audio generation job queued',
   })
-  async generateAudio(@Body() dto: any) {
-    // TODO: Implement
-    return {
-      jobId: 'job_pending',
-      status: 'queued',
-    };
+  async generateAudio(
+    @Body() dto: GenerateAudioDto,
+    @CurrentUser() user: any,
+  ): Promise<GenerateAudioResponseDto> {
+    return this.generateService.generateAudio(user.userId, dto);
   }
 
   @Post('video')

@@ -1,6 +1,6 @@
 # 📊 PROGRESS.md — Seguimiento de Desarrollo
 
-**Actualizado:** 17 de mayo de 2026, 01:15 UTC | **Fase Actual:** Week 2 (Backend Generation Pipeline \u2014 Task 2.4 COMPLETADA)
+**Actualizado:** 17 de mayo de 2026, 01:30 UTC | **Fase Actual:** Week 2 (Backend Generation Pipeline — Task 2.5 COMPLETADA)
 
 ---
 
@@ -145,9 +145,23 @@
   - Client: Poll GET /job/:jobId for progress and image URLs in result
 - [x] **Status:** ✅ COMPLETED — Foundation for Task 2.5
 
-#### ⏳ Task 2.5: POST `/generate/audio` (ElevenLabs API) — NEXT
-- ⏳ Implement audio endpoint using ElevenLabs (voice synthesis)
-- ⏳ Reuse same async processor pattern
+#### ✅ Task 2.5: POST `/generate/audio` (ElevenLabs API) — COMPLETADA ✅
+- [x] Implemented ElevenLabsService with real API integration (Fetch)
+- [x] Created `GenerateAudioDto` with scriptId + optional voiceId validation
+- [x] Extended queue.service.ts interface with voiceId field
+- [x] Added `generateAudio()` endpoint handler in GenerateService
+- [x] Added `generateAudioContent()` helper for processor (calls ElevenLabs)
+- [x] Extended GenerateQueueProcessor to handle type='audio'
+- [x] Updated generate.controller.ts POST /audio endpoint with full implementation
+- [x] Fixed TypeScript strict mode issues in DTO class
+- [x] npm build EXIT CODE 0 ✅
+- [x] **Result:** Async audio endpoint complete, full pipeline integration
+  - Client: POST /audio {scriptId, voiceId?} → returns jobId immediately
+  - Background: Queue processor → Fetches script result → ElevenLabs generates narration
+  - Client: Poll GET /job/:jobId for progress and audioUrl in result
+- [x] **Status:** ✅ COMPLETED — Foundation for Task 2.6 (Video Assembly)
+
+#### ⏳ Task 2.6: Video Assembly (FFmpeg) — NEXT
 - ⏳ Estimated: ~4 hours
 
 ---
@@ -263,17 +277,17 @@
 
 ```
 Semana 1:  ✅ 100% (Backend infrastructure)
-Semana 2:  ✅ 63% (Task 2.1 ✅ + Task 2.2 ✅ + Task 2.3 ✅ + Task 2.4 ✅ | Tasks 2.5-2.7 pending)
+Semana 2:  ✅ 68% (Task 2.1 ✅ + Task 2.2 ✅ + Task 2.3 ✅ + Task 2.4 ✅ + Task 2.5 ✅ | Tasks 2.6-2.7 pending)
 Semana 3:  ⏳ 0% (Frontend)
 Semana 4:  ⏳ 0% (Video assembly)
 Semana 5-6: ⏳ 0% (Stabilization + Deploy)
 
-TOTAL MVP: 58% → **63%** ✅ (On track for Week 6 launch)
+TOTAL MVP: 63% → **68%** ✅ (On track for Week 6 launch)
 ```
 
 ---
 
-**Last Updated:** 2026-05-17 00:30 UTC (Task 2.3 Completion)  
+**Last Updated:** 2026-05-17 01:30 UTC (Task 2.5 Completion)  
 **By:** Automated Progress Tracking  
 **Next Review:** Start of Task 2.4  
 **Archivos Creados esta sesión:**

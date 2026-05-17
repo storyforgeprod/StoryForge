@@ -10,6 +10,7 @@ export interface GenerationJobData {
   story?: string; // For script generation
   scriptId?: string; // For images/audio/video (references script job)
   imageDescription?: string; // Optional custom description for images
+  voiceId?: string; // Optional ElevenLabs voice ID for audio
   _startTime?: number; // For measuring processing time
 }
 

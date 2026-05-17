@@ -1,6 +1,6 @@
 # 🤝 HANDOFF.md — Info para Siguiente Dev/Agente
 
-**Actualizado:** 17 de mayo de 2026, 01:15 UTC | **Status:** Week 2 Progress (Task 2.1-2.4 COMPLETED)  
+**Actualizado:** 17 de mayo de 2026, 01:30 UTC | **Status:** Week 2 Progress (Task 2.1-2.5 COMPLETED)  
 **Para:** Siguiente dev que retome | **Duración esperada:** 5 min lectura
 
 ---
@@ -9,12 +9,13 @@
 
 **Mayo 15:** Documentación completada. Repo con docs listos, NO hay código aún.  
 **Mayo 16:** Semana 1 Setup completado: Backend NestJS boilerplate deployable.  
-**Mayo 17:** Semana 2 Tasks 2.1-2.4 COMPLETADAS:
+**Mayo 17:** Semana 2 Tasks 2.1-2.5 COMPLETADAS:
   - 2.1: Prisma integration for job tracking ✅
   - 2.2: Structure validation via npm build ✅
   - 2.3: Bull queue processor for async execution ✅
   - 2.4: Replicate images endpoint (POST /generate/images) ✅
-**Hoy:** Backend async pipeline completo con script + image generation.
+  - 2.5: ElevenLabs audio endpoint (POST /generate/audio) ✅
+**Hoy:** Backend async pipeline completo con script + image + audio generation.
 
 ---
 
@@ -32,18 +33,20 @@
 ✅ Task 2.2: Structure validation + testing approach
 ✅ Task 2.3: Bull queue processor + async pattern
 ✅ Task 2.4: Replicate images endpoint + GenerateImagesDto
+✅ Task 2.5: ElevenLabs audio endpoint + GenerateAudioDto
 ✅ npm run build: Successful (EXIT CODE 0)
-✅ TypeScript: All types fixed (projectId nullable, status includes 'pending', DTO class/interface)
+✅ TypeScript: All types fixed (projectId nullable, status includes 'pending', DTO class/interface, voiceId field)
 ✅ Architecture: GenerateService async → queues job → returns immediately
 
-🏗️ ASYNC JOB PIPELINE COMPLETE (Script + Images)
+🏗️ ASYNC JOB PIPELINE COMPLETE (Script + Images + Audio)
    Client POST /script → Server creates Job(pending) → Returns jobId immediately
    Client POST /images (with scriptId) → Server creates Job(pending) → Returns jobId immediately
-   Background: Queue processor executes Claude API (script) or Replicate (images) → updates Job with result
+   Client POST /audio (with scriptId) → Server creates Job(pending) → Returns jobId immediately
+   Background: Queue processor executes Claude (script), Replicate (images), or ElevenLabs (audio) → updates Job with result
    Client can poll GET /job/:jobId to track progress
 
-Próximo: Task 2.5 (ElevenLabs audio endpoint) — same async processor pattern
-Timeline: ~4 hours remaining for Week 2 (Tasks 2.5-2.7)
+Próximo: Task 2.6 (FFmpeg video assembly) — same async processor pattern
+Timeline: ~3-4 hours remaining for Week 2 (Tasks 2.6-2.7)
 ```
 
 ### 3. Documentación Clave

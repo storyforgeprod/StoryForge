@@ -1,19 +1,46 @@
 # NEXT STEPS — StoryForge MVP Implementation
 
-**Last Updated:** 17 May 2026 01:15 UTC | **MVP Progress:** 63% (Task 2.4 ✅)
+**Last Updated:** 17 May 2026 01:30 UTC | **MVP Progress:** 68% (Task 2.5 ✅)
 
 ---
 
 ## 🎯 IMMEDIATE ACTION (NOW)
 
-### Task 2.5: ElevenLabs Audio Endpoint
+### Task 2.6: FFmpeg Video Assembly
 
 **Status:** ⏳ READY TO CODE  
 **Criticality:** ⭐⭐ REQUIRED for Week 2  
 **Estimated Time:** 4 hours (PASO 1-5)  
-**Depends On:** ✅ Task 2.4 (Images endpoint) COMPLETED
+**Depends On:** ✅ Task 2.5 (Audio endpoint) COMPLETED
 
-**What:** Implement POST `/generate/audio` using ElevenLabs voice synthesis. Narrate the script with AI voice.
+**What:** Implement POST `/generate/video` using FFmpeg to assemble images, narration, and effects into final video.
+
+---
+
+## ✅ Just Completed: Task 2.5
+
+### Task 2.5: ElevenLabs Audio Endpoint — COMPLETADA ✅
+
+**Implemented:**
+- ✅ ElevenLabsService with full Fetch API integration
+- ✅ GenerateAudioDto with scriptId + voiceId validation
+- ✅ Queue processor extended for type='audio'
+- ✅ GenerateService.generateAudio() + generateAudioContent()
+- ✅ Controller POST /audio endpoint fully implemented
+- ✅ npm build EXIT CODE 0 (0 TypeScript errors)
+
+**Pattern Proven:** Full async queue pipeline for 3 external APIs:
+1. Claude (script generation) ✅
+2. Replicate (images) ✅
+3. ElevenLabs (audio) ✅
+
+**Files Modified:**
+- backend/src/integrations/elevenlabs.service.ts (stub → real implementation)
+- backend/src/generate/generate.service.ts (2 new methods)
+- backend/src/generate/generate.queue.processor.ts (added audio case)
+- backend/src/generate/generate.controller.ts (implemented endpoint)
+- backend/src/common/queue/queue.service.ts (added voiceId field)
+- backend/src/generate/dto/generate-audio.dto.ts (NEW file)
 
 ---
 
@@ -24,11 +51,9 @@
 ```
 instructions/
 ├── 🎯 TASK DOCUMENTATION
-│   ├── TASK_2_3_PLAN.md ← Full architecture + testing
-│   ├── TASK_2_3_RUN_NOW.md ← 6-step executable quick start ⭐
-│   ├── TASK_2_2_PLAN.md
-│   ├── TASK_2_2_RUN_NOW.md
-│   ├── TASK_2_1_VERIFIED.md
+│   ├── TASK_2_5_PLAN.md ← Full implementation guide (created this session) ⭐
+│   ├── TASK_2_4_PLAN.md ← Replicate images pattern
+│   ├── TASK_2_3_PLAN.md ← Bull queue architecture
 │   └── ... (more tasks)
 │
 └── 📋 SESSION & REFERENCE
@@ -40,14 +65,14 @@ instructions/
 
 **Root-level documentation (governance + planning):**
 - [IMPLEMENTATION_PLAN.md](IMPLEMENTATION_PLAN.md) — Master plan + decision log
-- [PROGRESS.md](PROGRESS.md) — Weekly status
-- [HANDOFF.md](HANDOFF.md) — Setup + context
+- [PROGRESS.md](PROGRESS.md) — Weekly status (updated ✅)
+- [HANDOFF.md](HANDOFF.md) — Setup + context (updated ✅)
 - [DEVELOPMENT_GUIDELINES.md](DEVELOPMENT_GUIDELINES.md) — Code standards
 - [STACK_INIT.md](STACK_INIT.md) — Authorized tech stack
 
 ---
 
-## 🚀 Task 2.3 Implementation (5 hours)
+## 🚀 Task 2.6 Implementation (Estimated 4 hours)
 
 ### PASO 1: Create Queue Processor
 **File:** `backend/src/generate/generate.queue.processor.ts`  
