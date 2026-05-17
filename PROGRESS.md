@@ -1,6 +1,6 @@
 # 📊 PROGRESS.md — Seguimiento de Desarrollo
 
-**Actualizado:** 17 de mayo de 2026, 01:50 UTC | **Fase Actual:** Week 2 (Backend Generation Pipeline — Task 2.6 COMPLETADA — 72% MVP)
+**Actualizado:** 17 de mayo de 2026, 02:00 UTC | **Fase Actual:** Week 2 (Backend Generation Pipeline — Task 2.7 COMPLETADA — 76% MVP)
 
 ---
 
@@ -176,6 +176,20 @@
   - Background: Queue processor → Fetches both jobs → FFmpeg assembles 1080×1920 video
   - Client: Poll GET /job/:jobId for progress and videoUrl in result
 - [x] **Status:** ✅ COMPLETED — All 4 APIs integrated (Claude, Replicate, ElevenLabs, FFmpeg)
+
+#### ✅ Task 2.7: Rate Limiting & API Security — COMPLETADA ✅
+- [x] Registered ThrottlerGuard globally in app.module.ts with APP_GUARD provider
+- [x] Added @Throttle() decorators to all POST endpoints with per-endpoint limits
+- [x] Configured rate limits: script(5), images(10), audio(15), video(10) per minute
+- [x] Updated .env.example with rate limit configuration variables
+- [x] Updated backend/.env.local with default rate limit settings
+- [x] Changed script endpoint response from 200 → 202 for async consistency
+- [x] npm build EXIT CODE 0 ✅
+- [x] **Result:** All endpoints protected from abuse, configurable per environment
+  - Requests 1-N: ✅ Allowed
+  - Request N+1: ❌ 429 Too Many Requests
+  - After TTL (60s): Counter resets
+- [x] **Status:** ✅ COMPLETED — API Security layer complete
 
 ---
 

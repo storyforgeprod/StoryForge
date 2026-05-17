@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
+import { APP_GUARD } from '@nestjs/core';
 import { ConfigModule } from '@nestjs/config';
-import { ThrottlerModule } from '@nestjs/throttler';
+import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
 import { GenerateModule } from './generate/generate.module';
 import { PrismaModule } from './common/prisma/prisma.module';
 import { SupabaseModule } from './common/supabase/supabase.module';
@@ -26,6 +27,11 @@ import { AuthModule } from './common/auth/auth.module';
     GenerateModule,
   ],
   controllers: [],
-  providers: [],
+  providers: [
+    {
+      provide: APP_GUARD,
+      useClass: ThrottlerGuard,
+    },
+  ],
 })
 export class AppModule {}

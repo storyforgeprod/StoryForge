@@ -1,58 +1,52 @@
 # NEXT STEPS — StoryForge MVP Implementation
 
-**Last Updated:** 17 May 2026 01:50 UTC | **MVP Progress:** 72% (Task 2.6 ✅)
+**Last Updated:** 17 May 2026 02:00 UTC | **MVP Progress:** 76% (Task 2.7 ✅)
 
 ---
 
 ## 🎯 IMMEDIATE ACTION (NOW)
 
-### Task 2.7: Rate Limiting & API Security
+### Task 2.8: Documentation & Handoff
 
-**Status:** ⏳ READY TO CODE  
-**Criticality:** ⭐⭐⭐ REQUIRED for Week 2 completion  
+**Status:** ⏳ READY  
+**Criticality:** ⭐⭐⭐ REQUIRED for MVP completion  
 **Estimated Time:** 2-3 hours  
-**Depends On:** ✅ Task 2.6 (Video endpoint) COMPLETED
+**Depends On:** ✅ Task 2.7 (Rate limiting) COMPLETED
 
-**What:** Implement @Throttle() decorators on all POST endpoints to prevent abuse. Register ThrottlerGuard in app.module.ts with configurable thresholds per endpoint.
-
-**Files to Modify:**
-1. `backend/src/generate/generate.controller.ts` — Add @Throttle() to POST /script, /images, /audio, /video
-2. `backend/src/app.module.ts` — Import ThrottlerModule, register guard
-3. `.env.example` + `.env.local` — Add rate limit configuration
+**What:** Create comprehensive API documentation, deployment guide, and handoff notes for production launch.
 
 ---
 
-## ✅ Just Completed: Task 2.6
+## ✅ Just Completed: Task 2.7
 
-### Task 2.6: FFmpeg Video Assembly — COMPLETADA ✅
+### Task 2.7: Rate Limiting & API Security — COMPLETADA ✅
 
 **Implemented:**
-- ✅ VideoService with full FFmpeg wrapper (160+ lines)
-- ✅ GenerateVideoDto with imageJobId + audioJobId validation
-- ✅ Queue processor extended for type='video'
-- ✅ GenerateService.generateVideo() + generateVideoContent()
-- ✅ Controller POST /video endpoint fully implemented
-- ✅ uuid npm package installed
+- ✅ ThrottlerGuard registered globally via APP_GUARD in app.module.ts
+- ✅ @Throttle() decorators on all 4 POST endpoints
+- ✅ Per-endpoint rate limits: script(5), images(10), audio(15), video(10) per minute
+- ✅ Environment variables configured (.env.example + .env.local)
+- ✅ Response codes updated: script endpoint now returns 202 (async)
 - ✅ npm build EXIT CODE 0 (0 TypeScript errors)
 
-**4-API Integration Complete:** Full async queue pipeline for all external APIs:
-1. Claude (script generation) ✅
-2. Replicate (images) ✅
-3. ElevenLabs (audio) ✅
-4. FFmpeg (video assembly) ✅
+**Protection Matrix:**
+| Endpoint | Requests/min | Cost Protection |
+|---|---|---|
+| /script | 5 | $0.10+ per request (Claude) |
+| /images | 10 | $0.01 per image (Replicate) |
+| /audio | 15 | ~$0.01 per minute (ElevenLabs) |
+| /video | 10 | CPU intensive (FFmpeg) |
 
 **Files Modified:**
-- backend/src/integrations/video.service.ts (stub → full FFmpeg wrapper)
-- backend/src/generate/generate.service.ts (2 new methods)
-- backend/src/generate/generate.queue.processor.ts (added video case)
-- backend/src/generate/generate.controller.ts (implemented endpoint)
-- backend/src/common/queue/queue.service.ts (added video fields)
-- backend/src/generate/dto/generate-video.dto.ts (VERIFIED)
-- package.json (added uuid dependency)
+- backend/src/app.module.ts (added ThrottlerGuard provider)
+- backend/src/generate/generate.controller.ts (added @Throttle decorators)
+- backend/src/main.ts (removed manual guard registration)
+- .env.example (new file with full config)
+- backend/.env.local (added rate limit variables)
 
 **Documentation Created:**
-- [TASK_2_6_COMPLETE.md](TASK_2_6_COMPLETE.md) ← Full implementation details ⭐
-- Updated [PROGRESS.md](PROGRESS.md) with Task 2.6 status
+- [TASK_2_7_COMPLETE.md](TASK_2_7_COMPLETE.md) ← Full implementation details ⭐
+- Updated [PROGRESS.md](PROGRESS.md) with Task 2.7 status
 
 ---
 

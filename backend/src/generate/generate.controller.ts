@@ -1,4 +1,5 @@
 import { Controller, Post, Body, HttpCode, HttpStatus, UseGuards, Get, Param } from '@nestjs/common';
+import { Throttle } from '@nestjs/throttler';
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
 import { GenerateService } from './generate.service';
 import { GenerateScriptDto, GenerateScriptResponseDto } from './dto/generate-script.dto';
@@ -16,15 +17,15 @@ export class GenerateController {
   constructor(private readonly generateService: GenerateService) {}
 
   @Post('script')
-  @HttpCode(HttpStatus.OK)
+  @Throttle({ default: { limit: 5, ttl: 60000 } })
+  @HttpCode(HttpStatus.ACCEPTED)
   @ApiOperation({
     summary: 'Generate script from story',
     description: 'Takes a story and generates a short-form video script using Claude AI',
   })
   @ApiResponse({
-    status: 200,
-    description: 'Script generated successfully',
-    type: GenerateScriptResponseDto,
+    status: 202,
+    description: 'Script generation job queued',
   })
   @ApiResponse({
     status: 400,
@@ -53,8 +54,7 @@ export class GenerateController {
     return this.generateService.getJobStatus(jobId, user.userId);
   }
 
-  @Post('images')
-  @HttpCode(HttpStatus.ACCEPTED)
+  @Post('images')  @Throttle({ default: { limit: 10, ttl: 60000 } })  @HttpCode(HttpStatus.ACCEPTED)
   @ApiOperation({
     summary: 'Generate images from script',
     description: 'Generate visual assets for video scenes using Replicate',
@@ -71,6 +71,7 @@ export class GenerateController {
   }
 
   @Post('audio')
+  @Throttle({ default: { limit: 15, ttl: 60000 } })
   @HttpCode(HttpStatus.ACCEPTED)
   @ApiOperation({
     summary: 'Generate narration audio',
@@ -88,6 +89,7 @@ export class GenerateController {
   }
 
   @Post('video')
+  @Throttle({ default: { limit: 10, ttl: 60000 } })
   @HttpCode(HttpStatus.ACCEPTED)
   @ApiOperation({
     summary: 'Assemble final video from images and audio',
