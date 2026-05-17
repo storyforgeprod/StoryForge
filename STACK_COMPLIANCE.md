@@ -123,7 +123,7 @@
 
 ## 🚀 Deploy Stack Verification
 
-### Frontend (Vercel)
+### Frontend (Render)
 - ⏳ Not yet configured
 - Planned for Week 3
 
@@ -167,7 +167,7 @@
 ### Medium-term (Week 3)
 - [ ] Scaffold frontend with React + Vite
 - [ ] Verify all frontend dependencies match STACK_INIT.md
-- [ ] Configure Vercel deployment
+- [ ] Configure Render deployment
 
 ### Long-term (Week 4+)
 - [ ] Install FFmpeg (native binary)
