@@ -6,18 +6,28 @@
 
 ## 📌 Your Immediate Action Items (TODAY)
 
-### **👉 Option A: START TESTING NOW (Recommended)**
-↓ Go to: **[TASK_2_2_RUN_NOW.md](TASK_2_2_RUN_NOW.md)**
-- 6 steps (copy-paste commands)
-- ~40 minutes total
-- Includes PowerShell one-liner to start backend
-- See your first Job created in Prisma ✨
+### **👉 Task 2.2 — ELEGÍ UNA OPCIÓN:**
 
-### Option B: **If you want quick reference**
-↓ See: **[TASK_2_2_QUICK_START.md](TASK_2_2_QUICK_START.md)**
-- Step-by-step guide without running anything yet
-- Prerequisites checklist
-- URL references
+1. **Opción A: Full Testing** (Recomendado — 40 min)
+   - ↓ Ir a: **[TASK_2_2_RUN_NOW.md](TASK_2_2_RUN_NOW.md)**
+   - Requiere: ANTHROPIC_API_KEY + Supabase
+   - Resultado: End-to-end testing con base de datos real
+
+2. **Opción B: Mock Testing** (15 min, sin dependencias)
+   - ↓ Ver: **[TASK_2_2_PLAN.md](TASK_2_2_PLAN.md#-opción-b-testing-mock-sin-dependencias-externas)**
+   - Requiere: Solo Node.js
+   - Resultado: Verificar lógica sin BD
+
+3. **Opción C: Code Review** (5 min)
+   - ↓ Leer: **[TASK_2_1_VERIFIED.md](TASK_2_1_VERIFIED.md)**
+   - Requiere: Nada
+   - Resultado: Entender implementación
+
+---
+
+### **Ver también:**
+- **[TASK_2_2_PLAN.md](TASK_2_2_PLAN.md)** — Decision tree y opciones disponibles
+- **[IMPLEMENTATION_PLAN.md](IMPLEMENTATION_PLAN.md)** — Handoff guidelines para próximos desarrolladores
 
 ---
 

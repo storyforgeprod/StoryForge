@@ -18,14 +18,27 @@
 
 ## 🎯 Quick Navigation
 
-### 👤 For New Developers
+### � **FOR IMMEDIATE ACTION** ← Start here!
+
+👉 **[EXECUTIVE_SUMMARY.md](EXECUTIVE_SUMMARY.md)** — What was done today + your next step (3 options)
+
+### �👤 For New Developers
 
 1. **First time setup?** → Read [QUICK_START.md](QUICK_START.md) (10 min)
 2. **What are we building?** → Read [etapa4-brief-final.md](analisis/etapa4-brief-final.md) (5 min)
 3. **How does it work?** → Read [STACK_INIT.md](STACK_INIT.md) (10 min)
 4. **How do I code here?** → Read [DEVELOPMENT_GUIDELINES.md](DEVELOPMENT_GUIDELINES.md) (15 min)
+5. **What's happening now?** → Read [NEXT_STEPS.md](NEXT_STEPS.md) (Current tasks)
 
-### 📋 For Project Managers / Technical Leads
+### 🚀 For Continuing Development
+
+1. **Current status?** → [PROGRESS.md](PROGRESS.md) — What's done, what's next
+2. **How to continue?** → [HANDOFF.md](HANDOFF.md) — Setup guide + context
+3. **Today's summary?** → [DAILY_SUMMARY_2026_05_16.md](DAILY_SUMMARY_2026_05_16.md) — What was accomplished
+4. **Task 2.1 verified?** → [TASK_2_1_VERIFIED.md](TASK_2_1_VERIFIED.md) — Implementation verification
+5. **Task 2.2 options?** → [TASK_2_2_PLAN.md](TASK_2_2_PLAN.md) — 👈 **Choose your testing approach**
+
+###  For Project Managers / Technical Leads
 
 1. **What's the plan?** → [IMPLEMENTATION_PLAN.md](IMPLEMENTATION_PLAN.md)
    - Week-by-week breakdown

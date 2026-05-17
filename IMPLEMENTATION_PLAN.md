@@ -213,7 +213,57 @@ Semana 1 - Cierre de viernes:
 
 ---
 
-## 🚨 Consideraciones Especiales
+## � Handoff para Próximo Desarrollador
+
+Cuando continúes el desarrollo en la próxima sesión:
+
+### 1️⃣ **Revisar Estado Actual**
+- Lee **[PROGRESS.md](PROGRESS.md)** — qué se completó, estado actual, bloqueadores
+- Lee **[HANDOFF.md](HANDOFF.md)** — contexto técnico, cómo ejecutar localmente, archivos clave
+- Lee **[SESSION_SUMMARY_2026_05_16.md](SESSION_SUMMARY_2026_05_16.md)** (o la sesión más reciente) — resumen de la sesión anterior
+
+### 2️⃣ **Antes de Hacer Cambios**
+- Consulta **[DEVELOPMENT_GUIDELINES.md](DEVELOPMENT_GUIDELINES.md)**
+  - Convenciones de código (nombrado, comentarios, estructura)
+  - Proceso de testing
+  - Proceso de commit y PR
+- Consulta **[OPTIONAL_COMPONENTS.md](OPTIONAL_COMPONENTS.md)**
+  - Qué componentes son removibles post-MVP
+  - Qué es core vs qué es nice-to-have
+  - Cómo desactivar features opcionalmente
+
+### 3️⃣ **Después de Terminar tu Trabajo**
+- Actualiza **[PROGRESS.md](PROGRESS.md)** con lo que completaste
+  - Marca tareas como ✅ o 🔄
+  - Agrega bloqueadores si los hay
+  - Actualiza hitos de semana
+- Actualiza **[HANDOFF.md](HANDOFF.md)** con:
+  - Cambios clave realizados
+  - Cómo ejecutar ahora (si cambió)
+  - Archivos modificados
+  - Próximos pasos
+- Si hay investigación importante, agrega una entrada en **[SESSION_SUMMARY_YYYY_MM_DD.md](./)**
+
+### 4️⃣ **Stack Compliance Check**
+- Si necesitas agregar una nueva dependencia → actualiza [STACK_INIT.md](STACK_INIT.md)
+- Si necesitas cambiar tecnología → actualiza [STACK_COMPLIANCE.md](STACK_COMPLIANCE.md)
+- Documenta cambio en CLAUDE.md para el equipo
+
+### 5️⃣ **Referencia Rápida de Documentos**
+| Archivo | Consultar cuando... |
+|---------|-------------------|
+| [PROGRESS.md](PROGRESS.md) | Necesitas saber qué se hizo |
+| [HANDOFF.md](HANDOFF.md) | Necesitas contexto técnico |
+| [DEVELOPMENT_GUIDELINES.md](DEVELOPMENT_GUIDELINES.md) | Vas a escribir código |
+| [OPTIONAL_COMPONENTS.md](OPTIONAL_COMPONENTS.md) | Necesitas saber qué features son opcionales |
+| [STACK_INIT.md](STACK_INIT.md) | Necesitas agregar dependencias |
+| [STACK_COMPLIANCE.md](STACK_COMPLIANCE.md) | Necesitas verificar cumplimiento técnico |
+| [QUICK_START.md](QUICK_START.md) | Necesitas setup rápido (10 min) |
+| [IMPLEMENTATION_PLAN.md](IMPLEMENTATION_PLAN.md) | Necesitas entender roadmap (este archivo) |
+
+---
+
+## �🚨 Consideraciones Especiales
 
 ### Decisiones Técnicas Reversibles
 
