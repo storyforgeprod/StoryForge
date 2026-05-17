@@ -27,7 +27,14 @@
 
 ### **Ver también:**
 - **[TASK_2_2_PLAN.md](TASK_2_2_PLAN.md)** — Decision tree y opciones disponibles
-- **[IMPLEMENTATION_PLAN.md](IMPLEMENTATION_PLAN.md)** — Handoff guidelines para próximos desarrolladores
+- **[IMPLEMENTATION_PLAN.md](IMPLEMENTATION_PLAN.md)** — **📌 PLAN MAESTRO** de todo el proyecto:
+  - 6 semanas de tareas con estimaciones
+  - Fase 1 (backend), Fase 2 (frontend), Fase 3 (deploy)
+  - Reglas de stack compliance y documentación
+  - **Léelo para:** Entender qué va después de Task 2.2, qué archivos crear, cómo reportar progreso
+  - **Úsalo como:** Referencia única de verdad del proyecto
+- **[PROGRESS.md](PROGRESS.md)** — Qué se hizo cada sesión (para tracking)
+- **[HANDOFF.md](HANDOFF.md)** — Setup + contexto para próximo desarrollador
 
 ---
 

@@ -27,7 +27,54 @@ Este plan es vinculante a:
 **Cambios no autorizados sin actualizar STACK_INIT.md = Deuda técnica.**
 
 ---
+## 📝 DOCUMENTACIÓN DE DESARROLLO — ⭐ CRÍTICO
 
+**REGLA FUNDAMENTAL:** Cada archivo que se use, se cree, se modifique o incida en el desarrollo debe estar documentado en este archivo (IMPLEMENTATION_PLAN.md).
+
+### Qué Documentar Aquí
+
+Cualquier cosa que afecte decisiones futuras o continuidad del proyecto:
+- ✅ **Nuevas opciones o decisiones** (ej: "Elegimos Opción A en Task 2.2")
+- ✅ **Archivos creados** (referencia a su propósito en este plan)
+- ✅ **Cambios a la arquitectura** (actualizar PHASE que corresponde)
+- ✅ **Problemas encontrados + soluciones** (para evitar repetirlos)
+- ✅ **Bloqueos o dependencias** (qué espera qué)
+- ✅ **Actualizaciones a tareas** (cambios de estimación, prioridad, etc.)
+- ✅ **Decisiones técnicas** (siempre vinculadas a STACK_INIT.md)
+
+### Archivos Clave Este Proyecto (Referencias)
+
+| Archivo | Propósito | Cuándo Revisar |
+|---------|-----------|-----------------|
+| **[STACK_INIT.md](STACK_INIT.md)** | Stack autorizado (tecnologías, versiones) | Antes de agregar dependencies |
+| **[PROGRESS.md](PROGRESS.md)** | Seguimiento semanal (qué se hizo) | Cada sesión de desarrollo |
+| **[HANDOFF.md](HANDOFF.md)** | Contexto + setup para próximo dev | Fin de cada sesión |
+| **[DEVELOPMENT_GUIDELINES.md](DEVELOPMENT_GUIDELINES.md)** | Convenciones de código, patrones | Antes de escribir código |
+| **[OPTIONAL_COMPONENTS.md](OPTIONAL_COMPONENTS.md)** | Features opcionales / removibles | Al planificar nueva feature |
+| **[IMPLEMENTATION_PLAN.md](IMPLEMENTATION_PLAN.md)** | ← **AQUÍ AHORA** — Plan maestro + decisiones | Toda decisión arquitectónica |
+
+### Flujo de Actualización
+
+**Cuando hagas cambios:**
+1. Modifica el código / crea archivo
+2. **ACTUALIZA IMPLEMENTATION_PLAN.md** con:
+   - Qué se cambió y por qué
+   - Referencia al archivo nuevo/modificado
+   - Cualquier impacto en fases futuras
+3. Actualiza PROGRESS.md
+4. Actualiza HANDOFF.md
+
+**Ejemplo:**
+```markdown
+### Task 2.2 Completado ✅
+- Ejecuté: Opción A (Full Testing)
+- Resultado: ANTHROPIC_API_KEY validado, Job creation works
+- Cambios: Ninguno al código (testing pasó)
+- Siguiente: Task 2.3 - Queue processor
+- Archivos afectados: Ninguno nuevo, solo datos en logs
+```
+
+---
 ## �📋 Resumen Ejecutivo
 
 Este documento define **cómo** se va a construir StoryForge, cuándo, en qué orden y cómo se va a rastrear el progreso. Está alineado con la **Hoja de Ruta Sugerida** del brief final y vinculado directamente al backlog de Azure DevOps.

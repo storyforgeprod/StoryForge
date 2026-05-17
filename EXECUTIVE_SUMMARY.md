@@ -51,6 +51,7 @@
 
 | Archivo | Propósito | Tamaño |
 |---------|-----------|--------|
+| **[IMPLEMENTATION_PLAN.md](IMPLEMENTATION_PLAN.md)** | **📌 PLAN MAESTRO** — 6 semanas, fases, tareas, tracking | 20KB |
 | **START_HERE.md** ← 👈 **EMPIEZA AQUÍ** | Instrucciones para próximo paso | 4KB |
 | TASK_2_2_PLAN.md | 3 opciones ejecutables + decision tree | 12KB |
 | TASK_2_1_VERIFIED.md | Verificación de código | 8KB |
@@ -128,6 +129,23 @@
 
 ---
 
+## 📖 REFERENCIA DE ARCHIVOS CLAVE
+
+Antes de continuar, familiarízate con estos archivos:
+
+| Archivo | Para Qué | Acción |
+|---------|---------|--------|
+| **[IMPLEMENTATION_PLAN.md](IMPLEMENTATION_PLAN.md)** | Ver plan completo de 6 semanas, qué viene después | ⭐ **LEE PRIMERO** — Es tu referencia única |
+| [PROGRESS.md](PROGRESS.md) | Tracking semanal de lo completado | Actualiza cada sesión |
+| [HANDOFF.md](HANDOFF.md) | Setup + contexto para próximo dev | Actualiza cada sesión |
+| [DEVELOPMENT_GUIDELINES.md](DEVELOPMENT_GUIDELINES.md) | Convenciones, patrones de código | Consulta antes de codear |
+| [OPTIONAL_COMPONENTS.md](OPTIONAL_COMPONENTS.md) | Features opcionales/removibles | Consulta al planificar |
+| [STACK_INIT.md](STACK_INIT.md) | Stack autorizado (tecnologías exactas) | Respeta siempre |
+
+**👉 Acción crítica:** Si añades un archivo nuevo, módulo, dependency o haces decisión técnica → **actualiza IMPLEMENTATION_PLAN.md**
+
+---
+
 ## 🎓 Key Points
 
 ### ✅ Task 2.1 Status
@@ -146,6 +164,7 @@ Próximos devs saben qué hacer: ✅
 Handoff completo:           ✅
 Documentación compresiva:   ✅
 Entrada clara para continuar: ✅
+Documentación centralizada:  ✅ (IMPLEMENTATION_PLAN.md)
 ```
 
 ### ✅ Code Quality
