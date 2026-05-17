@@ -152,13 +152,13 @@ PORT=3000
 | Entorno | Plataforma | URL | Auto-deploy |
 |---------|-----------|-----|------------|
 | **Development** | Local Vite | `http://localhost:5173` | Manual |
-| **Staging** | Vercel | `staging-storyforge.vercel.app` | Push a `staging` branch |
-| **Production** | Vercel | `storyforge.app` | Push a `main` branch |
+| **Staging** | Render | `staging-storyforge.onrender.com` | Push a `staging` branch |
+| **Production** | Render | `storyforge.onrender.com` | Push a `main` branch |
 
-**Setup Vercel:**
+**Setup Render:**
 ```
-1. Conectar repo GitHub a Vercel
-2. Configurar variables de entorno en Vercel dashboard
+1. Conectar repo GitHub a Render
+2. Configurar variables de entorno en Render
 3. Auto-deploy habilitado en push
 ```
 
@@ -333,7 +333,7 @@ cd frontend && npm run dev  # en otra terminal
 |-----------|----------|---------|
 | **Sentry** | Error tracking | Free tier (~5k events/mes) |
 | **PostHog** | Product analytics | Free tier (~1M events/mes) |
-| **Vercel Analytics** | Frontend perf | Incluido |
+| **Render Analytics** | Frontend perf | Incluido |
 | **Render Metrics** | Backend health | Incluido |
 
 **Credenciales a configurar:**
@@ -360,7 +360,7 @@ POSTHOG_URL=https://app.posthog.com
 [ ] Conectar servicios de IA (API keys)
 [ ] Verificar npm run dev (ambos) local
 [ ] Crear CI/CD en GitHub Actions / Azure Pipelines
-[ ] Deploy a Vercel (frontend)
+[ ] Deploy a Render (frontend)
 [ ] Deploy a Render (backend)
 [ ] Verificar staging funciona
 [ ] Documentar en SETUP.md paso a paso
@@ -378,7 +378,6 @@ POSTHOG_URL=https://app.posthog.com
 - **Prisma:** https://www.prisma.io/docs/
 - **BullMQ:** https://docs.bullmq.io/
 - **Render:** https://render.com/docs
-- **Vercel:** https://vercel.com/docs
 
 ---
 
