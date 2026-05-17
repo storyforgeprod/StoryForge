@@ -2,11 +2,13 @@ import { Injectable, BadRequestException, NotFoundException, ForbiddenException 
 import { GenerateScriptDto, GenerateScriptResponseDto } from './dto/generate-script.dto';
 import { GenerateImagesDto, GenerateImagesResponseDto, ImageGenerationResult } from './dto/generate-images.dto';
 import { GenerateAudioDto, GenerateAudioResponseDto, AudioGenerationResult } from './dto/generate-audio.dto';
+import { GenerateVideoDto, GenerateVideoResponseDto, VideoAssemblyResult } from './dto/generate-video.dto';
 import { Anthropic } from '@anthropic-ai/sdk';
 import { PrismaService } from '../common/prisma/prisma.service';
 import { QueueService } from '../common/queue/queue.service';
 import { ReplicateService } from '../integrations/replicate.service';
 import { ElevenLabsService } from '../integrations/elevenlabs.service';
+import { VideoService } from '../integrations/video.service';
 
 @Injectable()
 export class GenerateService {
@@ -17,6 +19,7 @@ export class GenerateService {
     private queue: QueueService,
     private replicateService: ReplicateService,
     private elevenLabsService: ElevenLabsService,
+    private videoService: VideoService,
   ) {
     this.client = new Anthropic({
       apiKey: process.env.ANTHROPIC_API_KEY,
@@ -423,6 +426,166 @@ Respond with ONLY the visual description, no explanations.`,
       audioUrl,
       audioLength,
       textUsed: scriptText.substring(0, 100),
+      generatedAt: new Date(),
+    };
+  }
+
+  /**
+   * Generate video from images and audio
+   * Creates Job (pending) + adds to queue, returns immediately
+   * Queue processor handles FFmpeg call asynchronously
+   */
+  async generateVideo(
+    userId: string,
+    dto: GenerateVideoDto,
+  ): Promise<GenerateVideoResponseDto> {
+    // 1. Validate inputs
+    if (!dto.imageJobId || dto.imageJobId.trim().length === 0) {
+      throw new BadRequestException('imageJobId is required');
+    }
+
+    if (!dto.audioJobId || dto.audioJobId.trim().length === 0) {
+      throw new BadRequestException('audioJobId is required');
+    }
+
+    // 2. Verify image job exists and belongs to user
+    const imageJob = await this.prisma.job.findUnique({
+      where: { id: dto.imageJobId },
+    });
+
+    if (!imageJob || imageJob.userId !== userId) {
+      throw new ForbiddenException('Unauthorized access to this image job');
+    }
+
+    if (imageJob.status !== 'completed') {
+      throw new BadRequestException(
+        `Image job must be completed first (current: ${imageJob.status})`,
+      );
+    }
+
+    // 3. Verify audio job exists and belongs to user
+    const audioJob = await this.prisma.job.findUnique({
+      where: { id: dto.audioJobId },
+    });
+
+    if (!audioJob || audioJob.userId !== userId) {
+      throw new ForbiddenException('Unauthorized access to this audio job');
+    }
+
+    if (audioJob.status !== 'completed') {
+      throw new BadRequestException(
+        `Audio job must be completed first (current: ${audioJob.status})`,
+      );
+    }
+
+    // 4. Create Video Job
+    let videoJob;
+    try {
+      videoJob = await this.prisma.job.create({
+        data: {
+          userId,
+          projectId: imageJob.projectId,
+          type: 'video',
+          status: 'pending',
+          progress: 0,
+        },
+      });
+    } catch (error) {
+      console.error('Failed to create video job:', error);
+      throw new BadRequestException('Failed to create video assembly job');
+    }
+
+    // 5. Queue the job
+    try {
+      await this.queue.addGenerationJob({
+        jobId: videoJob.id,
+        userId,
+        projectId: imageJob.projectId,
+        type: 'video',
+        imageJobId: dto.imageJobId,
+        audioJobId: dto.audioJobId,
+        fps: dto.fps,
+        bitrate: dto.bitrate,
+        _startTime: Date.now(),
+      });
+    } catch (error) {
+      console.error('Failed to queue video job:', error);
+      await this.prisma.job.update({
+        where: { id: videoJob.id },
+        data: {
+          status: 'failed',
+          error: 'Failed to queue video assembly job',
+        },
+      });
+      throw new BadRequestException('Failed to queue video assembly job');
+    }
+
+    // 6. Return immediately
+    return {
+      jobId: videoJob.id,
+      status: 'pending',
+      message: 'Video assembly queued',
+      createdAt: videoJob.createdAt,
+    };
+  }
+
+  /**
+   * Generate video content (used by queue processor)
+   * This is the actual async logic that calls VideoService (FFmpeg)
+   */
+  async generateVideoContent(
+    userId: string,
+    data: { jobId: string; imageJobId: string; audioJobId: string; fps?: number; bitrate?: string },
+  ): Promise<VideoAssemblyResult> {
+    // 1. Fetch the image job result
+    const imageJob = await this.prisma.job.findUnique({
+      where: { id: data.imageJobId },
+    });
+
+    if (!imageJob || imageJob.status !== 'completed') {
+      throw new BadRequestException('Image job not completed');
+    }
+
+    const imageResult = JSON.parse(imageJob.result || '{}');
+    const imageUrls = imageResult.imageUrls || [];
+
+    // 2. Fetch the audio job result
+    const audioJob = await this.prisma.job.findUnique({
+      where: { id: data.audioJobId },
+    });
+
+    if (!audioJob || audioJob.status !== 'completed') {
+      throw new BadRequestException('Audio job not completed');
+    }
+
+    const audioResult = JSON.parse(audioJob.result || '{}');
+    const audioUrl = audioResult.audioUrl || '';
+
+    // 3. Validate we have both resources
+    if (!imageUrls || imageUrls.length === 0) {
+      throw new BadRequestException('No image URLs found in image job result');
+    }
+
+    if (!audioUrl) {
+      throw new BadRequestException('No audio URL found in audio job result');
+    }
+
+    // 4. Call VideoService to assemble video
+    const videoUrl = await this.videoService.assembleVideo(imageUrls, audioUrl, {
+      fps: data.fps,
+      bitrate: data.bitrate,
+    });
+
+    // 5. Get file size and duration
+    const fs = require('fs');
+    const fileSize = fs.statSync(videoUrl.replace('file://', '')).size;
+    const duration = audioResult.audioLength || 60; // Use audio length from job
+
+    return {
+      videoUrl,
+      duration,
+      fileSize,
+      format: 'mp4',
       generatedAt: new Date(),
     };
   }

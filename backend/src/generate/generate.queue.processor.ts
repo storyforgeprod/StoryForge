@@ -13,6 +13,10 @@ interface GenerationJobData {
   scriptId?: string;
   imageDescription?: string;
   voiceId?: string;
+  imageJobId?: string;
+  audioJobId?: string;
+  fps?: number;
+  bitrate?: string;
   _startTime: number;
 }
 
@@ -59,6 +63,14 @@ export class GenerateQueueProcessor {
           jobId,
           scriptId: job.data.scriptId || '',
           voiceId: job.data.voiceId,
+        });
+      } else if (type === 'video') {
+        result = await this.generateService.generateVideoContent(userId, {
+          jobId,
+          imageJobId: job.data.imageJobId || '',
+          audioJobId: job.data.audioJobId || '',
+          fps: job.data.fps,
+          bitrate: job.data.bitrate,
         });
       } else {
         throw new Error(`Type ${type} not yet implemented`);

@@ -4,6 +4,7 @@ import { GenerateService } from './generate.service';
 import { GenerateScriptDto, GenerateScriptResponseDto } from './dto/generate-script.dto';
 import { GenerateImagesDto, GenerateImagesResponseDto } from './dto/generate-images.dto';
 import { GenerateAudioDto, GenerateAudioResponseDto } from './dto/generate-audio.dto';
+import { GenerateVideoDto, GenerateVideoResponseDto } from './dto/generate-video.dto';
 import { JwtAuthGuard } from '../common/auth/jwt.guard';
 import { CurrentUser } from '../common/auth/current-user.decorator';
 
@@ -89,18 +90,19 @@ export class GenerateController {
   @Post('video')
   @HttpCode(HttpStatus.ACCEPTED)
   @ApiOperation({
-    summary: 'Assemble final video',
-    description: 'Combine images, audio, and effects into final video',
+    summary: 'Assemble final video from images and audio',
+    description: 'Creates async video assembly job. Returns jobId for polling.',
   })
   @ApiResponse({
     status: 202,
-    description: 'Video assembly job queued',
+    description: 'Video assembly job created',
   })
-  async generateVideo(@Body() dto: any) {
-    // TODO: Implement
-    return {
-      jobId: 'job_pending',
-      status: 'queued',
-    };
+  @ApiResponse({ status: 400, description: 'Invalid request' })
+  @ApiResponse({ status: 403, description: 'Unauthorized' })
+  async generateVideo(
+    @Body() dto: GenerateVideoDto,
+    @CurrentUser() user: any,
+  ): Promise<GenerateVideoResponseDto> {
+    return this.generateService.generateVideo(user.userId, dto);
   }
 }

@@ -1,6 +1,6 @@
 # 📊 PROGRESS.md — Seguimiento de Desarrollo
 
-**Actualizado:** 17 de mayo de 2026, 01:30 UTC | **Fase Actual:** Week 2 (Backend Generation Pipeline — Task 2.5 COMPLETADA)
+**Actualizado:** 17 de mayo de 2026, 01:50 UTC | **Fase Actual:** Week 2 (Backend Generation Pipeline — Task 2.6 COMPLETADA — 72% MVP)
 
 ---
 
@@ -161,8 +161,21 @@
   - Client: Poll GET /job/:jobId for progress and audioUrl in result
 - [x] **Status:** ✅ COMPLETED — Foundation for Task 2.6 (Video Assembly)
 
-#### ⏳ Task 2.6: Video Assembly (FFmpeg) — NEXT
-- ⏳ Estimated: ~4 hours
+#### ✅ Task 2.6: FFmpeg Video Assembly — COMPLETADA ✅
+- [x] Implemented VideoService with FFmpeg wrapper in `backend/src/integrations/video.service.ts`
+- [x] Created `GenerateVideoDto` with imageJobId + audioJobId validation
+- [x] Extended queue.service.ts interface with imageJobId, audioJobId, fps, bitrate fields
+- [x] Added `generateVideo()` endpoint handler in GenerateService
+- [x] Added `generateVideoContent()` helper for processor (calls VideoService)
+- [x] Extended GenerateQueueProcessor to handle type='video'
+- [x] Updated generate.controller.ts POST /video endpoint with full implementation
+- [x] Installed uuid npm package for unique video IDs
+- [x] npm build EXIT CODE 0 ✅
+- [x] **Result:** Complete video assembly pipeline with 4-API integration
+  - Client: POST /video {imageJobId, audioJobId, fps?, bitrate?} → returns jobId immediately
+  - Background: Queue processor → Fetches both jobs → FFmpeg assembles 1080×1920 video
+  - Client: Poll GET /job/:jobId for progress and videoUrl in result
+- [x] **Status:** ✅ COMPLETED — All 4 APIs integrated (Claude, Replicate, ElevenLabs, FFmpeg)
 
 ---
 

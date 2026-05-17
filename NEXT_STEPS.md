@@ -1,46 +1,58 @@
 # NEXT STEPS — StoryForge MVP Implementation
 
-**Last Updated:** 17 May 2026 01:30 UTC | **MVP Progress:** 68% (Task 2.5 ✅)
+**Last Updated:** 17 May 2026 01:50 UTC | **MVP Progress:** 72% (Task 2.6 ✅)
 
 ---
 
 ## 🎯 IMMEDIATE ACTION (NOW)
 
-### Task 2.6: FFmpeg Video Assembly
+### Task 2.7: Rate Limiting & API Security
 
 **Status:** ⏳ READY TO CODE  
-**Criticality:** ⭐⭐ REQUIRED for Week 2  
-**Estimated Time:** 4 hours (PASO 1-5)  
-**Depends On:** ✅ Task 2.5 (Audio endpoint) COMPLETED
+**Criticality:** ⭐⭐⭐ REQUIRED for Week 2 completion  
+**Estimated Time:** 2-3 hours  
+**Depends On:** ✅ Task 2.6 (Video endpoint) COMPLETED
 
-**What:** Implement POST `/generate/video` using FFmpeg to assemble images, narration, and effects into final video.
+**What:** Implement @Throttle() decorators on all POST endpoints to prevent abuse. Register ThrottlerGuard in app.module.ts with configurable thresholds per endpoint.
+
+**Files to Modify:**
+1. `backend/src/generate/generate.controller.ts` — Add @Throttle() to POST /script, /images, /audio, /video
+2. `backend/src/app.module.ts` — Import ThrottlerModule, register guard
+3. `.env.example` + `.env.local` — Add rate limit configuration
 
 ---
 
-## ✅ Just Completed: Task 2.5
+## ✅ Just Completed: Task 2.6
 
-### Task 2.5: ElevenLabs Audio Endpoint — COMPLETADA ✅
+### Task 2.6: FFmpeg Video Assembly — COMPLETADA ✅
 
 **Implemented:**
-- ✅ ElevenLabsService with full Fetch API integration
-- ✅ GenerateAudioDto with scriptId + voiceId validation
-- ✅ Queue processor extended for type='audio'
-- ✅ GenerateService.generateAudio() + generateAudioContent()
-- ✅ Controller POST /audio endpoint fully implemented
+- ✅ VideoService with full FFmpeg wrapper (160+ lines)
+- ✅ GenerateVideoDto with imageJobId + audioJobId validation
+- ✅ Queue processor extended for type='video'
+- ✅ GenerateService.generateVideo() + generateVideoContent()
+- ✅ Controller POST /video endpoint fully implemented
+- ✅ uuid npm package installed
 - ✅ npm build EXIT CODE 0 (0 TypeScript errors)
 
-**Pattern Proven:** Full async queue pipeline for 3 external APIs:
+**4-API Integration Complete:** Full async queue pipeline for all external APIs:
 1. Claude (script generation) ✅
 2. Replicate (images) ✅
 3. ElevenLabs (audio) ✅
+4. FFmpeg (video assembly) ✅
 
 **Files Modified:**
-- backend/src/integrations/elevenlabs.service.ts (stub → real implementation)
+- backend/src/integrations/video.service.ts (stub → full FFmpeg wrapper)
 - backend/src/generate/generate.service.ts (2 new methods)
-- backend/src/generate/generate.queue.processor.ts (added audio case)
+- backend/src/generate/generate.queue.processor.ts (added video case)
 - backend/src/generate/generate.controller.ts (implemented endpoint)
-- backend/src/common/queue/queue.service.ts (added voiceId field)
-- backend/src/generate/dto/generate-audio.dto.ts (NEW file)
+- backend/src/common/queue/queue.service.ts (added video fields)
+- backend/src/generate/dto/generate-video.dto.ts (VERIFIED)
+- package.json (added uuid dependency)
+
+**Documentation Created:**
+- [TASK_2_6_COMPLETE.md](TASK_2_6_COMPLETE.md) ← Full implementation details ⭐
+- Updated [PROGRESS.md](PROGRESS.md) with Task 2.6 status
 
 ---
 
