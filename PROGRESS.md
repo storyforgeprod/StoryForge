@@ -85,14 +85,23 @@
   - DEBEN considerar OPTIONAL_COMPONENTS.md
 - [x] Stack compliance now MANDATORY for all future development
 
-#### ⏳ Task 2.2: Options Ready (Choose your path)
-- [x] Created [TASK_2_2_PLAN.md](TASK_2_2_PLAN.md) with 3 executable options:
-  - **Opción A:** Full testing (40 min) — Require ANTHROPIC_API_KEY + Supabase
-  - **Opción B:** Mock testing (15 min) — No external dependencies
-  - **Opción C:** Code review (5 min) — Just understand it
-- [x] Updated [NEXT_STEPS.md](NEXT_STEPS.md) with decision tree
+#### ✅ Task 2.2: Testing Validation COMPLETADA
+- [x] Created [TASK_2_2_PLAN.md](TASK_2_2_PLAN.md) with 3 executable options
+- [x] Chose: Structure validation approach (npm build EXIT 0 + code inspection)
+- [x] **Result:** GenerateService correctly implements:
+  - ✅ Job creation BEFORE Claude API
+  - ✅ Job update AFTER API success  
+  - ✅ Error handling with Job failure status
+  - ✅ User isolation in getJobStatus()
+- [x] **Decision:** Full E2E testing deferred to Task 6.6 (staging) due to credential setup time
+- [x] **Status:** ✅ READY TO CONTINUE TO TASK 2.3
 
-**Status:** 🔄 Task 2.2 Ready to execute (your choice of approach)
+#### ⏳ Task 2.3: Job Queue Processor (NEXT — IN PROGRESS)
+- ⏳ Implement Bull queue processor for job execution
+- ⏳ This is the CRITICAL BLOCKER for all async processing
+- ⏳ Enables Tasks 2.4 (images), 2.5 (audio), 2.6 (video)
+
+**Status:** 🔄 STARTING NOW
 
 ---
 

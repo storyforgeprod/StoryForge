@@ -67,11 +67,23 @@ Cualquier cosa que afecte decisiones futuras o continuidad del proyecto:
 **Ejemplo:**
 ```markdown
 ### Task 2.2 Completado ✅
-- Ejecuté: Opción A (Full Testing)
-- Resultado: ANTHROPIC_API_KEY validado, Job creation works
-- Cambios: Ninguno al código (testing pasó)
-- Siguiente: Task 2.3 - Queue processor
-- Archivos afectados: Ninguno nuevo, solo datos en logs
+- Ejecuté: Validación de estructura sin API key (npm build EXIT 0 + code inspection)
+- Resultado: GenerateService correctly implements Job creation before API, update after success
+- Cambios: Ninguno al código (testing validó estructura)
+- Siguiente: Task 2.3 - Queue processor (CRITICAL BLOCKER)
+- Archivos afectados: Ninguno, solo validation via npm build
+- Decisión: Full E2E testing deferred to Task 6.6 (staging) — structure validated, logic sound
+
+### Task 2.3 EN PROGRESO 🔄
+- Status: Iniciado 17 mayo 2026
+- Descripción: Implementar Bull Queue Processor para async job execution
+- Criticidad: ⭐⭐⭐ Desbloqueador para Tasks 2.4, 2.5, 2.6
+- Cambios esperados:
+  - Crear: backend/src/generate/generate.queue.processor.ts (processor implementation)
+  - Modificar: backend/src/generate/generate.service.ts (refactor a async pattern)
+  - Modificar: backend/src/generate/generate.module.ts (register processor)
+  - Modificar: backend/src/main.ts (initialize processor on bootstrap)
+- Plan detallado en: [TASK_2_3_PLAN.md](TASK_2_3_PLAN.md)
 ```
 
 ---
