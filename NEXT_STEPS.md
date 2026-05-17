@@ -6,25 +6,18 @@
 
 ## 📌 Your Immediate Action Items (TODAY)
 
-### Option A: **If you want to test now** (Recommended)
-↓ Go to: **[TASK_2_2_QUICK_START.md](TASK_2_2_QUICK_START.md)**
-- 6 simple steps
-- ~30 minutes total
-- See your first Job created in Prisma
+### **👉 Option A: START TESTING NOW (Recommended)**
+↓ Go to: **[TASK_2_2_RUN_NOW.md](TASK_2_2_RUN_NOW.md)**
+- 6 steps (copy-paste commands)
+- ~40 minutes total
+- Includes PowerShell one-liner to start backend
+- See your first Job created in Prisma ✨
 
-### Option B: **If you want to understand the code first**
-↓ Read: **[CODE_CHANGES_2_1.md](CODE_CHANGES_2_1.md)**
-- Before/After code comparison
-- Database flow diagram
-- API changes explained
-- Security improvements listed
-
-### Option C: **If you want comprehensive documentation**
-↓ See: **[SEMANA2_TEST.md](SEMANA2_TEST.md)**
-- Full testing guide (200+ lines)
-- All edge cases
-- Debugging section
-- Advanced examples
+### Option B: **If you want quick reference**
+↓ See: **[TASK_2_2_QUICK_START.md](TASK_2_2_QUICK_START.md)**
+- Step-by-step guide without running anything yet
+- Prerequisites checklist
+- URL references
 
 ---
 

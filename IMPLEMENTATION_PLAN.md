@@ -7,7 +7,28 @@
 
 ---
 
-## 📋 Resumen Ejecutivo
+## � STACK COMPLIANCE — ⭐ IMPORTANTE
+
+**TODAS las decisiones técnicas deben respetar el stack definido en [STACK_INIT.md](STACK_INIT.md).**
+
+Este plan es vinculante a:
+- **Backend:** NestJS 10+ | TypeScript 5+ | Prisma + Supabase | Bull/Redis | Swagger
+- **Frontend:** React 18+ | Vite 5+ | TailwindCSS 3+ | shadcn/ui | TypeScript 5+
+- **Bases de datos:** Supabase PostgreSQL | Supabase Storage | Redis (Upstash)
+- **Servicios de IA:** Claude (Anthropic) | Replicate (Flux) | ElevenLabs (TTS) | FFmpeg (video)
+- **Deploy:** Vercel (frontend) | Render (backend) | GitHub Actions CI/CD
+
+**Si hay necesidad de agregar/cambiar una tecnología:**
+1. Justificar en el backlog de Azure DevOps
+2. Actualizar STACK_INIT.md
+3. Notificar al equipo en CLAUDE.md
+4. Actualizar este plan
+
+**Cambios no autorizados sin actualizar STACK_INIT.md = Deuda técnica.**
+
+---
+
+## �📋 Resumen Ejecutivo
 
 Este documento define **cómo** se va a construir StoryForge, cuándo, en qué orden y cómo se va a rastrear el progreso. Está alineado con la **Hoja de Ruta Sugerida** del brief final y vinculado directamente al backlog de Azure DevOps.
 

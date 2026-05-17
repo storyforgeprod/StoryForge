@@ -204,6 +204,9 @@ Deploy automático a Render/Vercel en push a `develop`
 | Documento | Propósito | Audiencia |
 |-----------|----------|-----------|
 | **[NEXT_STEPS.md](NEXT_STEPS.md)** | **👈 START HERE** | Developers |
+| [SESSION_SUMMARY_2026_05_16.md](SESSION_SUMMARY_2026_05_16.md) | Today's work summary | Developers |
+| [STACK_INIT.md](STACK_INIT.md) | Tech stack reference | Developers |
+| [STACK_COMPLIANCE.md](STACK_COMPLIANCE.md) | Stack verification | Developers |
 | [QUICK_START.md](QUICK_START.md) | Setup local en 10 min | Developers |
 | [IMPLEMENTATION_PLAN.md](IMPLEMENTATION_PLAN.md) | Hoja de ruta semanal | PMs + Developers |
 | [STACK_INIT.md](STACK_INIT.md) | Tech stack detail | Developers |
@@ -216,7 +219,8 @@ Deploy automático a Render/Vercel en push a `develop`
 | [SEMANA2_TASKS.md](SEMANA2_TASKS.md) | Detalles Semana 2 | Developers |
 | [TASK_2_1_COMPLETE.md](TASK_2_1_COMPLETE.md) | Task 2.1 resumen | Developers |
 | [CODE_CHANGES_2_1.md](CODE_CHANGES_2_1.md) | Código detallado | Developers |
-| [TASK_2_2_QUICK_START.md](TASK_2_2_QUICK_START.md) | 👈 **Testing guide** | Developers |
+| [TASK_2_2_RUN_NOW.md](TASK_2_2_RUN_NOW.md) | **👉 Test NOW (40 min)** | Developers |
+| [TASK_2_2_QUICK_START.md](TASK_2_2_QUICK_START.md) | Quick setup guide | Developers |
 | [SEMANA2_TEST.md](SEMANA2_TEST.md) | Testing detallado | Developers |
 | [etapa4-brief-final.md](analisis/etapa4-brief-final.md) | Product Brief | Everyone |
 | [backlog-azure-devops.md](analisis/backlog-azure-devops.md) | Stories detalladas | PMs |
@@ -253,7 +257,7 @@ git push origin main     # Deploy a production
 ```
 
 CI/CD automático con:
-- Frontend: Vercel
+- Frontend: Render
 - Backend: Render
 
 ### Manual (Si es necesario)
