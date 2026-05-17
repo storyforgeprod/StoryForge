@@ -41,10 +41,11 @@ export class GenerateScriptDto {
 
 export class GenerateScriptResponseDto {
   @ApiProperty({
-    description: 'Generated script',
+    description: 'Generated script (null if still processing)',
     example: 'Scene 1: Establishing shot...',
+    required: false,
   })
-  script!: string;
+  script?: string | null;
 
   @ApiProperty({
     description: 'Job ID for tracking',
@@ -54,9 +55,17 @@ export class GenerateScriptResponseDto {
 
   @ApiProperty({
     description: 'Processing status',
-    example: 'processing',
+    example: 'pending',
+    enum: ['pending', 'processing', 'completed', 'failed'],
   })
-  status!: 'processing' | 'completed' | 'failed';
+  status!: 'pending' | 'processing' | 'completed' | 'failed';
+
+  @ApiProperty({
+    description: 'Status message',
+    example: 'Script generation queued',
+    required: false,
+  })
+  message?: string;
 
   @ApiProperty({
     description: 'Timestamp when generation started',

@@ -1,9 +1,10 @@
 import { NestFactory } from '@nestjs/core';
-import { ValidationPipe } from '@nestjs/common';
+import { ValidationPipe, Logger } from '@nestjs/common';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import * as Sentry from '@sentry/node';
 import { AppModule } from './app.module';
 import { LoggerService } from './common/logger/logger.service';
+import { QueueService } from './common/queue/queue.service';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, {
@@ -45,6 +46,20 @@ async function bootstrap() {
     .build();
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('api', app, document);
+
+  // 🆕 Initialize queue processor
+  const queueService = app.get(QueueService);
+  try {
+    await queueService.process(1, async (job) => {
+      // Processor is decorated with @Processor and @Process
+      // Bull will automatically route jobs to GenerateQueueProcessor
+      return { processed: true };
+    });
+    console.log('✅ Queue processor initialized');
+  } catch (error) {
+    console.warn('⚠️ Queue processor initialization warning:', error);
+    // Don't exit here - queue is optional for basic functionality
+  }
 
   const port = process.env.PORT || 3000;
   await app.listen(port);

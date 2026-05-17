@@ -1,6 +1,6 @@
 # 🤝 HANDOFF.md — Info para Siguiente Dev/Agente
 
-**Actualizado:** 16 de mayo de 2026 | **Status:** Planning → Semana 1 Setup  
+**Actualizado:** 17 de mayo de 2026 | **Status:** Week 2 Progress (Task 2.1-2.3 COMPLETED)  
 **Para:** Siguiente dev que retome | **Duración esperada:** 5 min lectura
 
 ---
@@ -8,8 +8,12 @@
 ## 🎯 TL;DR — Qué pasó hasta ahora
 
 **Mayo 15:** Documentación completada. Repo con docs listos, NO hay código aún.  
-**Mayo 16:** Creados PROGRESS.md y HANDOFF.md. Listo para Semana 1 desarrollo.  
-**Hoy:** Tú empezando desarrollo.
+**Mayo 16:** Semana 1 Setup completado: Backend NestJS boilerplate deployable.  
+**Mayo 17:** Semana 2 Tasks 2.1-2.3 COMPLETADAS:
+  - 2.1: Prisma integration for job tracking ✅
+  - 2.2: Structure validation via npm build ✅
+  - 2.3: Bull queue processor for async execution ✅
+**Hoy:** Backend async pipeline completo.
 
 ---
 
@@ -20,34 +24,40 @@
 - **Stack:** React + NestJS + Supabase + Claude + Replicate + ElevenLabs
 - **Timeline:** 6 semanas MVP
 
-### 2. Status (16-mayo - Semana 1.7 COMPLETADO)
+### 2. Status (17-mayo - Semana 2.3 COMPLETADO)
 ```
-✅ Backend: NestJS boilerplate deployable
-✅ npm run build: Successful (0 errors)
-✅ npm run start:dev: Running on localhost:3000
-✅ POST /generate/script: Endpoint implemented + Swagger documented
-✅ Prisma ORM: Schema complete (User, Project, Job, Output models)
-✅ Supabase SDK: Integrated + SupabaseService ready
-✅ Bull Queue: QueueService + processor framework ready
-✅ JWT Auth: Strategy + guards + decorators ready
-✅ API Docs: Swagger UI available at /api
+✅ Week 1: Backend NestJS boilerplate deployable
+✅ Task 2.1: Prisma integration + Job tracking
+✅ Task 2.2: Structure validation + testing approach
+✅ Task 2.3: Bull queue processor + async pattern
+✅ npm run build: Successful (EXIT CODE 0)
+✅ TypeScript: All types fixed (projectId nullable, status includes 'pending')
+✅ Architecture: GenerateService async → queues job → returns immediately
 
-✨ INFRASTRUCTURE LAYER COMPLETE
+🏗️ ASYNC JOB PIPELINE COMPLETE
+   Client POST /script → Server creates Job(pending) → Returns jobId immediately
+   Background: Queue processor executes Claude API → updates Job with result
+   Client can poll GET /job/:jobId to track progress
 
-Próximo: Integración GenerateService con Prisma (Semana 2.1)
-```
-
-### 3. Documentación Lista
-```
-README.md              ← START HERE (overview)
-QUICK_START.md         ← Si necesitas setup local
-IMPLEMENTATION_PLAN.md ← Tu guía semanal
-DEVELOPMENT_GUIDELINES.md ← Cómo programar acá
-INDEX.md               ← Encuentra lo que necesitas
-backend/README.md      ← Backend API documentation
+Próximo: Task 2.4 (Replicate images endpoint) — same async processor pattern
+Timeline: ~5 hours remaining for Week 2 (Tasks 2.4-2.7)
 ```
 
-### 4. Backend Estado
+### 3. Documentación Clave
+```
+README.md                    ← START HERE (overview + quick links)
+QUICK_START.md              ← Setup local rápido (10 min)
+IMPLEMENTATION_PLAN.md      ← Master plan + decision log
+PROGRESS.md                 ← Weekly status (update after each task)
+HANDOFF.md                  ← THIS FILE (context + setup)
+DEVELOPMENT_GUIDELINES.md   ← Code standards + conventions
+NEXT_STEPS.md              ← What to do next + quick references
+
+instructions/TASK_2_3_PLAN.md     ← Full architecture of async pattern
+instructions/SESSION_COMPLETION_* ← Session summaries (reference)
+```
+
+### 4. Backend Architecture
 ```
 ✅ Compilado y funcionando (localhost:3000)
 ✅ Swagger docs: http://localhost:3000/api

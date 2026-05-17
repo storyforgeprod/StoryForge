@@ -1,6 +1,6 @@
 # 📊 PROGRESS.md — Seguimiento de Desarrollo
 
-**Actualizado:** 16 de mayo de 2026 | **Fase Actual:** 1 (Planning → Desarrollo)
+**Actualizado:** 17 de mayo de 2026 | **Fase Actual:** Week 2 (Backend Generation Pipeline)
 
 ---
 
@@ -96,12 +96,24 @@
 - [x] **Decision:** Full E2E testing deferred to Task 6.6 (staging) due to credential setup time
 - [x] **Status:** ✅ READY TO CONTINUE TO TASK 2.3
 
-#### ⏳ Task 2.3: Job Queue Processor (NEXT — IN PROGRESS)
-- ⏳ Implement Bull queue processor for job execution
-- ⏳ This is the CRITICAL BLOCKER for all async processing
-- ⏳ Enables Tasks 2.4 (images), 2.5 (audio), 2.6 (video)
+#### ✅ Task 2.3: Job Queue Processor COMPLETADA ✅
+- [x] Created `generate.queue.processor.ts` with @Processor('generation') decorator
+- [x] Implemented processGenerationJob() handler (mark processing → execute → mark completed/failed)
+- [x] Refactored GenerateService: async pattern with QueueService injection
+- [x] Added `generateScriptContent()` helper method for processor
+- [x] Registered processor in GenerateModule (BullModule + GenerateQueueProcessor)
+- [x] Initialized processor in main.ts bootstrap
+- [x] Fixed TypeScript types: projectId nullable, status includes 'pending'
+- [x] npm build EXIT CODE 0 ✅
+- [x] **Result:** GenerateService now queues jobs asynchronously instead of blocking
+  - Client: POST /script → returns jobId immediately with status: pending
+  - Background: Queue processor executes Claude API
+  - Client: Can poll GET /job/:jobId to track progress
+- [x] **Status:** ✅ COMPLETED — Foundation for Tasks 2.4, 2.5, 2.6
 
-**Status:** 🔄 STARTING NOW
+#### ⏳ Task 2.4: POST `/generate/images` (Replicate API) — NEXT
+- ⏳ Implement images endpoint using Replicate (Flux model)
+- ⏳ Reuse async processor pattern from Task 2.3
 
 ---
 
@@ -129,28 +141,62 @@
 |-----------|-------|
 | **Task 2.1** | ✅ COMPLETADO + VERIFICADO |
 | **Task 2.2** | ✅ COMPLETADO (structure validation) |
+| **Task 2.3** | ✅ COMPLETADO (async queue processor) |
 | **File Reorganization** | ✅ 10 archivos movidos a instructions/ |
-| **IMPLEMENTATION_PLAN** | ✅ Updated with documentation structure |
-| **NEXT_STEPS** | ✅ Updated with instructions/ references |
-| **Build Status** | ✅ EXIT CODE 0 (npm run build) |
-| **Code Quality** | ✅ 0 TypeScript errors |
-| **Stack Compliance** | ✅ Mandatory (STACK_INIT.md) |
-| **Governance** | ✅ Developer handoff rules established |
-| **Task 2.3** | 🔄 READY TO CODE (5 h estimated) |
+| **npm dependencies** | ✅ Resuelto (@nestjs/jwt, sentry) |
+| **TypeScript Types** | ✅ Fijos (projectId nullable, status includes pending) |
+| **Compilation** | ✅ EXIT CODE 0 (npm run build) |
+| **Queue Processor** | ✅ Creado con @Processor decorator |
+| **GenerateService Refactor** | ✅ Async pattern + QueueService injection |
+| **Module Registration** | ✅ BullModule + GenerateQueueProcessor |
+| **Bootstrap Initialization** | ✅ Queue processor init en main.ts |
+
+**MVP Progress:** 52% → **58%** (after Task 2.3 completion)
 
 ---
 
 ## 🎯 AHORA: Task 2.3 Implementation
 
-**Status:** 🔄 IN PROGRESS  
+**Status:** ✅ COMPLETED  
 **Criticality:** ⭐⭐⭐ BLOCKER for Tasks 2.4, 2.5, 2.6  
-**Next Step:** [NEXT_STEPS.md](NEXT_STEPS.md) → Follow [instructions/TASK_2_3_RUN_NOW.md](instructions/TASK_2_3_RUN_NOW.md)
+**Completion Date:** 17 de mayo de 2026
 
-**What we're doing:** Implementing Bull queue processor for async job execution
-- Convert GenerateService from synchronous to async pattern
-- Create GenerateQueueProcessor to handle background execution
-- Enable progress tracking (pending → processing → completed)
-- Foundation for all remaining generation tasks (images, audio, video)
+**What we implemented:** Bull queue processor for async job execution
+- ✅ Created `generate.queue.processor.ts` with @Processor decorator
+- ✅ Refactored GenerateService from sync → async pattern
+- ✅ Added `generateScriptContent()` helper method for processor
+- ✅ Registered processor in GenerateModule
+- ✅ Initialized processor in main.ts bootstrap
+- ✅ Fixed TypeScript types (projectId nullable, status includes 'pending')
+- ✅ npm build EXIT CODE 0 ✅
+
+**Changes made:**
+1. **NEW FILE:** `backend/src/generate/generate.queue.processor.ts` (~85 lines)
+   - @Processor('generation') class with processGenerationJob() handler
+   - Executes job: mark processing → execute → mark completed OR failed
+   - Integrates with PrismaService for job tracking
+
+2. **MODIFIED:** `backend/src/generate/generate.service.ts`
+   - Added QueueService injection to constructor
+   - Refactored `generateScript()`: now creates Job(pending) + queues immediately → returns jobId
+   - Added `generateScriptContent()`: async logic called by processor (calls Claude API)
+
+3. **MODIFIED:** `backend/src/generate/generate.module.ts`
+   - Imported BullModule, QueueModule, GenerateQueueProcessor
+   - Registered 'generation' queue with BullModule.registerQueue()
+   - Added GenerateQueueProcessor to providers
+
+4. **MODIFIED:** `backend/src/main.ts`
+   - Added QueueService import
+   - Initialize queue processor on bootstrap with queueService.process()
+
+5. **MODIFIED:** `backend/src/common/queue/queue.service.ts`
+   - Updated GenerationJobData interface: projectId nullable, added story field
+
+6. **MODIFIED:** `backend/src/generate/dto/generate-script.dto.ts`
+   - Updated GenerateScriptResponseDto: added 'pending' status, optional message field, made script nullable
+
+**Next:** Task 2.4 (Images endpoint) — same processor pattern
 
 ---
 

@@ -2,12 +2,16 @@ import { Injectable, BadRequestException, NotFoundException } from '@nestjs/comm
 import { GenerateScriptDto, GenerateScriptResponseDto } from './dto/generate-script.dto';
 import { Anthropic } from '@anthropic-ai/sdk';
 import { PrismaService } from '../common/prisma/prisma.service';
+import { QueueService } from '../common/queue/queue.service';
 
 @Injectable()
 export class GenerateService {
   private client: Anthropic;
 
-  constructor(private prisma: PrismaService) {
+  constructor(
+    private prisma: PrismaService,
+    private queue: QueueService,
+  ) {
     this.client = new Anthropic({
       apiKey: process.env.ANTHROPIC_API_KEY,
     });
@@ -15,7 +19,8 @@ export class GenerateService {
 
   /**
    * Generate script from story text
-   * Creates a Prisma Job record to track the generation
+   * Creates Job (pending) + adds to queue, returns immediately
+   * Queue processor handles Claude API call asynchronously
    */
   async generateScript(
     userId: string,
@@ -25,16 +30,16 @@ export class GenerateService {
       throw new BadRequestException('Story cannot be empty');
     }
 
-    // Create Job record with 'processing' status
+    // 1. Create Job record with 'pending' status
     let job;
     try {
       job = await this.prisma.job.create({
         data: {
           userId,
-          projectId: null, // Will be populated later when project is created
+          projectId: null,
           type: 'script',
-          status: 'processing',
-          progress: 10,
+          status: 'pending',
+          progress: 0,
         },
       });
     } catch (error) {
@@ -42,55 +47,62 @@ export class GenerateService {
       throw new BadRequestException('Failed to create generation job');
     }
 
+    // 2. Add to queue (async processing)
     try {
-      const prompt = this._buildScriptPrompt(dto.story, dto.style, dto.duration);
-
-      const response = await this.client.messages.create({
-        model: 'claude-3-5-sonnet-20241022',
-        max_tokens: 2048,
-        messages: [
-          {
-            role: 'user',
-            content: prompt,
-          },
-        ],
+      await this.queue.addGenerationJob({
+        jobId: job.id,
+        userId,
+        projectId: null,
+        type: 'script',
+        story: dto.story,
+        _startTime: Date.now(),
       });
-
-      const script = this._extractTextFromResponse(response);
-
-      // Update Job record with completed status and result
-      const updatedJob = await this.prisma.job.update({
-        where: { id: job.id },
-        data: {
-          status: 'completed',
-          progress: 100,
-          result: JSON.stringify({ script }),
-          completedAt: new Date(),
-          processingTimeMs: Date.now() - job.createdAt.getTime(),
-        },
-      });
-
-      return {
-        script,
-        jobId: updatedJob.id,
-        status: 'completed',
-        createdAt: updatedJob.createdAt,
-      };
     } catch (error) {
-      // Update Job record with failed status
+      console.error('Failed to queue job:', error);
+      // Update job to failed if queueing fails
       await this.prisma.job.update({
         where: { id: job.id },
         data: {
           status: 'failed',
-          error: error instanceof Error ? error.message : 'Unknown error',
-          completedAt: new Date(),
-          processingTimeMs: Date.now() - job.createdAt.getTime(),
+          error: 'Failed to queue generation job',
         },
       });
-
-      console.error('Claude API error:', error);
-      throw new BadRequestException('Failed to generate script');
+      throw new BadRequestException('Failed to queue generation job');
     }
+
+    // 3. Return immediately (client doesn't wait for Claude)
+    return {
+      jobId: job.id,
+      status: 'pending',
+      message: 'Script generation queued',
+      createdAt: job.createdAt,
+    };
+  }
+
+  /**
+   * Generate script content (used by queue processor)
+   * This is the actual async logic that calls Claude API
+   */
+  async generateScriptContent(
+    userId: string,
+    data: { story: string },
+  ): Promise<{ script: string }> {
+    const prompt = this._buildScriptPrompt(data.story, 'anime', 60);
+
+    const response = await this.client.messages.create({
+      model: 'claude-3-5-sonnet-20241022',
+      max_tokens: 2048,
+      messages: [
+        {
+          role: 'user',
+          content: prompt,
+        },
+      ],
+    });
+
+    const script = this._extractTextFromResponse(response);
+
+    return { script };
   }
 
   /**

@@ -3,14 +3,12 @@ import Queue from 'bull';
 import Redis from 'ioredis';
 
 export interface GenerationJobData {
-  userId: string;
-  projectId: string;
-  type: 'script' | 'images' | 'audio' | 'video';
-  storyText?: string;
-  script?: string;
-  style?: string;
-  duration?: number;
   jobId: string; // Prisma Job ID
+  userId: string;
+  projectId: string | null;
+  type: 'script' | 'images' | 'audio' | 'video';
+  story?: string; // For script generation
+  _startTime?: number; // For measuring processing time
 }
 
 @Injectable()
