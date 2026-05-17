@@ -203,6 +203,7 @@ Deploy automático a Render/Vercel en push a `develop`
 
 | Documento | Propósito | Audiencia |
 |-----------|----------|-----------|
+| **[NEXT_STEPS.md](NEXT_STEPS.md)** | **👈 START HERE** | Developers |
 | [QUICK_START.md](QUICK_START.md) | Setup local en 10 min | Developers |
 | [IMPLEMENTATION_PLAN.md](IMPLEMENTATION_PLAN.md) | Hoja de ruta semanal | PMs + Developers |
 | [STACK_INIT.md](STACK_INIT.md) | Tech stack detail | Developers |
@@ -213,6 +214,10 @@ Deploy automático a Render/Vercel en push a `develop`
 | [PROGRESS.md](PROGRESS.md) | Tracking semanal | Everyone |
 | [HANDOFF.md](HANDOFF.md) | Para siguiente dev | Onboarding |
 | [SEMANA2_TASKS.md](SEMANA2_TASKS.md) | Detalles Semana 2 | Developers |
+| [TASK_2_1_COMPLETE.md](TASK_2_1_COMPLETE.md) | Task 2.1 resumen | Developers |
+| [CODE_CHANGES_2_1.md](CODE_CHANGES_2_1.md) | Código detallado | Developers |
+| [TASK_2_2_QUICK_START.md](TASK_2_2_QUICK_START.md) | 👈 **Testing guide** | Developers |
+| [SEMANA2_TEST.md](SEMANA2_TEST.md) | Testing detallado | Developers |
 | [etapa4-brief-final.md](analisis/etapa4-brief-final.md) | Product Brief | Everyone |
 | [backlog-azure-devops.md](analisis/backlog-azure-devops.md) | Stories detalladas | PMs |
 

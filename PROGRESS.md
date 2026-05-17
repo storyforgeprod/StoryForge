@@ -66,6 +66,24 @@
 - [x] **1.6** POST `/generate/script` endpoint con Claude integration ✅
 - [x] **1.7** Infrastructure layer: Prisma + Auth + Queue framework ✅
 
+### 🔄 Semana 2 EN PROGRESO
+
+#### ✅ Task 2.1: Prisma Integration COMPLETADA
+- [x] Modified GenerateService to inject PrismaService
+- [x] Create Job record BEFORE calling Claude API
+- [x] Update Job with result AFTER Claude succeeds
+- [x] Made projectId optional in Prisma schema
+- [x] npm run build: EXIT CODE 0 ✅
+
+#### ⏳ Task 2.2: Real Claude API Testing (NEXT)
+- [ ] Fill ANTHROPIC_API_KEY in .env.local
+- [ ] Test POST /generate/script with real Claude key
+- [ ] Verify Job created in Prisma database
+- [ ] Check GET /generate/job/:jobId endpoint
+
+**Documentation:**
+- Created [SEMANA2_TEST.md](SEMANA2_TEST.md) with full testing guide
+
 **Archivos Creados esta sesión:**
 ```
 backend/package.json                    ✅ 54 dependencies

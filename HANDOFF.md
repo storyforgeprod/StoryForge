@@ -57,12 +57,21 @@ backend/README.md      ← Backend API documentation
 ✅ Job queue framework (Bull + Redis)
 ✅ JWT auth (strategy, guards, decorators)
 ```
-### Próximo Step (Semana 2 - Iniciando)
-- Integrar GenerateService con Prisma (crear Job records)
-- Testear POST `/generate/script` con Claude API key real
-- Implementar job queue processor
-- Agregar endpoints /generate/images y /generate/audio
-- Rate limiting + error handling
+### Próximo Step (Semana 2 - EN PROGRESO)
+
+**✅ Task 2.1 COMPLETADA:** Integración con Prisma
+- GenerateService ahora inyecta PrismaService
+- Crea Job record ANTES de llamar Claude API (status: processing)
+- Actualiza Job con resultado después de Claude (status: completed)
+- Retorna Prisma Job ID real
+- npm run build: ✅ EXIT CODE 0
+
+**⏳ Task 2.2 (AHORA):** Testear con Claude API real
+- Ver: [TASK_2_2_QUICK_START.md](TASK_2_2_QUICK_START.md) para paso a paso
+- Steps: Setup env → Run migrations → Test endpoint → Verify Job
+- Documentación: [SEMANA2_TEST.md](SEMANA2_TEST.md) para testing guide completo
+
+**Próximos (2.3-2.7):** Job queue processor → Replicate/ElevenLabs → Rate limiting → E2E tests
 
 ---
 
@@ -82,6 +91,24 @@ backend/README.md      ← Backend API documentation
 - [x] Supabase service + auth guards
 - [x] Bull queue framework
 - [x] API Swagger documentation
+
+### 📋 Checklist Semana 2 — 🔄 EN PROGRESO
+
+#### Task 2.1 (Prisma Integration) — ✅ COMPLETADO
+- [x] GenerateService inyecta PrismaService
+- [x] Job record creado antes de Claude API call
+- [x] Job actualizado con resultado/error
+- [x] projectId optional en schema
+- [x] npm build: EXIT CODE 0
+
+#### Task 2.2 (Real Claude Testing) — ⏳ EN PROGRESO
+- [ ] ANTHROPIC_API_KEY en .env.local
+- [ ] Prisma migrations ejecutadas
+- [ ] JWT token generado (supabase gen jwt)
+- [ ] POST /generate/script testing completo
+- [ ] Job verificado en Prisma Studio
+- [ ] GET /generate/job/:jobId testado
+- [ ] Error handling validado
 
 ---
 

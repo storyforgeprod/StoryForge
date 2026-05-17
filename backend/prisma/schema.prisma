@@ -68,8 +68,8 @@ model Job {
   userId            String
   user              User       @relation(fields: [userId], references: [id], onDelete: Cascade)
   
-  projectId         String
-  project           Project    @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  projectId         String?    // Optional: Will be populated later when project is created
+  project           Project?   @relation(fields: [projectId], references: [id], onDelete: Cascade)
   
   // Job tracking
   type              String     // "script", "images", "audio", "video"

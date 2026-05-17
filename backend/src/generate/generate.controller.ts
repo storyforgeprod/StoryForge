@@ -1,10 +1,14 @@
-import { Controller, Post, Body, HttpCode, HttpStatus } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
+import { Controller, Post, Body, HttpCode, HttpStatus, UseGuards, Get, Param } from '@nestjs/common';
+import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
 import { GenerateService } from './generate.service';
 import { GenerateScriptDto, GenerateScriptResponseDto } from './dto/generate-script.dto';
+import { JwtAuthGuard } from '../common/auth/jwt.guard';
+import { CurrentUser } from '../common/auth/current-user.decorator';
 
 @ApiTags('Generate')
 @Controller('generate')
+@UseGuards(JwtAuthGuard)
+@ApiBearerAuth('JWT')
 export class GenerateController {
   constructor(private readonly generateService: GenerateService) {}
 
@@ -23,8 +27,27 @@ export class GenerateController {
     status: 400,
     description: 'Invalid input',
   })
-  async generateScript(@Body() dto: GenerateScriptDto): Promise<GenerateScriptResponseDto> {
-    return this.generateService.generateScript(dto);
+  async generateScript(
+    @Body() dto: GenerateScriptDto,
+    @CurrentUser() user: any,
+  ): Promise<GenerateScriptResponseDto> {
+    return this.generateService.generateScript(user.userId, dto);
+  }
+
+  @Get('job/:jobId')
+  @ApiOperation({
+    summary: 'Get job status',
+    description: 'Retrieve the status and result of a generation job',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Job status retrieved',
+  })
+  async getJobStatus(
+    @Param('jobId') jobId: string,
+    @CurrentUser() user: any,
+  ) {
+    return this.generateService.getJobStatus(jobId, user.userId);
   }
 
   @Post('images')
