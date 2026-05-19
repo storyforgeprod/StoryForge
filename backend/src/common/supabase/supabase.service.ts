@@ -23,14 +23,25 @@ export class SupabaseService {
   }
 
   /**
-   * Verify JWT token from Supabase Auth
+   * Verify Supabase access token (JWT string from Authorization header)
    */
-  async verifyToken(token: string) {
+  async verifyAccessToken(accessToken: string) {
     try {
-      const { data, error } = await this.supabase.auth.getUser(token);
+      const { data, error } = await this.supabase.auth.getUser(accessToken);
       if (error) throw error;
       return data.user;
-    } catch (error) {
+    } catch {
+      return null;
+    }
+  }
+
+  /** Load auth user by Supabase UUID (service role) */
+  async getAuthUserById(userId: string) {
+    try {
+      const { data, error } = await this.supabase.auth.admin.getUserById(userId);
+      if (error) throw error;
+      return data.user;
+    } catch {
       return null;
     }
   }
@@ -39,7 +50,7 @@ export class SupabaseService {
    * Get authenticated user from token
    */
   async getUserFromToken(token: string) {
-    return this.verifyToken(token);
+    return this.verifyAccessToken(token);
   }
 
   /**

@@ -166,13 +166,15 @@ Este documento define **cómo** se va a construir StoryForge, cuándo, en qué o
 
 | Tarea | Descripción | Responsable | Estimación | Status | Tipo |
 |------|-------------|-------------|-----------|--------|------|
-| **2.1** | Integrar GenerateService con Prisma (Job tracking) | Backend | 4h | 🔄 | Feature |
-| **2.2** | Testear POST `/generate/script` con Claude API real | Backend | 2h | 🔄 | Testing |
-| **2.3** | Implementar job queue processor para generaciones | Backend | 5h | ⏳ | Feature |
-| **2.4** | Endpoint POST `/generate/images` — Integración Replicate | Backend | 5h | ⏳ | Feature |
-| **2.5** | Endpoint POST `/generate/audio` — Integración ElevenLabs | Backend | 4h | ⏳ | Feature |
-| **2.6** | Rate limiting y manejo de errores en endpoints | Backend | 3h | ⏳ | Feature |
-| **2.7** | Testing E2E local: script → images → audio pipeline | Backend | 3h | ⏳ | Testing |
+| **2.1** | Integrar GenerateService con Prisma (Job tracking) | Backend | 4h | ✅ | Feature |
+| **2.2** | Testear POST `/generate/script` con Claude API real | Backend | 2h | ✅ | Testing |
+| **2.3** | Implementar job queue processor para generaciones | Backend | 5h | ✅ | Feature |
+| **2.4** | Endpoint POST `/generate/images` — Integración Replicate | Backend | 5h | ✅ | Feature |
+| **2.5** | Endpoint POST `/generate/audio` — Integración ElevenLabs | Backend | 4h | ✅ | Feature |
+| **2.6** | Endpoint POST `/generate/video` — FFmpeg assembly | Backend | 8h | ✅ | Feature |
+| **2.7** | Rate limiting y manejo de errores en endpoints | Backend | 3h | ✅ | Feature |
+| **2.8** | Documentación API + deploy + handoff | Backend | 3h | ✅ | Documentation |
+| **2.9** | Testing E2E local: script → images → audio → video | Backend | 3h | ⏳ | Testing |
 
 **Hito:** Todos los endpoints generación funcionando con queue + rate limiting + error handling.
 
@@ -191,11 +193,11 @@ Este documento define **cómo** se va a construir StoryForge, cuándo, en qué o
 
 | Tarea | Descripción | Responsable | Estimación | Status | Tipo |
 |------|-------------|-------------|-----------|--------|------|
-| **3.1** | Setup React + Vite + TailwindCSS + shadcn/ui | Frontend | 2h | ⏳ | Setup |
-| **3.2** | Integración Supabase Auth (Google OAuth) en frontend | Frontend | 3h | ⏳ | Feature |
-| **3.3** | Implementar Historia 2.1: Registro/Login (3 SP) | Frontend | 3h | ⏳ | Feature |
-| **3.4** | Dashboard + Visualización de cuota (Historia 2.2 - 3 SP) | Frontend | 3h | ⏳ | Feature |
-| **3.5** | Crear componente Input de texto + validación | Frontend | 2h | ⏳ | Component |
+| **3.1** | Setup React + Vite + TailwindCSS + shadcn/ui | Frontend | 2h | ✅ | Setup |
+| **3.2** | Integración Supabase Auth (Google OAuth) en frontend | Frontend | 3h | ✅ | Feature |
+| **3.3** | Implementar Historia 2.1: Registro/Login (3 SP) | Frontend | 3h | ✅ | Feature |
+| **3.4** | Dashboard + Visualización de cuota (Historia 2.2 - 3 SP) | Frontend | 3h | ⏳ | Feature (diferido) |
+| **3.5** | Crear componente Input de texto + validación | Frontend | 2h | ✅ | Component |
 | **3.6** | Crear componente Selector de estilo visual (4 géneros) | Frontend | 2h | ⏳ | Component |
 | **3.7** | Crear componente Selector de voz (biblioteca) | Frontend | 2h | ⏳ | Component |
 | **3.8** | Conectar frontend a endpoint `/generate/script` | Frontend | 2h | ⏳ | Integration |
@@ -418,5 +420,52 @@ Al completar tareas en ADO, actualizar el status aquí también para mantener si
 
 ---
 
-**Última actualización:** 15 de mayo de 2026  
-**Próxima revisión:** Viernes, Semana 1 (cierre de sprint)
+---
+
+## 📌 Registro de decisiones — Semana 2 (Backend)
+
+### Task 3.5 Completado ✅ (19 mayo 2026)
+- **Status:** ✅ COMPLETED
+- **Componente:** `StoryInput` + `validateStory` (50–5000 chars)
+- **Doc:** `instructions/TASK_3_5_COMPLETE.md`
+- **Siguiente:** Task 3.6 — Selector de estilo visual
+
+### Tasks 3.2 + 3.3 Completados ✅ (19 mayo 2026)
+- **Status:** ✅ COMPLETED | **3.4:** ⏳ DIFERIDO (cuota/dashboard)
+- **Frontend:** AuthProvider, Google OAuth, LoginCard, ProtectedRoute `/app`, `/auth/callback`
+- **Backend:** UsersService (upsert por supabaseId), JwtStrategy + SUPABASE_JWT_SECRET
+- **Doc:** `instructions/TASK_3_2_3_COMPLETE.md`
+- **Siguiente:** Task 3.5 — Input de texto
+
+### Task 3.1 Completado ✅ (19 mayo 2026)
+- **Status:** ✅ COMPLETED
+- **Descripción:** Scaffold frontend React + Vite + Tailwind + shadcn/ui
+- **Archivos:** `frontend/` completo (package.json, vite, tailwind, pages, services)
+- **Documentación:** `instructions/TASK_3_1_COMPLETE.md`
+- **Resultado:** `npm run build` EXIT 0 | dev en :5173
+- **Siguiente:** Task 3.2 — Supabase Auth (Google OAuth)
+
+### Task 2.8 Completado ✅ (19 mayo 2026)
+- **Status:** ✅ COMPLETED
+- **Descripción:** Paquete de documentación para handoff y deploy del backend MVP
+- **Archivos creados en root:**
+  - `API_ENDPOINTS.md` — Referencia de endpoints + cURL
+  - `ARCHITECTURE.md` — Patrón async, módulos, integraciones
+  - `DEPLOYMENT.md` — Setup local + Render
+  - `TROUBLESHOOTING.md` — Issues comunes (incl. fix node_modules Windows)
+  - `.env.production` — Template producción
+- **Archivos creados en instructions/:**
+  - `instructions/TASK_2_8_COMPLETE.md`
+  - `instructions/HANDOFF_2_8.md`
+- **Resultado:** ✅ `npm run build` EXIT 0 | Semana 2 backend lista para Week 3 (frontend)
+- **Siguiente:** Task 3.1 — Setup React + Vite + Tailwind + shadcn/ui
+
+### Tasks 2.1–2.7 (17 mayo 2026)
+- Ver [PROGRESS.md](PROGRESS.md) y `instructions/TASK_2_*_COMPLETE.md` para detalle
+- Patrón async unificado en `generate.queue.processor.ts`
+- Rate limits: script(5), images(10), audio(15), video(10) / min
+
+---
+
+**Última actualización:** 19 de mayo de 2026  
+**Próxima revisión:** Inicio Semana 3 (Frontend — Task 3.1)

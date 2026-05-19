@@ -9,7 +9,7 @@
 | Phase | Status | Timeline |
 |-------|--------|----------|
 | 🎯 **Discovery** | ✅ Complete | Completado |
-| 🚀 **Implementation** | ⏳ In Progress | Semanas 1-6 |
+| 🚀 **Implementation** | ⏳ In Progress (~80%) | Semanas 1-6 — Week 2 backend ✅ |
 | ✨ **Validation** | ⏳ Pending | Semanas 7+ |
 
 **Total Scope:** 66 story points across 3 epics, 9 user stories
@@ -20,7 +20,7 @@
 
 ### � **FOR IMMEDIATE ACTION** ← Start here!
 
-👉 **[EXECUTIVE_SUMMARY.md](EXECUTIVE_SUMMARY.md)** — What was done today + your next step (3 options)
+👉 **[NEXT_STEPS.md](NEXT_STEPS.md)** — Task 3.1: Frontend setup · [API_ENDPOINTS.md](API_ENDPOINTS.md) · [instructions/HANDOFF_2_8.md](instructions/HANDOFF_2_8.md)
 
 ### �👤 For New Developers
 
@@ -34,9 +34,9 @@
 
 1. **Current status?** → [PROGRESS.md](PROGRESS.md) — What's done, what's next
 2. **How to continue?** → [HANDOFF.md](HANDOFF.md) — Setup guide + context
-3. **Today's summary?** → [DAILY_SUMMARY_2026_05_16.md](DAILY_SUMMARY_2026_05_16.md) — What was accomplished
-4. **Task 2.1 verified?** → [TASK_2_1_VERIFIED.md](TASK_2_1_VERIFIED.md) — Implementation verification
-5. **Task 2.2 options?** → [TASK_2_2_PLAN.md](TASK_2_2_PLAN.md) — 👈 **Choose your testing approach**
+3. **Backend handoff?** → [instructions/HANDOFF_2_8.md](instructions/HANDOFF_2_8.md)
+4. **API docs?** → [API_ENDPOINTS.md](API_ENDPOINTS.md)
+5. **Task history?** → [instructions/TASK_2_8_COMPLETE.md](instructions/TASK_2_8_COMPLETE.md)
 
 ###  For Project Managers / Technical Leads
 

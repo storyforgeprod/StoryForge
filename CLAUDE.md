@@ -70,22 +70,24 @@ See [MCP_INTEGRATION.md](MCP_INTEGRATION.md).
 
 ---
 
-## 🔄 Latest Status (May 16, 2026)
+## 🔄 Latest Status (May 19, 2026)
 
-**Session Summary:** Full-day development session  
-**Completed:**
-- ✅ Task 2.1: Prisma integration verified
-- ✅ Stack governance established (MANDATORY stack compliance)
-- ✅ Task 2.2: 3 testing options prepared
+**Week 2 backend:** ✅ COMPLETE (Tasks 2.1–2.8)  
+**Completed this phase:**
+- ✅ Full async generation pipeline (Claude, Replicate, ElevenLabs, FFmpeg)
+- ✅ Rate limiting + JWT auth + Prisma job tracking
+- ✅ Task 2.8: API/deploy/troubleshooting documentation
 
-**Current Progress:** 52% MVP complete (on track for Week 6)
+**Current Progress:** ~87% MVP (story input done; 3.4 deferred)
 
 **Quick Links for Continuation:**
-- [START_HERE.md](START_HERE.md) — Entry point for next developer
-- [PROGRESS.md](PROGRESS.md) — Daily status
+- [NEXT_STEPS.md](NEXT_STEPS.md) — Task 3.6 (style selector) ⭐
+- [instructions/TASK_3_5_COMPLETE.md](instructions/TASK_3_5_COMPLETE.md) — Story input
+- [instructions/TASK_3_2_3_COMPLETE.md](instructions/TASK_3_2_3_COMPLETE.md) — Auth setup
+- [instructions/HANDOFF_2_8.md](instructions/HANDOFF_2_8.md) — Detailed handoff
+- [API_ENDPOINTS.md](API_ENDPOINTS.md) — API reference
+- [PROGRESS.md](PROGRESS.md) — Weekly status
 - [HANDOFF.md](HANDOFF.md) — Setup + context
-- [IMPLEMENTATION_PLAN.md](IMPLEMENTATION_PLAN.md) — 6-week roadmap (with handoff guidelines)
-- [TASK_2_2_PLAN.md](TASK_2_2_PLAN.md) — 3 executable Task 2.2 options
-- [DAILY_SUMMARY_2026_05_16.md](DAILY_SUMMARY_2026_05_16.md) — What was done today
+- [IMPLEMENTATION_PLAN.md](IMPLEMENTATION_PLAN.md) — 6-week roadmap
 
 **Governance Note:** All technical decisions must now respect STACK_INIT.md. Unauthorized changes = technical debt. Future developers MUST update PROGRESS.md + HANDOFF.md after each session. See IMPLEMENTATION_PLAN.md for mandatory developer guidelines.

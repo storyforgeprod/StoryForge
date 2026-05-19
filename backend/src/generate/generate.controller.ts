@@ -54,7 +54,9 @@ export class GenerateController {
     return this.generateService.getJobStatus(jobId, user.userId);
   }
 
-  @Post('images')  @Throttle({ default: { limit: 10, ttl: 60000 } })  @HttpCode(HttpStatus.ACCEPTED)
+  @Post('images')
+  @Throttle({ default: { limit: 10, ttl: 60000 } })
+  @HttpCode(HttpStatus.ACCEPTED)
   @ApiOperation({
     summary: 'Generate images from script',
     description: 'Generate visual assets for video scenes using Replicate',

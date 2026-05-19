@@ -1,6 +1,6 @@
 # 📊 PROGRESS.md — Seguimiento de Desarrollo
 
-**Actualizado:** 17 de mayo de 2026, 02:00 UTC | **Fase Actual:** Week 2 (Backend Generation Pipeline — Task 2.7 COMPLETADA — 76% MVP)
+**Actualizado:** 19 de mayo de 2026 | **Fase Actual:** Week 3 — Task 3.5 ✅ | 3.4 diferida — ~87% MVP
 
 ---
 
@@ -191,6 +191,43 @@
   - After TTL (60s): Counter resets
 - [x] **Status:** ✅ COMPLETED — API Security layer complete
 
+#### ✅ Task 2.8: Documentation & Handoff — COMPLETADA ✅
+- [x] Created API_ENDPOINTS.md (5 endpoints + cURL)
+- [x] Created ARCHITECTURE.md (async pattern + mermaid)
+- [x] Created DEPLOYMENT.md (local + Render)
+- [x] Created TROUBLESHOOTING.md (Windows build fix documented)
+- [x] Created .env.production template
+- [x] Created instructions/HANDOFF_2_8.md + TASK_2_8_COMPLETE.md
+- [x] Updated README.md, HANDOFF.md, IMPLEMENTATION_PLAN.md, NEXT_STEPS.md
+- [x] npm run build EXIT CODE 0 ✅ (clean node_modules reinstall verified)
+- [x] **Status:** ✅ COMPLETED — Week 2 backend documentation complete
+- [x] **Siguiente:** Task 3.1 — Frontend setup (React + Vite + Tailwind)
+
+#### ✅ Task 3.1: Frontend Setup — COMPLETADA ✅
+- [x] React 18 + Vite 5 + TypeScript 5 + TailwindCSS 3
+- [x] shadcn/ui pattern (Button, Card, components.json, CSS variables)
+- [x] React Router: Landing `/`, Generate `/app`, NotFound
+- [x] Services: `api.ts` (Axios + JWT interceptor), `supabase.ts`
+- [x] Structure per STACK_INIT.md (components, pages, hooks, types, services)
+- [x] npm run build EXIT CODE 0 ✅
+- [x] npm run dev on port 5173 ✅
+- [x] **Siguiente:** Task 3.2 — Supabase Auth (Google OAuth)
+
+#### ✅ Task 3.2 + 3.3: Auth + Login UI — COMPLETADAS ✅
+- [x] Google OAuth (Supabase) + AuthProvider + useAuth
+- [x] LoginCard, UserMenu, ProtectedRoute, /auth/callback
+- [x] Backend: UsersService upsert + JwtStrategy (SUPABASE_JWT_SECRET)
+- [x] npm build EXIT 0 (frontend + backend)
+- [x] **Task 3.4:** ⏳ DIFERIDA (dashboard/cuota)
+- [x] **Siguiente:** Task 3.5 — Story input
+
+#### ✅ Task 3.5: Story Input + Validation — COMPLETADA ✅
+- [x] StoryInput component (textarea, counter, a11y)
+- [x] validation.ts (50–5000 chars, matches backend DTO)
+- [x] Generate page step 1 integrated
+- [x] npm run build EXIT 0
+- [x] **Siguiente:** Task 3.6 — Style selector
+
 ---
 
 ### 📚 Documentación Creada Esta Sesión
@@ -304,17 +341,17 @@
 
 ```
 Semana 1:  ✅ 100% (Backend infrastructure)
-Semana 2:  ✅ 68% (Task 2.1 ✅ + Task 2.2 ✅ + Task 2.3 ✅ + Task 2.4 ✅ + Task 2.5 ✅ | Tasks 2.6-2.7 pending)
-Semana 3:  ⏳ 0% (Frontend)
-Semana 4:  ⏳ 0% (Video assembly)
+Semana 2:  ✅ 100% (Tasks 2.1–2.8: pipeline + rate limits + docs)
+Semana 3:  🔄 55% (3.1–3.3, 3.5 ✅ | 3.4 diferida | 3.6–3.8 pending)
+Semana 4:  ⏳ 0% (Video UI + E2E)
 Semana 5-6: ⏳ 0% (Stabilization + Deploy)
 
-TOTAL MVP: 63% → **68%** ✅ (On track for Week 6 launch)
+TOTAL MVP: ~85% ✅ (Backend + auth frontend)
 ```
 
 ---
 
-**Last Updated:** 2026-05-17 01:30 UTC (Task 2.5 Completion)  
+**Last Updated:** 2026-05-19 (Task 2.8 Completion)  
 **By:** Automated Progress Tracking  
 **Next Review:** Start of Task 2.4  
 **Archivos Creados esta sesión:**
