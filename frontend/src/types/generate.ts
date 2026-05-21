@@ -6,3 +6,10 @@ export const StoryStyle = {
 } as const;
 
 export type StoryStyle = typeof StoryStyle[keyof typeof StoryStyle];
+
+export type VoiceOption = {
+    id: string;
+    name: string;
+    description: string;
+    previewUrl: string;
+};
