@@ -7,14 +7,50 @@ import { UserMenu } from '@/components/auth/UserMenu';
 import { StoryInput } from '@/components/Input/StoryInput';
 import { StyleSelector } from '@/components/StyleSelector/StyleSelector';
 import { VoiceSelector } from '@/components/VoiceSelector/VoiceSelector';
+import { AudioPlayer } from '@/components/AudioPlayer/AudioPlayer';
 import { ImageGrid } from '@/components/ImageGrid/ImageGrid';
+import { PipelineProgress, type PipelineStage } from '@/components/PipelineProgress/PipelineProgress';
 import { validateStory } from '@/utils/validation';
 import { StoryStyle } from '@/types/generate';
 import { useGenerateScript } from '@/hooks/useGenerateScript';
 import { useGenerateImages } from '@/hooks/useGenerateImages';
+import { useGenerateAudio } from '@/hooks/useGenerateAudio';
 import { useAuth } from '@/contexts/AuthContext';
 
 type WizardStep = 'story' | 'style' | 'voice';
+
+function deriveStages(
+    genPhase: string,
+    imagesPhase: string,
+    audioPhase: string,
+): PipelineStage[] {
+    const scriptStatus =
+        genPhase === 'completed' ? 'done' : genPhase === 'error' ? 'error' : 'pending';
+    const imagesStatus =
+        imagesPhase === 'completed'
+            ? 'done'
+            : imagesPhase === 'error'
+                ? 'error'
+                : imagesPhase === 'idle'
+                    ? 'pending'
+                    : 'active';
+    const audioStatus =
+        audioPhase === 'completed'
+            ? 'done'
+            : audioPhase === 'error'
+                ? 'error'
+                : audioPhase === 'idle'
+                    ? 'pending'
+                    : 'active';
+    const videoStatus = 'pending'; // Task 4.7
+
+    return [
+        { id: 'script', label: 'Guión', status: scriptStatus },
+        { id: 'images', label: 'Imágenes', status: imagesStatus },
+        { id: 'audio', label: 'Audio', status: audioStatus },
+        { id: 'video', label: 'Video', status: videoStatus },
+    ];
+}
 
 export function Generate() {
     const { session } = useAuth();
@@ -30,6 +66,12 @@ export function Generate() {
     const validation = useMemo(() => validateStory(story), [story]);
     const { state: genState, generate, reset: resetGeneration } = useGenerateScript(token);
     const { state: imagesState, generate: generateImages, reset: resetImages } = useGenerateImages(token);
+    const { state: audioState, generate: generateAudio, reset: resetAudio } = useGenerateAudio(token);
+
+    const stages = useMemo(
+        () => deriveStages(genState.phase, imagesState.phase, audioState.phase),
+        [genState.phase, imagesState.phase, audioState.phase],
+    );
 
     useEffect(() => {
         if (genState.phase === 'polling') {
@@ -70,9 +112,19 @@ export function Generate() {
         resetImages();
     };
 
+    const handleGenerateAudio = () => {
+        if (!scriptJobId || !voiceId) return;
+        generateAudio(scriptJobId, voiceId);
+    };
+
+    const handleAudioRetry = () => {
+        resetAudio();
+    };
+
     const handleRetry = () => {
         resetGeneration();
         resetImages();
+        resetAudio();
         setScriptJobId(null);
         setStep('story');
     };
@@ -81,6 +133,8 @@ export function Generate() {
         genState.phase === 'submitting' || genState.phase === 'polling';
     const isGeneratingImages =
         imagesState.phase === 'submitting' || imagesState.phase === 'polling';
+    const isGeneratingAudio =
+        audioState.phase === 'submitting' || audioState.phase === 'polling';
 
     return (
         <div className="min-h-screen">
@@ -97,6 +151,8 @@ export function Generate() {
                     <UserMenu />
                 </div>
             </header>
+
+            <PipelineProgress stages={stages} />
 
             <main className="mx-auto max-w-3xl px-4 py-8">
                 {/* Script generation — loading */}
@@ -173,8 +229,76 @@ export function Generate() {
                         <CardContent className="space-y-4">
                             <ImageGrid imageUrls={imagesState.imageUrls} />
                             <div className="flex justify-end">
-                                <Button type="button" disabled>
+                                <Button type="button" onClick={() => { }} disabled>
                                     Continuar al audio
+                                </Button>
+                            </div>
+                        </CardContent>
+                    </Card>
+                )}
+
+                {/* Audio generation — loading */}
+                {isGeneratingAudio && (
+                    <Card>
+                        <CardContent className="flex flex-col items-center gap-4 py-16">
+                            <Loader2 className="h-10 w-10 animate-spin text-primary" />
+                            <p className="text-sm text-muted-foreground">
+                                Generando narración…
+                            </p>
+                        </CardContent>
+                    </Card>
+                )}
+
+                {/* Audio generation — done */}
+                {audioState.phase === 'completed' && (
+                    <Card>
+                        <CardHeader>
+                            <CardTitle>Narración generada</CardTitle>
+                            <CardDescription>
+                                Escuchá la narración y continúa al video.
+                            </CardDescription>
+                        </CardHeader>
+                        <CardContent className="space-y-4">
+                            {'audioUrl' in audioState && audioState.audioUrl && (
+                                <AudioPlayer
+                                    src={audioState.audioUrl}
+                                    durationSeconds={'audioLength' in audioState ? audioState.audioLength : undefined}
+                                />
+                            )}
+                            <div className="flex justify-end">
+                                <Button type="button" disabled>
+                                    Continuar al video
+                                </Button>
+                            </div>
+                        </CardContent>
+                    </Card>
+                )}
+
+                {/* Audio generation — error */}
+                {audioState.phase === 'error' && (
+                    <Card>
+                        <CardContent className="flex flex-col items-center gap-4 py-16">
+                            <p className="text-sm text-destructive">{audioState.message}</p>
+                            <Button type="button" variant="outline" onClick={handleAudioRetry}>
+                                Reintentar
+                            </Button>
+                        </CardContent>
+                    </Card>
+                )}
+
+                {/* Audio generation — idle (show button to start) */}
+                {imagesState.phase === 'completed' && audioState.phase === 'idle' && (
+                    <Card>
+                        <CardHeader>
+                            <CardTitle>Listo para generar narración</CardTitle>
+                            <CardDescription>
+                                Haz clic para generar el audio con la voz que seleccionaste.
+                            </CardDescription>
+                        </CardHeader>
+                        <CardContent className="space-y-4">
+                            <div className="flex justify-end">
+                                <Button type="button" onClick={handleGenerateAudio}>
+                                    Generar narración
                                 </Button>
                             </div>
                         </CardContent>

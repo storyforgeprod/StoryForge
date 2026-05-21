@@ -6,9 +6,9 @@ Total tasks: 3 | Estimated effort: M (≤ 3h)
 
 ## Checklist
 
-- [ ] TASK-4.4-01: Build `PipelineProgress` component
-- [ ] TASK-4.4-02: Integrate `PipelineProgress` into `Generate.tsx`
-- [ ] TASK-4.4-03: Unit tests for `PipelineProgress`
+- [x] TASK-4.4-01: Build `PipelineProgress` component
+- [x] TASK-4.4-02: Integrate `PipelineProgress` into `Generate.tsx`
+- [x] TASK-4.4-03: Unit tests for `PipelineProgress`
 
 ---
 
