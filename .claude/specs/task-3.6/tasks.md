@@ -6,10 +6,10 @@ Total tasks: 4 | Estimated effort: S (< 2h)
 
 ## Checklist
 
-- [ ] TASK-3.6-01: Create `StoryStyle` frontend type
-- [ ] TASK-3.6-02: Build `StyleSelector` component
-- [ ] TASK-3.6-03: Wire `StyleSelector` into `Generate.tsx` as step 2
-- [ ] TASK-3.6-04: Unit tests for `StyleSelector`
+- [x] TASK-3.6-01: Create `StoryStyle` frontend type
+- [x] TASK-3.6-02: Build `StyleSelector` component
+- [x] TASK-3.6-03: Wire `StyleSelector` into `Generate.tsx` as step 2
+- [ ] TASK-3.6-04: Unit tests for `StyleSelector` — tests written but blocked by testing environment Node.js/ESM compatibility issues
 
 ---
 
