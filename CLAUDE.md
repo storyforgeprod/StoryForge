@@ -64,6 +64,7 @@ Standards de código y patrones obligatorios para el MVP. Se activan automática
 | `storyforge-frontend/` | Componentes, páginas, hooks, estilos, formularios, cualquier `.tsx` | File naming, typed components, custom hooks, estados UI, testing (Vitest + RTL), PostHog, checklist |
 | `storyforge-backend/` | Endpoints, controllers, services, DTOs, módulos NestJS, integraciones IA | File naming + folder structure (`controllers/` / `services/`), arquitectura modular, validación, rate limiting, logging, tests (Jest) |
 | `sdd-spec-creator/` | Al pegar una historia de ADO y pedir spec, tasks o arquitectura | Convierte historias en paquetes SDD: `spec.md` / `plan.md` / `tasks.md` con criterios EARS |
+| `spec-runner/` | "implement task X.X", "run the tasks", "implement spec X.X", o al señalar un `tasks.md` | Implementa tareas del spec en orden, marca `[x]` al completar, deja `[ ]` si hay error, corre build + tests al final |
 
 ## 🤖 Development Mode
 
