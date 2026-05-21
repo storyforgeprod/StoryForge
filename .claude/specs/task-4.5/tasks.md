@@ -6,10 +6,10 @@ Total tasks: 4 | Estimated effort: L (≤ 8h)
 
 ## Checklist
 
-- [ ] TASK-4.5-01: Verify FFmpeg availability and Supabase `videos` bucket
-- [ ] TASK-4.5-02: Implement `assembleVideo` in `VideoService`
-- [ ] TASK-4.5-03: Wire `jobId` into `generateVideoContent` for temp dir naming
-- [ ] TASK-4.5-04: Integration test for `assembleVideo` with mock URLs
+- [x] TASK-4.5-01: Verify FFmpeg availability and Supabase `videos` bucket
+- [x] TASK-4.5-02: Implement `assembleVideo` in `VideoService`
+- [x] TASK-4.5-03: Wire `jobId` into `generateVideoContent` for temp dir naming
+- [x] TASK-4.5-04: Integration test for `assembleVideo` with mock URLs
 
 ---
 

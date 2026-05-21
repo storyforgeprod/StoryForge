@@ -6,9 +6,9 @@ Total tasks: 3 | Estimated effort: M (≤ 3h)
 
 ## Checklist
 
-- [ ] TASK-4.3-01: Build `AudioPlayer` component
-- [ ] TASK-4.3-02: Wire audio generation phase into `Generate.tsx`
-- [ ] TASK-4.3-03: Unit tests for `AudioPlayer`
+- [x] TASK-4.3-01: Build `AudioPlayer` component
+- [x] TASK-4.3-02: Wire audio generation phase into `Generate.tsx`
+- [x] TASK-4.3-03: Unit tests for `AudioPlayer`
 
 ---
 

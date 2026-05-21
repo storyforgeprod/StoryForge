@@ -2,9 +2,11 @@ import {
   IsString,
   IsNotEmpty,
   IsOptional,
+  IsEnum,
   Length,
 } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
+import { StoryStyle } from './generate-script.dto';
 
 export class GenerateImagesDto {
   @ApiProperty({
@@ -14,6 +16,15 @@ export class GenerateImagesDto {
   @IsString()
   @IsNotEmpty()
   scriptId: string = '';
+
+  @ApiProperty({
+    description: 'Visual style for image generation',
+    enum: StoryStyle,
+    example: StoryStyle.ANIME,
+  })
+  @IsEnum(StoryStyle)
+  @IsNotEmpty()
+  style!: StoryStyle;
 
   @ApiProperty({
     description: 'Optional custom description for image generation',

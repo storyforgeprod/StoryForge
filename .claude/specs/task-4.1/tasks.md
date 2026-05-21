@@ -6,10 +6,10 @@ Total tasks: 4 | Estimated effort: M (≤ 3h)
 
 ## Checklist
 
-- [ ] TASK-4.1-01: Add image and audio result types to `generate.ts`
-- [ ] TASK-4.1-02: Add `postGenerateImages` and `postGenerateAudio` to `generateApi.ts`
-- [ ] TASK-4.1-03: Build `useGenerateImages` and `useGenerateAudio` hooks
-- [ ] TASK-4.1-04: Unit tests for both new hooks
+- [x] TASK-4.1-01: Add image and audio result types to `generate.ts`
+- [x] TASK-4.1-02: Add `postGenerateImages` and `postGenerateAudio` to `generateApi.ts`
+- [x] TASK-4.1-03: Build `useGenerateImages` and `useGenerateAudio` hooks
+- [x] TASK-4.1-04: Unit tests for both new hooks
 
 ---
 

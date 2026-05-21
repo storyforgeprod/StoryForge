@@ -1,6 +1,10 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { GenerateService } from './generate.service';
 import { PrismaService } from '../common/prisma/prisma.service';
+import { QueueService } from '../common/queue/queue.service';
+import { ReplicateService } from '../integrations/replicate.service';
+import { ElevenLabsService } from '../integrations/elevenlabs.service';
+import { VideoService } from '../integrations/video.service';
 
 describe('GenerateService - Task 2.1 Prisma Integration', () => {
   let service: GenerateService;
@@ -37,6 +41,10 @@ describe('GenerateService - Task 2.1 Prisma Integration', () => {
       providers: [
         GenerateService,
         { provide: PrismaService, useValue: prismaMock },
+        { provide: QueueService, useValue: { addGenerationJob: jest.fn() } },
+        { provide: ReplicateService, useValue: { generateImage: jest.fn() } },
+        { provide: ElevenLabsService, useValue: { generateAudio: jest.fn() } },
+        { provide: VideoService, useValue: { assembleVideo: jest.fn() } },
       ],
     }).compile();
 

@@ -6,9 +6,9 @@ Total tasks: 3 | Estimated effort: S (≤ 2h)
 
 ## Checklist
 
-- [ ] TASK-4.8-01: Build `DownloadCard` component
-- [ ] TASK-4.8-02: Wire video assembly phase into `Generate.tsx`
-- [ ] TASK-4.8-03: Unit tests for `DownloadCard`
+- [x] TASK-4.8-01: Build `DownloadCard` component
+- [x] TASK-4.8-02: Wire video assembly phase into `Generate.tsx`
+- [x] TASK-4.8-03: Unit tests for `DownloadCard`
 
 ---
 

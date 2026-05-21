@@ -6,11 +6,11 @@ Total tasks: 3 | Estimated effort: M (≤ 4h)
 
 ## Checklist
 
-- [ ] TASK-4.2-01: Build `ImageGrid` component
-- [ ] TASK-4.2-02: Wire image generation phase into `Generate.tsx`
-- [ ] TASK-4.2-03: Unit tests for `ImageGrid`
-- [ ] TASK-4.2-04: Add `style` field to `GenerateImagesDto`
-- [ ] TASK-4.2-05: Propagate `style` to Replicate prompt in queue processor
+- [x] TASK-4.2-01: Build `ImageGrid` component
+- [x] TASK-4.2-02: Wire image generation phase into `Generate.tsx`
+- [x] TASK-4.2-03: Unit tests for `ImageGrid`
+- [x] TASK-4.2-04: Add `style` field to `GenerateImagesDto`
+- [x] TASK-4.2-05: Propagate `style` to Replicate prompt in queue processor
 
 ---
 
