@@ -14,7 +14,7 @@ import { CurrentUser } from '../common/auth/current-user.decorator';
 @UseGuards(JwtAuthGuard)
 @ApiBearerAuth('JWT')
 export class GenerateController {
-  constructor(private readonly generateService: GenerateService) {}
+  constructor(private readonly generateService: GenerateService) { }
 
   @Post('script')
   @Throttle({ default: { limit: 5, ttl: 60000 } })
@@ -59,7 +59,7 @@ export class GenerateController {
   @HttpCode(HttpStatus.ACCEPTED)
   @ApiOperation({
     summary: 'Generate images from script',
-    description: 'Generate visual assets for video scenes using Replicate',
+    description: 'Generate visual assets for video scenes using Azure Foundry Flux.2-pro',
   })
   @ApiResponse({
     status: 202,

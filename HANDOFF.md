@@ -25,7 +25,14 @@
 
 **Frontend** `.env.local`: `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY`, `VITE_API_URL`
 
-**Backend** `.env.local`: añadir `SUPABASE_JWT_SECRET` (Supabase → Settings → API → JWT Secret)
+**Backend** `.env.local`: añadir `SUPABASE_JWT_SECRET` (Supabase → Settings → API → JWT Secret) y Azure AI vars:
+- `AZURE_OPENAI_ENDPOINT`
+- `AZURE_OPENAI_API_KEY`
+- `AZURE_OPENAI_DEPLOYMENT_GPT41`
+- `AZURE_OPENAI_API_VERSION`
+- `AZURE_FOUNDRY_IMAGE_ENDPOINT`
+- `AZURE_FOUNDRY_IMAGE_API_KEY`
+- `AZURE_FOUNDRY_FLUX_DEPLOYMENT`
 
 **Supabase Dashboard:** Google provider + redirect `http://localhost:5173/auth/callback`
 
