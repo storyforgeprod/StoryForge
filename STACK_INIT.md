@@ -268,8 +268,6 @@ storyforge/
 ├── docker-compose.yml       (Local dev: PostgreSQL + Redis opcional)
 ├── IMPLEMENTATION_PLAN.md
 ├── STACK_INIT.md            (este archivo)
-├── DEVELOPMENT_GUIDELINES.md
-├── MCP_INTEGRATION.md
 └── README.md
 ```
 

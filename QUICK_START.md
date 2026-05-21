@@ -205,7 +205,7 @@ https://storyforge-staging.onrender.com
 ## 📞 Ayuda
 
 - **Error específico:** Buscar en logs de backend → ver Sentry DSN
-- **Bloqueo técnico:** Revisar DEVELOPMENT_GUIDELINES.md
+- **Bloqueo técnico:** Ver [TROUBLESHOOTING.md](TROUBLESHOOTING.md)
 - **¿Qué hacer ahora?:** Ver IMPLEMENTATION_PLAN.md → Semana actual
 
 ---

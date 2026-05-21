@@ -39,7 +39,6 @@ StoryForge/
 │   ├── IMPLEMENTATION_PLAN.md ← Plan maestro + decisiones arquitectónicas
 │   ├── PROGRESS.md ← Tracking semanal
 │   ├── HANDOFF.md ← Setup + contexto técnico
-│   ├── DEVELOPMENT_GUIDELINES.md ← Convenciones de código
 │   ├── OPTIONAL_COMPONENTS.md ← Features removibles
 │   ├── STACK_INIT.md ← Stack autorizado
 │   ├── README.md ← Overview
@@ -61,7 +60,6 @@ StoryForge/
     │   └── ... (nuevo archivo por cada sesión)
     │
     └── 📖 REFERENCE GUIDES
-        ├── START_HERE.md ← Entry point para próximo dev
         ├── NEXT_STEPS_TASK_2_3.md ← Navigation
         └── ... (guías de continuación)
 ```
@@ -86,7 +84,6 @@ Cualquier cosa que afecte decisiones futuras o continuidad del proyecto:
 | **[STACK_INIT.md](STACK_INIT.md)** | Stack autorizado (tecnologías, versiones) | Root | Antes de agregar dependencies |
 | **[PROGRESS.md](PROGRESS.md)** | Seguimiento semanal (qué se hizo) | Root | Cada sesión de desarrollo |
 | **[HANDOFF.md](HANDOFF.md)** | Contexto + setup para próximo dev | Root | Fin de cada sesión |
-| **[DEVELOPMENT_GUIDELINES.md](DEVELOPMENT_GUIDELINES.md)** | Convenciones de código, patrones | Root | Antes de escribir código |
 | **[OPTIONAL_COMPONENTS.md](OPTIONAL_COMPONENTS.md)** | Features opcionales / removibles | Root | Al planificar nueva feature |
 | **[IMPLEMENTATION_PLAN.md](IMPLEMENTATION_PLAN.md)** | ← **AQUÍ AHORA** — Plan maestro + decisiones | Root | Toda decisión arquitectónica |
 | **[instructions/TASK_X_PLAN.md](instructions/)** | Arquitectura detallada de task | instructions/ | Al planificar task |
@@ -323,10 +320,6 @@ Cuando continúes el desarrollo en la próxima sesión:
 - Lee **[SESSION_SUMMARY_2026_05_16.md](SESSION_SUMMARY_2026_05_16.md)** (o la sesión más reciente) — resumen de la sesión anterior
 
 ### 2️⃣ **Antes de Hacer Cambios**
-- Consulta **[DEVELOPMENT_GUIDELINES.md](DEVELOPMENT_GUIDELINES.md)**
-  - Convenciones de código (nombrado, comentarios, estructura)
-  - Proceso de testing
-  - Proceso de commit y PR
 - Consulta **[OPTIONAL_COMPONENTS.md](OPTIONAL_COMPONENTS.md)**
   - Qué componentes son removibles post-MVP
   - Qué es core vs qué es nice-to-have
@@ -346,18 +339,15 @@ Cuando continúes el desarrollo en la próxima sesión:
 
 ### 4️⃣ **Stack Compliance Check**
 - Si necesitas agregar una nueva dependencia → actualiza [STACK_INIT.md](STACK_INIT.md)
-- Si necesitas cambiar tecnología → actualiza [STACK_COMPLIANCE.md](STACK_COMPLIANCE.md)
-- Documenta cambio en CLAUDE.md para el equipo
+- Documenta cambio en CLAUDE.md
 
 ### 5️⃣ **Referencia Rápida de Documentos**
 | Archivo | Consultar cuando... |
 |---------|-------------------|
 | [PROGRESS.md](PROGRESS.md) | Necesitas saber qué se hizo |
 | [HANDOFF.md](HANDOFF.md) | Necesitas contexto técnico |
-| [DEVELOPMENT_GUIDELINES.md](DEVELOPMENT_GUIDELINES.md) | Vas a escribir código |
 | [OPTIONAL_COMPONENTS.md](OPTIONAL_COMPONENTS.md) | Necesitas saber qué features son opcionales |
 | [STACK_INIT.md](STACK_INIT.md) | Necesitas agregar dependencias |
-| [STACK_COMPLIANCE.md](STACK_COMPLIANCE.md) | Necesitas verificar cumplimiento técnico |
 | [QUICK_START.md](QUICK_START.md) | Necesitas setup rápido (10 min) |
 | [IMPLEMENTATION_PLAN.md](IMPLEMENTATION_PLAN.md) | Necesitas entender roadmap (este archivo) |
 

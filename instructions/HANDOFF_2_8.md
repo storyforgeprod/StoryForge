@@ -98,7 +98,7 @@ Docs: [ARCHITECTURE.md](../ARCHITECTURE.md)
 
 - Repo: https://dev.azure.com/ia-aplicada-grupo-04/StoryForge
 - PAT: Windows Credential Manager (workspace `ia-aplicada-grupo-04`)
-- MCP: see [MCP_INTEGRATION.md](../MCP_INTEGRATION.md) and [AZURE_DEVOPS_CONFIG.md](../AZURE_DEVOPS_CONFIG.md)
+- Config: [AZURE_DEVOPS_CONFIG.md](../AZURE_DEVOPS_CONFIG.md)
 - Close Week 2 tasks in ADO when merging (2.1–2.8)
 
 ---
