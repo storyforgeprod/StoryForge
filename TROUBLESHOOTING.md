@@ -180,4 +180,4 @@ NODE_ENV=development
 
 ---
 
-**See also:** [API_ENDPOINTS.md](API_ENDPOINTS.md) · [DEPLOYMENT.md](DEPLOYMENT.md) · [QUICK_START.md](QUICK_START.md)
+**See also:** [DEPLOYMENT.md](DEPLOYMENT.md) · [QUICK_START.md](QUICK_START.md)

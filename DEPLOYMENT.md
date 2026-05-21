@@ -180,4 +180,4 @@ VIDEO_OUTPUT_DIR=/tmp/storyforge-videos
 
 ---
 
-**See also:** [.env.production](.env.production) · [TROUBLESHOOTING.md](TROUBLESHOOTING.md) · [API_ENDPOINTS.md](API_ENDPOINTS.md)
+**See also:** [.env.production](.env.production) · [TROUBLESHOOTING.md](TROUBLESHOOTING.md)

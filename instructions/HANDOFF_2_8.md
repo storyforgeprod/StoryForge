@@ -78,7 +78,7 @@ npx prisma migrate dev
 npm run start:dev
 ```
 
-Docs: [API_ENDPOINTS.md](../API_ENDPOINTS.md) · [ARCHITECTURE.md](../ARCHITECTURE.md)
+Docs: [ARCHITECTURE.md](../ARCHITECTURE.md)
 
 ---
 

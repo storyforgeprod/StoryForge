@@ -192,7 +192,7 @@
 - [x] **Status:** ✅ COMPLETED — API Security layer complete
 
 #### ✅ Task 2.8: Documentation & Handoff — COMPLETADA ✅
-- [x] Created API_ENDPOINTS.md (5 endpoints + cURL)
+- [x] API documented via Swagger (`/api`)
 - [x] Created ARCHITECTURE.md (async pattern + mermaid)
 - [x] Created DEPLOYMENT.md (local + Render)
 - [x] Created TROUBLESHOOTING.md (Windows build fix documented)

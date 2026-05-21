@@ -162,4 +162,4 @@ Schema: `backend/prisma/schema.prisma`
 
 ---
 
-**See also:** [API_ENDPOINTS.md](API_ENDPOINTS.md) · [STACK_INIT.md](STACK_INIT.md) · [instructions/TASK_2_3_PLAN.md](instructions/TASK_2_3_PLAN.md)
+**See also:** [STACK_INIT.md](STACK_INIT.md) · [instructions/TASK_2_3_PLAN.md](instructions/TASK_2_3_PLAN.md)
