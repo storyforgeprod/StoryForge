@@ -40,3 +40,18 @@ export type GenerateAudioState =
     | { phase: 'polling'; jobId: string }
     | { phase: 'completed'; audioUrl: string; audioLength: number }
     | { phase: 'error'; message: string };
+
+export type VideoAssemblyResult = {
+    videoUrl: string;
+    duration: number;
+    fileSize: number;
+    format: string;
+    generatedAt: string;
+};
+
+export type GenerateVideoState =
+    | { phase: 'idle' }
+    | { phase: 'submitting' }
+    | { phase: 'polling'; jobId: string }
+    | { phase: 'completed'; videoUrl: string; duration: number; fileSize: number }
+    | { phase: 'error'; message: string };

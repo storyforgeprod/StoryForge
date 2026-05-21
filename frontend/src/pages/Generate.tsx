@@ -9,12 +9,14 @@ import { StyleSelector } from '@/components/StyleSelector/StyleSelector';
 import { VoiceSelector } from '@/components/VoiceSelector/VoiceSelector';
 import { AudioPlayer } from '@/components/AudioPlayer/AudioPlayer';
 import { ImageGrid } from '@/components/ImageGrid/ImageGrid';
+import { DownloadCard } from '@/components/DownloadCard/DownloadCard';
 import { PipelineProgress, type PipelineStage } from '@/components/PipelineProgress/PipelineProgress';
 import { validateStory } from '@/utils/validation';
 import { StoryStyle } from '@/types/generate';
 import { useGenerateScript } from '@/hooks/useGenerateScript';
 import { useGenerateImages } from '@/hooks/useGenerateImages';
 import { useGenerateAudio } from '@/hooks/useGenerateAudio';
+import { useGenerateVideo } from '@/hooks/useGenerateVideo';
 import { useAuth } from '@/contexts/AuthContext';
 
 type WizardStep = 'story' | 'style' | 'voice';
@@ -23,6 +25,7 @@ function deriveStages(
     genPhase: string,
     imagesPhase: string,
     audioPhase: string,
+    videoPhase: string,
 ): PipelineStage[] {
     const scriptStatus =
         genPhase === 'completed' ? 'done' : genPhase === 'error' ? 'error' : 'pending';
@@ -42,7 +45,14 @@ function deriveStages(
                 : audioPhase === 'idle'
                     ? 'pending'
                     : 'active';
-    const videoStatus = 'pending'; // Task 4.7
+    const videoStatus =
+        videoPhase === 'completed'
+            ? 'done'
+            : videoPhase === 'error'
+                ? 'error'
+                : videoPhase === 'idle'
+                    ? 'pending'
+                    : 'active';
 
     return [
         { id: 'script', label: 'Guión', status: scriptStatus },
@@ -62,15 +72,18 @@ export function Generate() {
     const [step, setStep] = useState<WizardStep>('story');
     const [submitAttempted, setSubmitAttempted] = useState(false);
     const [scriptJobId, setScriptJobId] = useState<string | null>(null);
+    const [imageJobId, setImageJobId] = useState<string | null>(null);
+    const [audioJobId, setAudioJobId] = useState<string | null>(null);
 
     const validation = useMemo(() => validateStory(story), [story]);
     const { state: genState, generate, reset: resetGeneration } = useGenerateScript(token);
     const { state: imagesState, generate: generateImages, reset: resetImages } = useGenerateImages(token);
     const { state: audioState, generate: generateAudio, reset: resetAudio } = useGenerateAudio(token);
+    const { state: videoState, generate: generateVideo, reset: resetVideo } = useGenerateVideo(token);
 
     const stages = useMemo(
-        () => deriveStages(genState.phase, imagesState.phase, audioState.phase),
-        [genState.phase, imagesState.phase, audioState.phase],
+        () => deriveStages(genState.phase, imagesState.phase, audioState.phase, videoState.phase),
+        [genState.phase, imagesState.phase, audioState.phase, videoState.phase],
     );
 
     useEffect(() => {
@@ -78,6 +91,18 @@ export function Generate() {
             setScriptJobId(genState.jobId);
         }
     }, [genState]);
+
+    useEffect(() => {
+        if (imagesState.phase === 'polling') {
+            setImageJobId(imagesState.jobId);
+        }
+    }, [imagesState]);
+
+    useEffect(() => {
+        if (audioState.phase === 'polling') {
+            setAudioJobId(audioState.jobId);
+        }
+    }, [audioState]);
 
     const handleContinue = () => {
         if (step === 'story') {
@@ -121,12 +146,39 @@ export function Generate() {
         resetAudio();
     };
 
+    const handleGenerateVideo = () => {
+        if (!imageJobId || !audioJobId) return;
+        generateVideo(imageJobId, audioJobId);
+    };
+
+    const handleVideoRetry = () => {
+        resetVideo();
+    };
+
     const handleRetry = () => {
         resetGeneration();
         resetImages();
         resetAudio();
+        resetVideo();
         setScriptJobId(null);
+        setImageJobId(null);
+        setAudioJobId(null);
         setStep('story');
+    };
+
+    const resetAll = () => {
+        resetGeneration();
+        resetImages();
+        resetAudio();
+        resetVideo();
+        setScriptJobId(null);
+        setImageJobId(null);
+        setAudioJobId(null);
+        setStory('');
+        setStyle(null);
+        setVoiceId(null);
+        setStep('story');
+        setSubmitAttempted(false);
     };
 
     const isGeneratingScript =
@@ -135,6 +187,8 @@ export function Generate() {
         imagesState.phase === 'submitting' || imagesState.phase === 'polling';
     const isGeneratingAudio =
         audioState.phase === 'submitting' || audioState.phase === 'polling';
+    const isGeneratingVideo =
+        videoState.phase === 'submitting' || videoState.phase === 'polling';
 
     return (
         <div className="min-h-screen">
@@ -228,11 +282,6 @@ export function Generate() {
                         </CardHeader>
                         <CardContent className="space-y-4">
                             <ImageGrid imageUrls={imagesState.imageUrls} />
-                            <div className="flex justify-end">
-                                <Button type="button" onClick={() => { }} disabled>
-                                    Continuar al audio
-                                </Button>
-                            </div>
                         </CardContent>
                     </Card>
                 )}
@@ -249,13 +298,13 @@ export function Generate() {
                     </Card>
                 )}
 
-                {/* Audio generation — done */}
-                {audioState.phase === 'completed' && (
+                {/* Audio generation — done; video not yet started */}
+                {audioState.phase === 'completed' && videoState.phase === 'idle' && (
                     <Card>
                         <CardHeader>
                             <CardTitle>Narración generada</CardTitle>
                             <CardDescription>
-                                Escuchá la narración y continúa al video.
+                                Escuchá la narración y generá el video final.
                             </CardDescription>
                         </CardHeader>
                         <CardContent className="space-y-4">
@@ -265,9 +314,16 @@ export function Generate() {
                                     durationSeconds={'audioLength' in audioState ? audioState.audioLength : undefined}
                                 />
                             )}
+                            <p className="text-sm text-muted-foreground">
+                                Puede tardar hasta 3 minutos.
+                            </p>
                             <div className="flex justify-end">
-                                <Button type="button" disabled>
-                                    Continuar al video
+                                <Button
+                                    type="button"
+                                    disabled={!imageJobId || !audioJobId}
+                                    onClick={handleGenerateVideo}
+                                >
+                                    Generar video
                                 </Button>
                             </div>
                         </CardContent>
@@ -311,6 +367,46 @@ export function Generate() {
                         <CardContent className="flex flex-col items-center gap-4 py-16">
                             <p className="text-sm text-destructive">{imagesState.message}</p>
                             <Button type="button" variant="outline" onClick={handleImagesRetry}>
+                                Reintentar
+                            </Button>
+                        </CardContent>
+                    </Card>
+                )}
+
+                {/* Video generation — loading */}
+                {isGeneratingVideo && (
+                    <Card>
+                        <CardContent className="flex flex-col items-center gap-4 py-16">
+                            <Loader2 className="h-10 w-10 animate-spin text-primary" />
+                            <p className="text-sm text-muted-foreground">
+                                Ensamblando tu video…
+                            </p>
+                        </CardContent>
+                    </Card>
+                )}
+
+                {/* Video generation — done */}
+                {videoState.phase === 'completed' && (
+                    <div className="space-y-4">
+                        <DownloadCard
+                            videoUrl={videoState.videoUrl}
+                            durationSeconds={videoState.duration}
+                            fileSizeBytes={videoState.fileSize}
+                        />
+                        <div className="flex justify-center">
+                            <Button type="button" variant="outline" onClick={resetAll}>
+                                Nueva historia
+                            </Button>
+                        </div>
+                    </div>
+                )}
+
+                {/* Video generation — error */}
+                {videoState.phase === 'error' && (
+                    <Card>
+                        <CardContent className="flex flex-col items-center gap-4 py-16">
+                            <p className="text-sm text-destructive">{videoState.message}</p>
+                            <Button type="button" variant="outline" onClick={handleVideoRetry}>
                                 Reintentar
                             </Button>
                         </CardContent>

@@ -80,3 +80,18 @@ export async function postGenerateAudio(
     });
     return handleResponse(res);
 }
+
+export async function postGenerateVideo(
+    body: { imageJobId: string; audioJobId: string; fps?: number; bitrate?: string },
+    token: string,
+): Promise<{ jobId: string; status: string; createdAt: string }> {
+    const res = await fetch(`${API_BASE}/generate/video`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(body),
+    });
+    return handleResponse(res);
+}

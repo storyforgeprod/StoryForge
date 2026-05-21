@@ -6,9 +6,9 @@ Total tasks: 3 | Estimated effort: S (≤ 2h)
 
 ## Checklist
 
-- [ ] TASK-4.7-01: Add video types and `postGenerateVideo` to service layer
-- [ ] TASK-4.7-02: Build `useGenerateVideo` hook
-- [ ] TASK-4.7-03: Unit tests for `useGenerateVideo`
+- [x] TASK-4.7-01: Add video types and `postGenerateVideo` to service layer
+- [x] TASK-4.7-02: Build `useGenerateVideo` hook
+- [x] TASK-4.7-03: Unit tests for `useGenerateVideo`
 
 ---
 

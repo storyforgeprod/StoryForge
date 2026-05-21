@@ -1,173 +1,262 @@
-import { Injectable, Logger } from '@nestjs/common';
-import { exec } from 'child_process';
-import { promisify } from 'util';
+import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
+import { spawn } from 'child_process';
 import * as fs from 'fs';
 import * as path from 'path';
+import * as os from 'os';
+import { createClient, SupabaseClient } from '@supabase/supabase-js';
 import { v4 as uuidv4 } from 'uuid';
 
-const execPromise = promisify(exec);
-
-interface VideoAssemblyOptions {
-  duration?: number; // seconds
-  fps?: number; // frames per second
-  bitrate?: string; // video bitrate
-}
+const BUCKET = 'videos';
 
 @Injectable()
-export class VideoService {
+export class VideoService implements OnModuleInit {
   private readonly logger = new Logger(VideoService.name);
-  private readonly outputDir = process.env.VIDEO_OUTPUT_DIR || '/tmp/storyforge-videos';
+  private readonly supabase: SupabaseClient;
 
   constructor() {
-    // Ensure output directory exists
-    if (!fs.existsSync(this.outputDir)) {
-      fs.mkdirSync(this.outputDir, { recursive: true });
+    this.supabase = createClient(
+      process.env.SUPABASE_URL || '',
+      process.env.SUPABASE_SERVICE_ROLE_KEY || '',
+      { auth: { autoRefreshToken: false, persistSession: false } },
+    );
+  }
+
+  async onModuleInit(): Promise<void> {
+    await this._verifyFfmpeg();
+    await this._ensureVideosBucket();
+  }
+
+  private _verifyFfmpeg(): Promise<void> {
+    return new Promise((resolve) => {
+      const proc = spawn('ffmpeg', ['-version']);
+      proc.stdout.once('data', (data: Buffer) => {
+        this.logger.log(`[FFmpeg] ${data.toString().split('\n')[0]}`);
+      });
+      proc.on('error', (err: Error) => {
+        this.logger.error(`[FFmpeg] Not found on PATH: ${err.message}`);
+        resolve();
+      });
+      proc.on('close', () => resolve());
+    });
+  }
+
+  private async _ensureVideosBucket(): Promise<void> {
+    const { data: buckets } = await this.supabase.storage.listBuckets();
+    if (buckets?.some((b) => b.name === BUCKET)) {
+      this.logger.log(`[Supabase] "${BUCKET}" bucket exists`);
+      return;
+    }
+    const { error } = await this.supabase.storage.createBucket(BUCKET, { public: false });
+    if (error) {
+      this.logger.error(`[Supabase] Failed to create "${BUCKET}" bucket: ${error.message}`);
+    } else {
+      this.logger.log(`[Supabase] Created "${BUCKET}" bucket`);
     }
   }
 
   async assembleVideo(
-    imageUrls: string[],
-    audioUrl: string,
-    options?: VideoAssemblyOptions,
+    images: string[],
+    audioPath: string,
+    metadata: { fps?: number; bitrate?: string; jobId?: string },
   ): Promise<string> {
-    if (!imageUrls || imageUrls.length === 0) {
-      throw new Error('At least one image is required');
+    const strategy = process.env.VIDEO_ASSEMBLY_STRATEGY ?? 'local';
+    this.logger.log(`[VideoService] using strategy: ${strategy}`);
+    if (strategy === 'serverless') {
+      return this._assembleServerless(images, audioPath, metadata);
     }
+    return this._assembleLocal(images, audioPath, metadata);
+  }
 
-    if (!audioUrl || audioUrl.trim().length === 0) {
-      throw new Error('Audio URL is required');
-    }
+  private async _assembleLocal(
+    images: string[],
+    audioPath: string,
+    metadata: { fps?: number; bitrate?: string; jobId?: string },
+  ): Promise<string> {
+    if (!images || images.length === 0) throw new Error('At least one image URL is required');
+    if (!audioPath?.trim()) throw new Error('Audio URL is required');
 
-    const videoId = uuidv4();
-    const outputPath = path.join(this.outputDir, `${videoId}.mp4`);
+    const jobId = metadata?.jobId || uuidv4();
+    const tmpDir = path.join(os.tmpdir(), jobId);
+    const startTime = Date.now();
+
+    this.logger.log(`[VideoAssembly] Job ${jobId}: ${images.length} image(s)`);
 
     try {
-      // 1. Download image and audio files
-      const imagePath = await this._downloadImage(imageUrls[0], videoId);
-      const audioPath = await this._downloadAudio(audioUrl, videoId);
+      fs.mkdirSync(tmpDir, { recursive: true });
 
-      // 2. Get audio duration
-      const duration = await this._getAudioDuration(audioPath);
+      await Promise.all([
+        ...images.map((url, i) => this._downloadFile(url, path.join(tmpDir, `img_${i}.jpg`))),
+        this._downloadFile(audioPath, path.join(tmpDir, 'audio.mp3')),
+      ]);
 
-      // 3. Build FFmpeg command for video assembly
-      const ffmpegCmd = this._buildFFmpegCommand(
-        imagePath,
-        audioPath,
-        outputPath,
-        duration,
-        options,
+      const audioDuration = await this._getAudioDuration(path.join(tmpDir, 'audio.mp3'));
+      const secPerImage = audioDuration / images.length;
+      const outputPath = path.join(tmpDir, 'output.mp4');
+
+      await this._runFfmpeg(
+        this._buildFfmpegArgs(tmpDir, images.length, secPerImage, outputPath, metadata),
       );
 
-      // 4. Execute FFmpeg
-      this.logger.log(`🎬 Assembling video: ${ffmpegCmd}`);
-      await execPromise(ffmpegCmd, { timeout: 300000 }); // 5 min timeout
+      if (!fs.existsSync(outputPath)) throw new Error('FFmpeg did not produce output video');
 
-      // 5. Verify output exists
-      if (!fs.existsSync(outputPath)) {
-        throw new Error('FFmpeg did not produce output video');
+      const storagePath = `${jobId}/${jobId}.mp4`;
+      const fileBuffer = fs.readFileSync(outputPath);
+
+      const { error: uploadError } = await this.supabase.storage
+        .from(BUCKET)
+        .upload(storagePath, fileBuffer, { contentType: 'video/mp4', upsert: true });
+
+      if (uploadError) throw new Error(`Supabase upload failed: ${uploadError.message}`);
+      this.logger.log(`[VideoAssembly] Uploaded: ${storagePath}`);
+
+      const { data: signedData, error: signedError } = await this.supabase.storage
+        .from(BUCKET)
+        .createSignedUrl(storagePath, 86400);
+
+      if (signedError || !signedData?.signedUrl) {
+        throw new Error(`Failed to create signed URL: ${signedError?.message}`);
       }
 
-      // 6. Return video URL (for now, return local path; in production, upload to storage)
-      return `file://${outputPath}`;
-    } catch (error) {
-      this.logger.error('FFmpeg error:', error);
-      // Cleanup on error
-      await this._cleanup(videoId);
-      throw error;
+      this.logger.log(`[VideoAssembly] Job ${jobId} done in ${Date.now() - startTime}ms`);
+      return signedData.signedUrl;
+    } finally {
+      await this._cleanupDir(tmpDir);
     }
   }
 
-  private async _downloadImage(
-    imageUrl: string,
-    videoId: string,
-  ): Promise<string> {
-    const imagePath = path.join(this.outputDir, `${videoId}_image.png`);
-
-    // If imageUrl is base64 (from local generation)
-    if (imageUrl.startsWith('data:')) {
-      const base64Data = imageUrl.replace(/^data:image\/\w+;base64,/, '');
-      fs.writeFileSync(imagePath, Buffer.from(base64Data, 'base64'));
-      return imagePath;
-    }
-
-    // If imageUrl is HTTP(S), download it
-    const response = await fetch(imageUrl);
-    const arrayBuffer = await response.arrayBuffer();
-    fs.writeFileSync(imagePath, Buffer.from(arrayBuffer));
-    return imagePath;
-  }
-
-  private async _downloadAudio(audioUrl: string, videoId: string): Promise<string> {
-    const audioPath = path.join(this.outputDir, `${videoId}_audio.mp3`);
-
-    // If audioUrl is base64 (from ElevenLabs)
-    if (audioUrl.startsWith('data:')) {
-      const base64Data = audioUrl.replace(/^data:audio\/\w+;base64,/, '');
-      fs.writeFileSync(audioPath, Buffer.from(base64Data, 'base64'));
-      return audioPath;
-    }
-
-    // If audioUrl is HTTP(S), download it
-    const response = await fetch(audioUrl);
-    const arrayBuffer = await response.arrayBuffer();
-    fs.writeFileSync(audioPath, Buffer.from(arrayBuffer));
-    return audioPath;
-  }
-
-  private async _getAudioDuration(audioPath: string): Promise<number> {
-    try {
-      const cmd = `ffprobe -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1:noprint_wrappers=1 "${audioPath}"`;
-      const { stdout } = await execPromise(cmd);
-      return parseFloat(stdout.trim());
-    } catch (error) {
-      this.logger.warn('Could not get audio duration, using default 60s');
-      return 60; // Default fallback
-    }
-  }
-
-  private _buildFFmpegCommand(
-    imagePath: string,
+  private async _assembleServerless(
+    images: string[],
     audioPath: string,
-    outputPath: string,
-    duration: number,
-    options?: VideoAssemblyOptions,
-  ): string {
-    const fps = options?.fps || 30;
-    const bitrate = options?.bitrate || '2000k';
-    const videoWidth = 1080;
-    const videoHeight = 1920; // YouTube Shorts vertical format
+    metadata: { fps?: number; bitrate?: string; jobId?: string },
+  ): Promise<string> {
+    const url = process.env.MODAL_FUNCTION_URL;
+    if (!url) throw new Error('MODAL_FUNCTION_URL is not set. Cannot use serverless strategy.');
 
-    // FFmpeg command:
-    // - scale image to vertical format (1080x1920)
-    // - loop image for audio duration
-    // - combine with audio
-    // - output as MP4 (H.264)
-    return (
-      `ffmpeg -loop 1 -i "${imagePath}" ` +
-      `-i "${audioPath}" ` +
-      `-c:v libx264 -preset fast ` +
-      `-vf "scale=${videoWidth}:${videoHeight}:force_original_aspect_ratio=decrease,pad=${videoWidth}:${videoHeight}:(ow-iw)/2:(oh-ih)/2" ` +
-      `-c:a aac -b:a 128k ` +
-      `-t ${duration} ` +
-      `-y "${outputPath}" 2>&1`
-    );
+    const response = await fetch(`${url}/assemble`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        imageUrls: images,
+        audioUrl: audioPath,
+        jobId: metadata?.jobId,
+        fps: metadata?.fps ?? 30,
+        bitrate: metadata?.bitrate ?? '2000k',
+      }),
+      signal: AbortSignal.timeout(240_000),
+    });
+
+    let body: { signedUrl?: string; error?: string } = {};
+    try {
+      body = (await response.json()) as { signedUrl?: string; error?: string };
+    } catch {
+      throw new Error(`Serverless function returned non-JSON response [${response.status}]`);
+    }
+
+    if (!response.ok) {
+      throw new Error(`Serverless assembly failed [${response.status}]: ${body.error ?? 'unknown error'}`);
+    }
+
+    if (!body.signedUrl) throw new Error('Serverless function did not return a signedUrl');
+    this.logger.log(`[VideoAssembly] Serverless signed URL received for job ${metadata?.jobId}`);
+    return body.signedUrl;
   }
 
-  private async _cleanup(videoId: string): Promise<void> {
-    try {
-      const files = [
-        path.join(this.outputDir, `${videoId}_image.png`),
-        path.join(this.outputDir, `${videoId}_audio.mp3`),
-        path.join(this.outputDir, `${videoId}.mp4`),
-      ];
+  private async _downloadFile(url: string, dest: string): Promise<void> {
+    if (url.startsWith('data:')) {
+      const base64 = url.replace(/^data:[^;]+;base64,/, '');
+      fs.writeFileSync(dest, Buffer.from(base64, 'base64'));
+      return;
+    }
+    const response = await fetch(url);
+    if (!response.ok) throw new Error(`Download failed [${response.status}]: ${url}`);
+    fs.writeFileSync(dest, Buffer.from(await response.arrayBuffer()));
+  }
 
-      for (const file of files) {
-        if (fs.existsSync(file)) {
-          fs.unlinkSync(file);
+  private _getAudioDuration(audioPath: string): Promise<number> {
+    return new Promise((resolve) => {
+      const proc = spawn('ffprobe', [
+        '-v', 'error',
+        '-show_entries', 'format=duration',
+        '-of', 'default=noprint_wrappers=1:nokey=1',
+        audioPath,
+      ]);
+      let output = '';
+      proc.stdout.on('data', (d: Buffer) => (output += d.toString()));
+      proc.on('error', () => resolve(60));
+      proc.on('close', () => {
+        const d = parseFloat(output.trim());
+        resolve(isNaN(d) ? 60 : Math.min(d, 60));
+      });
+    });
+  }
+
+  private _buildFfmpegArgs(
+    tmpDir: string,
+    numImages: number,
+    secPerImage: number,
+    outputPath: string,
+    options: { fps?: number; bitrate?: string },
+  ): string[] {
+    const fps = options?.fps ?? 30;
+    const bitrate = options?.bitrate ?? '2000k';
+    const args: string[] = [];
+
+    for (let i = 0; i < numImages; i++) {
+      args.push('-loop', '1', '-t', secPerImage.toFixed(2), '-i', path.join(tmpDir, `img_${i}.jpg`));
+    }
+    args.push('-i', path.join(tmpDir, 'audio.mp3'));
+
+    const scaleParts = Array.from(
+      { length: numImages },
+      (_, i) =>
+        `[${i}:v]scale=1080:1920:force_original_aspect_ratio=decrease,` +
+        `pad=1080:1920:(ow-iw)/2:(oh-ih)/2,setsar=1[v${i}]`,
+    );
+    const concatInputs = Array.from({ length: numImages }, (_, i) => `[v${i}]`).join('');
+    scaleParts.push(`${concatInputs}concat=n=${numImages}:v=1:a=0[outv]`);
+
+    args.push(
+      '-filter_complex', scaleParts.join(';'),
+      '-map', '[outv]',
+      '-map', `${numImages}:a`,
+      '-c:v', 'libx264', '-preset', 'fast', '-crf', '23', '-b:v', bitrate,
+      '-c:a', 'aac', '-b:a', '128k',
+      '-t', '60',
+      '-r', String(fps),
+      '-movflags', '+faststart',
+      '-y',
+      outputPath,
+    );
+
+    return args;
+  }
+
+  private _runFfmpeg(args: string[]): Promise<void> {
+    return new Promise((resolve, reject) => {
+      this.logger.log('[FFmpeg] Encoding...');
+      const proc = spawn('ffmpeg', args);
+      let stderr = '';
+      proc.stderr.on('data', (d: Buffer) => (stderr += d.toString()));
+      proc.on('error', (err: Error) => reject(new Error(`FFmpeg spawn error: ${err.message}`)));
+      proc.on('close', (code: number | null) => {
+        if (code !== 0) {
+          reject(new Error(`FFmpeg exited code ${code}: ${stderr.slice(-500)}`));
+        } else {
+          this.logger.log('[FFmpeg] Encoding complete');
+          resolve();
         }
+      });
+    });
+  }
+
+  private async _cleanupDir(dir: string): Promise<void> {
+    try {
+      if (fs.existsSync(dir)) {
+        fs.rmSync(dir, { recursive: true, force: true });
+        this.logger.log(`[VideoAssembly] Cleaned up ${dir}`);
       }
-    } catch (error) {
-      this.logger.warn(`Cleanup error for ${videoId}:`, error);
+    } catch (err) {
+      this.logger.warn(`[VideoAssembly] Cleanup error: ${err}`);
     }
   }
 }

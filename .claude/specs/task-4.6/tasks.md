@@ -8,7 +8,7 @@ Total tasks: 4 | Estimated effort: L (≤ 5h) — **DEFERRED: implement only if 
 
 ## Checklist
 
-- [ ] TASK-4.6-01: Add strategy switch to `VideoService.assembleVideo`
+- [x] TASK-4.6-01: Add strategy switch to `VideoService.assembleVideo`
 - [ ] TASK-4.6-02: Deploy Modal Labs assembly function
 - [ ] TASK-4.6-03: Implement `_assembleServerless` in `VideoService`
 - [ ] TASK-4.6-04: Manual smoke test of serverless path

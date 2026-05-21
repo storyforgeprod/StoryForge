@@ -576,12 +576,11 @@ Respond with ONLY the visual description, no explanations.`,
     const videoUrl = await this.videoService.assembleVideo(imageUrls, audioUrl, {
       fps: data.fps,
       bitrate: data.bitrate,
+      jobId: data.jobId,
     });
 
-    // 5. Get file size and duration
-    const fs = require('fs');
-    const fileSize = fs.statSync(videoUrl.replace('file://', '')).size;
-    const duration = audioResult.audioLength || 60; // Use audio length from job
+    const duration = audioResult.audioLength || 60;
+    const fileSize = 0; // video is in cloud storage; local size not available
 
     return {
       videoUrl,

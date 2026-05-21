@@ -6,7 +6,7 @@ Total tasks: 3 | Estimated effort: M (≤ 4h) — requires Tasks 4.1–4.8 compl
 
 ## Checklist
 
-- [ ] TASK-4.9-01: Verify local environment is fully operational
+- [x] TASK-4.9-01: Verify local environment is fully operational
 - [ ] TASK-4.9-02: Execute TC-1 Happy Path and document results
 - [ ] TASK-4.9-03: Execute TC-2, TC-3, TC-4 and document results
 
