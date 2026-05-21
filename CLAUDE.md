@@ -36,8 +36,7 @@ https://dev.azure.com/ia-aplicada-grupo-04/StoryForge
 2. [IMPLEMENTATION_PLAN.md](IMPLEMENTATION_PLAN.md) — 6-week roadmap + tracking
 3. [STACK_INIT.md](STACK_INIT.md) — Tech stack, versions, directory structure
 5. [AZURE_DEVOPS_CONFIG.md](AZURE_DEVOPS_CONFIG.md) — ADO setup + backlog
-6. [MCP_INTEGRATION.md](MCP_INTEGRATION.md) — Claude MCP integration for dev
-7. [OPTIONAL_COMPONENTS.md](OPTIONAL_COMPONENTS.md) — Removable/modifiable components
+6. [OPTIONAL_COMPONENTS.md](OPTIONAL_COMPONENTS.md) — Removable/modifiable components
 
 **Reference:**
 - `etapa4-brief-final.md` — Product Brief (JTBD, North Star Metric, exit criteria)
@@ -65,16 +64,6 @@ Standards de código y patrones obligatorios para el MVP. Se activan automática
 | `storyforge-backend/` | Endpoints, controllers, services, DTOs, módulos NestJS, integraciones IA | File naming + folder structure (`controllers/` / `services/`), arquitectura modular, validación, rate limiting, logging, tests (Jest) |
 | `sdd-spec-creator/` | Al pegar una historia de ADO y pedir spec, tasks o arquitectura | Convierte historias en paquetes SDD: `spec.md` / `plan.md` / `tasks.md` con criterios EARS |
 | `spec-runner/` | "implement task X.X", "run the tasks", "implement spec X.X", o al señalar un `tasks.md` | Implementa tareas del spec en orden, marca `[x]` al completar, deja `[ ]` si hay error, corre build + tests al final |
-
-## 🤖 Development Mode
-
-**MCP for Dev Acceleration:**
-- Claude accesses: project structure, API schema, DB schema
-- Auto test execution + validation
-- Code generation following guidelines + ADO story refs
-- Deploy automation Render
-
-See [MCP_INTEGRATION.md](MCP_INTEGRATION.md).
 
 ---
 

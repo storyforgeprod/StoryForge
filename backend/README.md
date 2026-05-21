@@ -203,4 +203,4 @@ Schema is in `prisma/schema.prisma` (currently empty, to be populated).
 
 ---
 
-**For more info:** See [IMPLEMENTATION_PLAN.md](../IMPLEMENTATION_PLAN.md) and [DEVELOPMENT_GUIDELINES.md](../DEVELOPMENT_GUIDELINES.md)
+**For more info:** See [IMPLEMENTATION_PLAN.md](../IMPLEMENTATION_PLAN.md)

@@ -471,5 +471,4 @@ Fix: Esperar instrucción PM (manual import)
 
 - [IMPLEMENTATION_PLAN.md](IMPLEMENTATION_PLAN.md) — Source of truth para timeline
 - [HANDOFF.md](HANDOFF.md) — Info para siguiente agente/dev
-- [INDEX.md](INDEX.md) — Guía qué leer según rol
 

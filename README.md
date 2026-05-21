@@ -27,8 +27,7 @@
 1. **First time setup?** → Read [QUICK_START.md](QUICK_START.md) (10 min)
 2. **What are we building?** → Read [etapa4-brief-final.md](analisis/etapa4-brief-final.md) (5 min)
 3. **How does it work?** → Read [STACK_INIT.md](STACK_INIT.md) (10 min)
-4. **How do I code here?** → Read [DEVELOPMENT_GUIDELINES.md](DEVELOPMENT_GUIDELINES.md) (15 min)
-5. **What's happening now?** → Read [NEXT_STEPS.md](NEXT_STEPS.md) (Current tasks)
+4. **What's happening now?** → Read [NEXT_STEPS.md](NEXT_STEPS.md) (Current tasks)
 
 ### 🚀 For Continuing Development
 
@@ -57,12 +56,7 @@
 
 ### 🤖 For Claude / AI Assistance
 
-1. **How can AI help?** → [MCP_INTEGRATION.md](MCP_INTEGRATION.md)
-   - Tools disponibles
-   - Flujos de trabajo
-   - Ejemplos de uso
-
-2. **What can I skip / change?** → [OPTIONAL_COMPONENTS.md](OPTIONAL_COMPONENTS.md)
+1. **What can I skip / change?** → [OPTIONAL_COMPONENTS.md](OPTIONAL_COMPONENTS.md)
    - Componentes reversibles (TTS, video render)
    - Arquitectura que lo permite
    - Decisiones post-MVP
@@ -147,7 +141,7 @@ git push -u origin feature/1-1-script-analysis
 ```
 
 ### 3. Développer localmente
-Seguir [DEVELOPMENT_GUIDELINES.md](DEVELOPMENT_GUIDELINES.md):
+Convenciones del proyecto:
 - ✅ TypeScript types
 - ✅ Validación de input
 - ✅ Tests unitarios
@@ -217,24 +211,13 @@ Deploy automático a Render en push a `develop`
 | Documento | Propósito | Audiencia |
 |-----------|----------|-----------|
 | **[NEXT_STEPS.md](NEXT_STEPS.md)** | **👈 START HERE** | Developers |
-| [SESSION_SUMMARY_2026_05_16.md](SESSION_SUMMARY_2026_05_16.md) | Today's work summary | Developers |
 | [STACK_INIT.md](STACK_INIT.md) | Tech stack reference | Developers |
-| [STACK_COMPLIANCE.md](STACK_COMPLIANCE.md) | Stack verification | Developers |
 | [QUICK_START.md](QUICK_START.md) | Setup local en 10 min | Developers |
 | [IMPLEMENTATION_PLAN.md](IMPLEMENTATION_PLAN.md) | Hoja de ruta semanal | PMs + Developers |
-| [STACK_INIT.md](STACK_INIT.md) | Tech stack detail | Developers |
-| [DEVELOPMENT_GUIDELINES.md](DEVELOPMENT_GUIDELINES.md) | Código + patrones | Developers |
 | [AZURE_DEVOPS_CONFIG.md](AZURE_DEVOPS_CONFIG.md) | Backlog + ADO | PMs |
-| [MCP_INTEGRATION.md](MCP_INTEGRATION.md) | AI-assisted dev | Developers |
 | [OPTIONAL_COMPONENTS.md](OPTIONAL_COMPONENTS.md) | Decisiones reversibles | Leads |
 | [PROGRESS.md](PROGRESS.md) | Tracking semanal | Everyone |
 | [HANDOFF.md](HANDOFF.md) | Para siguiente dev | Onboarding |
-| [SEMANA2_TASKS.md](SEMANA2_TASKS.md) | Detalles Semana 2 | Developers |
-| [TASK_2_1_COMPLETE.md](TASK_2_1_COMPLETE.md) | Task 2.1 resumen | Developers |
-| [CODE_CHANGES_2_1.md](CODE_CHANGES_2_1.md) | Código detallado | Developers |
-| [TASK_2_2_RUN_NOW.md](TASK_2_2_RUN_NOW.md) | **👉 Test NOW (40 min)** | Developers |
-| [TASK_2_2_QUICK_START.md](TASK_2_2_QUICK_START.md) | Quick setup guide | Developers |
-| [SEMANA2_TEST.md](SEMANA2_TEST.md) | Testing detallado | Developers |
 | [etapa4-brief-final.md](analisis/etapa4-brief-final.md) | Product Brief | Everyone |
 | [backlog-azure-devops.md](analisis/backlog-azure-devops.md) | Stories detalladas | PMs |
 
@@ -284,15 +267,14 @@ Ver [QUICK_START.md](QUICK_START.md#-deploy-local-a-staging-render)
 ### Stuck?
 1. Revisar [QUICK_START.md Troubleshooting](QUICK_START.md#-troubleshooting)
 2. Leer error logs (backend: `npm run start:dev` output)
-3. Revisar [DEVELOPMENT_GUIDELINES.md](DEVELOPMENT_GUIDELINES.md) para patrón similar
+3. Ver [TROUBLESHOOTING.md](TROUBLESHOOTING.md) para errores comunes
 
 ### Bloqueado?
 - Registrar en ADO: campo "Blockers"
-- Notificar al equipo async
 - Cambiar de tarea si es urgente
 
 ### Decisión técnica no clara?
-- Revisar [DEVELOPMENT_GUIDELINES.md](DEVELOPMENT_GUIDELINES.md) para precedentes
+- Revisar [OPTIONAL_COMPONENTS.md](OPTIONAL_COMPONENTS.md) para precedentes
 - Si no existe precedente, crear issue de diseño
 
 ---
@@ -325,7 +307,6 @@ Once alcanzamos esto, validamos si pivotar, escalar o cerrar.
 
 This README is the single source of truth. Update when:
 - Cambios en arquitectura → Update STACK_INIT.md
-- Cambios en workflow → Update DEVELOPMENT_GUIDELINES.md
 - Cambios en timeline → Update IMPLEMENTATION_PLAN.md
 
 **Last Updated:** 15 de mayo de 2026  
