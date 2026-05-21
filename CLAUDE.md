@@ -93,7 +93,6 @@ See [MCP_INTEGRATION.md](MCP_INTEGRATION.md).
 - [instructions/TASK_3_5_COMPLETE.md](instructions/TASK_3_5_COMPLETE.md) — Story input
 - [instructions/TASK_3_2_3_COMPLETE.md](instructions/TASK_3_2_3_COMPLETE.md) — Auth setup
 - [instructions/HANDOFF_2_8.md](instructions/HANDOFF_2_8.md) — Detailed handoff
-- [API_ENDPOINTS.md](API_ENDPOINTS.md) — API reference
 - [PROGRESS.md](PROGRESS.md) — Weekly status
 - [HANDOFF.md](HANDOFF.md) — Setup + context
 - [IMPLEMENTATION_PLAN.md](IMPLEMENTATION_PLAN.md) — 6-week roadmap

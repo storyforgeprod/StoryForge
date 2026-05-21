@@ -449,7 +449,7 @@ Al completar tareas en ADO, actualizar el status aquí también para mantener si
 - **Status:** ✅ COMPLETED
 - **Descripción:** Paquete de documentación para handoff y deploy del backend MVP
 - **Archivos creados en root:**
-  - `API_ENDPOINTS.md` — Referencia de endpoints + cURL
+
   - `ARCHITECTURE.md` — Patrón async, módulos, integraciones
   - `DEPLOYMENT.md` — Setup local + Render
   - `TROUBLESHOOTING.md` — Issues comunes (incl. fix node_modules Windows)

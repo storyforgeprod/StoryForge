@@ -45,4 +45,4 @@ cd frontend; npm run dev
 ## Docs
 
 - [NEXT_STEPS.md](NEXT_STEPS.md) — Task 3.5
-- [API_ENDPOINTS.md](API_ENDPOINTS.md)
+

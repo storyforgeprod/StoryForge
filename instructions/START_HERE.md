@@ -30,7 +30,7 @@
 
 | Doc | When |
 |-----|------|
-| [API_ENDPOINTS.md](../API_ENDPOINTS.md) | Calling or testing API |
+| Swagger UI (`http://localhost:3000/api`) | Calling or testing API |
 | [ARCHITECTURE.md](../ARCHITECTURE.md) | Understanding async flow |
 | [TROUBLESHOOTING.md](../TROUBLESHOOTING.md) | Build or runtime errors |
 | [instructions/HANDOFF_2_8.md](HANDOFF_2_8.md) | Full backend handoff |

@@ -20,7 +20,7 @@
 
 ### � **FOR IMMEDIATE ACTION** ← Start here!
 
-👉 **[NEXT_STEPS.md](NEXT_STEPS.md)** — Task 3.1: Frontend setup · [API_ENDPOINTS.md](API_ENDPOINTS.md) · [instructions/HANDOFF_2_8.md](instructions/HANDOFF_2_8.md)
+👉 **[NEXT_STEPS.md](NEXT_STEPS.md)** — Task 3.1: Frontend setup · [instructions/HANDOFF_2_8.md](instructions/HANDOFF_2_8.md)
 
 ### �👤 For New Developers
 
@@ -35,7 +35,7 @@
 1. **Current status?** → [PROGRESS.md](PROGRESS.md) — What's done, what's next
 2. **How to continue?** → [HANDOFF.md](HANDOFF.md) — Setup guide + context
 3. **Backend handoff?** → [instructions/HANDOFF_2_8.md](instructions/HANDOFF_2_8.md)
-4. **API docs?** → [API_ENDPOINTS.md](API_ENDPOINTS.md)
+4. **API docs?** → Swagger UI at `http://localhost:3000/api`
 5. **Task history?** → [instructions/TASK_2_8_COMPLETE.md](instructions/TASK_2_8_COMPLETE.md)
 
 ###  For Project Managers / Technical Leads
