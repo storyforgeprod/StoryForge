@@ -11,6 +11,7 @@ interface GenerationJobData {
   type: 'script' | 'images' | 'audio' | 'video';
   story?: string;
   scriptId?: string;
+  style?: string;
   imageDescription?: string;
   voiceId?: string;
   imageJobId?: string;
@@ -57,6 +58,7 @@ export class GenerateQueueProcessor {
         result = await this.generateService.generateImageContent(userId, {
           jobId,
           scriptId: job.data.scriptId || '',
+          style: job.data.style,
         });
       } else if (type === 'audio') {
         result = await this.generateService.generateAudioContent(userId, {

@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowLeft, ChevronLeft, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -7,9 +7,11 @@ import { UserMenu } from '@/components/auth/UserMenu';
 import { StoryInput } from '@/components/Input/StoryInput';
 import { StyleSelector } from '@/components/StyleSelector/StyleSelector';
 import { VoiceSelector } from '@/components/VoiceSelector/VoiceSelector';
+import { ImageGrid } from '@/components/ImageGrid/ImageGrid';
 import { validateStory } from '@/utils/validation';
 import { StoryStyle } from '@/types/generate';
 import { useGenerateScript } from '@/hooks/useGenerateScript';
+import { useGenerateImages } from '@/hooks/useGenerateImages';
 import { useAuth } from '@/contexts/AuthContext';
 
 type WizardStep = 'story' | 'style' | 'voice';
@@ -23,9 +25,17 @@ export function Generate() {
     const [voiceId, setVoiceId] = useState<string | null>(null);
     const [step, setStep] = useState<WizardStep>('story');
     const [submitAttempted, setSubmitAttempted] = useState(false);
+    const [scriptJobId, setScriptJobId] = useState<string | null>(null);
 
     const validation = useMemo(() => validateStory(story), [story]);
     const { state: genState, generate, reset: resetGeneration } = useGenerateScript(token);
+    const { state: imagesState, generate: generateImages, reset: resetImages } = useGenerateImages(token);
+
+    useEffect(() => {
+        if (genState.phase === 'polling') {
+            setScriptJobId(genState.jobId);
+        }
+    }, [genState]);
 
     const handleContinue = () => {
         if (step === 'story') {
@@ -51,13 +61,26 @@ export function Generate() {
         generate(story, style);
     };
 
+    const handleGenerateImages = () => {
+        if (!scriptJobId || !style) return;
+        generateImages(scriptJobId, style);
+    };
+
+    const handleImagesRetry = () => {
+        resetImages();
+    };
+
     const handleRetry = () => {
         resetGeneration();
+        resetImages();
+        setScriptJobId(null);
         setStep('story');
     };
 
-    const isGenerating =
+    const isGeneratingScript =
         genState.phase === 'submitting' || genState.phase === 'polling';
+    const isGeneratingImages =
+        imagesState.phase === 'submitting' || imagesState.phase === 'polling';
 
     return (
         <div className="min-h-screen">
@@ -76,7 +99,8 @@ export function Generate() {
             </header>
 
             <main className="mx-auto max-w-3xl px-4 py-8">
-                {isGenerating && (
+                {/* Script generation — loading */}
+                {isGeneratingScript && (
                     <Card>
                         <CardContent className="flex flex-col items-center gap-4 py-16">
                             <Loader2 className="h-10 w-10 animate-spin text-primary" />
@@ -87,28 +111,8 @@ export function Generate() {
                     </Card>
                 )}
 
-                {genState.phase === 'completed' && (
-                    <Card>
-                        <CardHeader>
-                            <CardTitle>Guión generado</CardTitle>
-                            <CardDescription>
-                                Tu guión está listo. Revisalo antes de continuar.
-                            </CardDescription>
-                        </CardHeader>
-                        <CardContent className="space-y-4">
-                            <pre className="max-h-96 overflow-y-auto rounded-lg bg-muted p-4 text-sm whitespace-pre-wrap">
-                                {genState.script}
-                            </pre>
-                            <div className="flex justify-end">
-                                <Button type="button" disabled>
-                                    Continuar
-                                </Button>
-                            </div>
-                        </CardContent>
-                    </Card>
-                )}
-
-                {genState.phase === 'error' && (
+                {/* Script generation — error */}
+                {genState.phase === 'error' && imagesState.phase === 'idle' && (
                     <Card>
                         <CardContent className="flex flex-col items-center gap-4 py-16">
                             <p className="text-sm text-destructive">{genState.message}</p>
@@ -119,6 +123,77 @@ export function Generate() {
                     </Card>
                 )}
 
+                {/* Script done — prompt to start image generation */}
+                {genState.phase === 'completed' && imagesState.phase === 'idle' && (
+                    <Card>
+                        <CardHeader>
+                            <CardTitle>Guión generado</CardTitle>
+                            <CardDescription>
+                                Revisá el guión y generá las imágenes para tu historia.
+                            </CardDescription>
+                        </CardHeader>
+                        <CardContent className="space-y-4">
+                            <pre className="max-h-64 overflow-y-auto rounded-lg bg-muted p-4 text-sm whitespace-pre-wrap">
+                                {genState.script}
+                            </pre>
+                            <div className="flex justify-end">
+                                <Button
+                                    type="button"
+                                    disabled={!scriptJobId || !style}
+                                    onClick={handleGenerateImages}
+                                >
+                                    Generar imágenes
+                                </Button>
+                            </div>
+                        </CardContent>
+                    </Card>
+                )}
+
+                {/* Image generation — loading */}
+                {isGeneratingImages && (
+                    <Card>
+                        <CardContent className="flex flex-col items-center gap-4 py-16">
+                            <Loader2 className="h-10 w-10 animate-spin text-primary" />
+                            <p className="text-sm text-muted-foreground">
+                                Generando imágenes…
+                            </p>
+                        </CardContent>
+                    </Card>
+                )}
+
+                {/* Image generation — done */}
+                {imagesState.phase === 'completed' && (
+                    <Card>
+                        <CardHeader>
+                            <CardTitle>Imágenes generadas</CardTitle>
+                            <CardDescription>
+                                Revisá las imágenes antes de continuar al audio.
+                            </CardDescription>
+                        </CardHeader>
+                        <CardContent className="space-y-4">
+                            <ImageGrid imageUrls={imagesState.imageUrls} />
+                            <div className="flex justify-end">
+                                <Button type="button" disabled>
+                                    Continuar al audio
+                                </Button>
+                            </div>
+                        </CardContent>
+                    </Card>
+                )}
+
+                {/* Image generation — error */}
+                {imagesState.phase === 'error' && (
+                    <Card>
+                        <CardContent className="flex flex-col items-center gap-4 py-16">
+                            <p className="text-sm text-destructive">{imagesState.message}</p>
+                            <Button type="button" variant="outline" onClick={handleImagesRetry}>
+                                Reintentar
+                            </Button>
+                        </CardContent>
+                    </Card>
+                )}
+
+                {/* Wizard — story / style / voice steps */}
                 {genState.phase === 'idle' && (
                     <Card>
                         <CardHeader>

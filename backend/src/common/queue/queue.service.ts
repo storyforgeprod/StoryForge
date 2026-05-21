@@ -9,6 +9,7 @@ export interface GenerationJobData {
   type: 'script' | 'images' | 'audio' | 'video';
   story?: string; // For script generation
   scriptId?: string; // For images/audio/video (references script job)
+  style?: string; // Visual style for image generation
   imageDescription?: string; // Optional custom description for images
   voiceId?: string; // Optional ElevenLabs voice ID for audio
   imageJobId?: string; // For video (references image job)

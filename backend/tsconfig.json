@@ -23,8 +23,9 @@
     "allowSyntheticDefaultImports": true,
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
-    "moduleResolution": "node"
+    "moduleResolution": "node",
+    "types": ["jest", "node"]
   },
   "include": ["src/**/*"],
-  "exclude": ["node_modules", "dist", "test", "**/*spec.ts"]
+  "exclude": ["node_modules", "dist", "test"]
 }

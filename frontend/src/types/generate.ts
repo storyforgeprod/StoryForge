@@ -13,3 +13,30 @@ export type VoiceOption = {
     description: string;
     previewUrl: string;
 };
+
+export type ImageGenerationResult = {
+    imageUrls: string[];
+    prompt: string;
+    generatedAt: string;
+};
+
+export type AudioGenerationResult = {
+    audioUrl: string;
+    audioLength: number;
+    textUsed: string;
+    generatedAt: string;
+};
+
+export type GenerateImagesState =
+    | { phase: 'idle' }
+    | { phase: 'submitting' }
+    | { phase: 'polling'; jobId: string }
+    | { phase: 'completed'; imageUrls: string[] }
+    | { phase: 'error'; message: string };
+
+export type GenerateAudioState =
+    | { phase: 'idle' }
+    | { phase: 'submitting' }
+    | { phase: 'polling'; jobId: string }
+    | { phase: 'completed'; audioUrl: string; audioLength: number }
+    | { phase: 'error'; message: string };

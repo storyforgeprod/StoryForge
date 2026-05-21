@@ -220,6 +220,7 @@ Provide only the script, no additional commentary.`;
         projectId: scriptJob.projectId,
         type: 'images',
         scriptId: dto.scriptId,
+        style: dto.style,
         imageDescription: dto.imageDescription,
         _startTime: Date.now(),
       });
@@ -250,7 +251,7 @@ Provide only the script, no additional commentary.`;
    */
   async generateImageContent(
     userId: string,
-    data: { jobId: string; scriptId: string },
+    data: { jobId: string; scriptId: string; style?: string },
   ): Promise<ImageGenerationResult> {
     // 1. Fetch original script Job to get the generated script
     const scriptJob = await this.prisma.job.findUnique({
@@ -271,7 +272,7 @@ Provide only the script, no additional commentary.`;
     }
 
     // 3. Generate image prompt from script using Claude
-    const imagePrompt = await this._buildImagePrompt(scriptContent);
+    const imagePrompt = await this._buildImagePrompt(scriptContent, data.style);
 
     // 4. Call Replicate to generate image
     const imageUrls = await this.replicateService.generateImage(imagePrompt, {
@@ -285,7 +286,7 @@ Provide only the script, no additional commentary.`;
     };
   }
 
-  private async _buildImagePrompt(scriptContent: string): Promise<string> {
+  private async _buildImagePrompt(scriptContent: string, style?: string): Promise<string> {
     // Use Claude to create a detailed image prompt from script
     const message = await this.client.messages.create({
       model: 'claude-3-5-sonnet-20241022',
@@ -302,7 +303,8 @@ Respond with ONLY the visual description, no explanations.`,
       ],
     });
 
-    return this._extractTextFromResponse(message);
+    const description = this._extractTextFromResponse(message);
+    return style ? `${style} style, ${description}` : description;
   }
 
   /**
