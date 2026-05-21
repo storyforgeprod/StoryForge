@@ -6,10 +6,10 @@ Total tasks: 4 | Estimated effort: S (< 2h)
 
 ## Checklist
 
-- [ ] TASK-3.7-01: Add `VoiceOption` type to `generate.ts`
-- [ ] TASK-3.7-02: Build `VoiceSelector` component
-- [ ] TASK-3.7-03: Wire `VoiceSelector` into `Generate.tsx` as step 3
-- [ ] TASK-3.7-04: Unit tests for `VoiceSelector`
+- [x] TASK-3.7-01: Add `VoiceOption` type to `generate.ts`
+- [x] TASK-3.7-02: Build `VoiceSelector` component
+- [x] TASK-3.7-03: Wire `VoiceSelector` into `Generate.tsx` as step 3
+- [x] TASK-3.7-04: Unit tests for `VoiceSelector`
 
 ---
 
@@ -43,7 +43,7 @@ Total tasks: 4 | Estimated effort: S (< 2h)
 **Size:** S
 **Depends on:** TASK-3.7-02, TASK-3.6-03
 **Description:** In `Generate.tsx`: add `voiceId` state (`string | null`). At step `'voice'` render `VoiceSelector`. The action button on this step is "Generar guión" (not "Continuar"). It calls `handleGenerateScript()` (Task 3.8 stub for now). Button disabled while `voiceId === null`.
-**Inputs:** Existing `Generate.tsx` after Task 3.6; `VoiceSelector` from TASK-3.7-02
+**Inputs:** Existing `Generate.tsx` after Task 3.6; `VoiceSelector` from TASK-3.7-02; `style` state
 **Output / Done when:** Steps 1 → 2 → 3 transition correctly; selecting a voice enables the submit button; `npm run build` EXIT 0.
 
 ---

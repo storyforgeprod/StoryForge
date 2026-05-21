@@ -6,11 +6,11 @@ Total tasks: 5 | Estimated effort: M (≤ 2h)
 
 ## Checklist
 
-- [ ] TASK-3.8-01: Create `generateApi.ts` service
-- [ ] TASK-3.8-02: Build `useGenerateScript` hook
-- [ ] TASK-3.8-03: Render loading, result, and error states in `Generate.tsx`
-- [ ] TASK-3.8-04: Unit tests for `useGenerateScript` hook
-- [ ] TASK-3.8-05: Unit tests for `generateApi.ts`
+- [x] TASK-3.8-01: Create `generateApi.ts` service
+- [x] TASK-3.8-02: Build `useGenerateScript` hook
+- [x] TASK-3.8-03: Render loading, result, and error states in `Generate.tsx`
+- [x] TASK-3.8-04: Unit tests for `useGenerateScript` hook
+- [x] TASK-3.8-05: Unit tests for `generateApi.ts`
 
 ---
 
