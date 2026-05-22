@@ -27,7 +27,7 @@ function mapApiError(err: unknown): string {
     return NETWORK_ERROR;
 }
 
-export function useGenerateAudio(token: string): UseGenerateAudioReturn {
+export function useGenerateAudio(): UseGenerateAudioReturn {
     const [state, setState] = useState<GenerateAudioState>({ phase: 'idle' });
     const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
     const attemptsRef = useRef(0);
@@ -54,7 +54,7 @@ export function useGenerateAudio(token: string): UseGenerateAudioReturn {
                     return;
                 }
                 try {
-                    const job = await getJobStatus(jobId, token);
+                    const job = await getJobStatus(jobId);
                     if (job.status === 'completed') {
                         clearPolling();
                         const result = job.result as AudioGenerationResult | undefined;
@@ -79,7 +79,7 @@ export function useGenerateAudio(token: string): UseGenerateAudioReturn {
                 }
             }, POLL_INTERVAL_MS);
         },
-        [token, clearPolling],
+        [clearPolling],
     );
 
     const generate = useCallback(
@@ -88,7 +88,7 @@ export function useGenerateAudio(token: string): UseGenerateAudioReturn {
             inFlightRef.current = true;
             setState({ phase: 'submitting' });
             try {
-                const { jobId } = await postGenerateAudio({ scriptId, voiceId }, token);
+                const { jobId } = await postGenerateAudio({ scriptId, voiceId });
                 setState({ phase: 'polling', jobId });
                 startPolling(jobId);
             } catch (err) {
@@ -96,7 +96,7 @@ export function useGenerateAudio(token: string): UseGenerateAudioReturn {
                 setState({ phase: 'error', message: mapApiError(err) });
             }
         },
-        [token, startPolling],
+        [startPolling],
     );
 
     const reset = useCallback(() => {

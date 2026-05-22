@@ -5,8 +5,6 @@ import * as generateApi from '@/services/generateApi';
 
 vi.mock('@/services/generateApi');
 
-const TOKEN = 'test-token';
-
 const mockPost = vi.mocked(generateApi.postGenerateAudio);
 const mockPoll = vi.mocked(generateApi.getJobStatus);
 
@@ -21,7 +19,7 @@ afterEach(() => {
 
 describe('useGenerateAudio', () => {
     it('starts in idle phase', () => {
-        const { result } = renderHook(() => useGenerateAudio(TOKEN));
+        const { result } = renderHook(() => useGenerateAudio());
         expect(result.current.state.phase).toBe('idle');
     });
 
@@ -42,7 +40,7 @@ describe('useGenerateAudio', () => {
             },
         });
 
-        const { result } = renderHook(() => useGenerateAudio(TOKEN));
+        const { result } = renderHook(() => useGenerateAudio());
 
         act(() => {
             result.current.generate('script-1');
@@ -71,7 +69,7 @@ describe('useGenerateAudio', () => {
         mockPost.mockResolvedValue({ jobId: 'job-2', status: 'pending', createdAt: '2026-01-01T00:00:00Z' });
         mockPoll.mockResolvedValue({ jobId: 'job-2', status: 'processing' });
 
-        const { result } = renderHook(() => useGenerateAudio(TOKEN));
+        const { result } = renderHook(() => useGenerateAudio());
 
         act(() => { result.current.generate('script-2', 'EXAVITQu4vr4xnSDxMaL'); });
 
@@ -79,7 +77,6 @@ describe('useGenerateAudio', () => {
 
         expect(mockPost).toHaveBeenCalledWith(
             { scriptId: 'script-2', voiceId: 'EXAVITQu4vr4xnSDxMaL' },
-            TOKEN,
         );
     });
 
@@ -87,7 +84,7 @@ describe('useGenerateAudio', () => {
         mockPost.mockResolvedValue({ jobId: 'job-3', status: 'pending', createdAt: '2026-01-01T00:00:00Z' });
         mockPoll.mockResolvedValue({ jobId: 'job-3', status: 'failed', error: 'ElevenLabs unavailable' });
 
-        const { result } = renderHook(() => useGenerateAudio(TOKEN));
+        const { result } = renderHook(() => useGenerateAudio());
 
         await act(async () => {
             result.current.generate('script-3');
@@ -108,7 +105,7 @@ describe('useGenerateAudio', () => {
         mockPost.mockResolvedValue({ jobId: 'job-4', status: 'pending', createdAt: '2026-01-01T00:00:00Z' });
         mockPoll.mockRejectedValue({ status: 500, message: 'Server error' });
 
-        const { result } = renderHook(() => useGenerateAudio(TOKEN));
+        const { result } = renderHook(() => useGenerateAudio());
 
         await act(async () => {
             result.current.generate('script-4');
@@ -125,7 +122,7 @@ describe('useGenerateAudio', () => {
     it('401 error → session expired message', async () => {
         mockPost.mockRejectedValue({ status: 401, message: 'Unauthorized' });
 
-        const { result } = renderHook(() => useGenerateAudio(TOKEN));
+        const { result } = renderHook(() => useGenerateAudio());
 
         await act(async () => {
             result.current.generate('script-5');
@@ -141,7 +138,7 @@ describe('useGenerateAudio', () => {
     it('429 error → rate limit message', async () => {
         mockPost.mockRejectedValue({ status: 429, message: 'Rate limit' });
 
-        const { result } = renderHook(() => useGenerateAudio(TOKEN));
+        const { result } = renderHook(() => useGenerateAudio());
 
         await act(async () => {
             result.current.generate('script-6');
@@ -158,7 +155,7 @@ describe('useGenerateAudio', () => {
         mockPost.mockResolvedValue({ jobId: 'job-7', status: 'pending', createdAt: '2026-01-01T00:00:00Z' });
         mockPoll.mockResolvedValue({ jobId: 'job-7', status: 'processing' });
 
-        const { result } = renderHook(() => useGenerateAudio(TOKEN));
+        const { result } = renderHook(() => useGenerateAudio());
 
         await act(async () => {
             result.current.generate('script-7');
@@ -182,7 +179,7 @@ describe('useGenerateAudio', () => {
     it('duplicate generate() while in-flight is ignored', async () => {
         mockPost.mockResolvedValue({ jobId: 'job-8', status: 'pending', createdAt: '2026-01-01T00:00:00Z' });
 
-        const { result } = renderHook(() => useGenerateAudio(TOKEN));
+        const { result } = renderHook(() => useGenerateAudio());
 
         act(() => { result.current.generate('script-8'); });
         expect(result.current.state.phase).toBe('submitting');
@@ -197,7 +194,7 @@ describe('useGenerateAudio', () => {
     it('reset() returns to idle state', async () => {
         mockPost.mockRejectedValue({ status: 429, message: 'Rate limit' });
 
-        const { result } = renderHook(() => useGenerateAudio(TOKEN));
+        const { result } = renderHook(() => useGenerateAudio());
 
         await act(async () => {
             result.current.generate('script-10');
@@ -219,7 +216,7 @@ describe('useGenerateAudio', () => {
             result: { audioUrl: 'https://audio.example.com/done.mp3', audioLength: 30, textUsed: 'done', generatedAt: '2026-01-01T00:00:00Z' },
         });
 
-        const { result } = renderHook(() => useGenerateAudio(TOKEN));
+        const { result } = renderHook(() => useGenerateAudio());
 
         await act(async () => {
             result.current.generate('script-11');

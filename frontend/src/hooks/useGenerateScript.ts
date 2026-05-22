@@ -34,7 +34,7 @@ function mapApiError(err: unknown): string {
     return NETWORK_ERROR;
 }
 
-export function useGenerateScript(token: string): UseGenerateScriptReturn {
+export function useGenerateScript(): UseGenerateScriptReturn {
     const [state, setState] = useState<GenerateScriptState>({ phase: 'idle' });
     const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
     const attemptsRef = useRef(0);
@@ -59,7 +59,7 @@ export function useGenerateScript(token: string): UseGenerateScriptReturn {
                     return;
                 }
                 try {
-                    const job = await getJobStatus(jobId, token);
+                    const job = await getJobStatus(jobId);
                     if (job.status === 'completed') {
                         clearPolling();
                         setState({ phase: 'completed', script: job.script ?? '' });
@@ -76,21 +76,21 @@ export function useGenerateScript(token: string): UseGenerateScriptReturn {
                 }
             }, POLL_INTERVAL_MS);
         },
-        [token, clearPolling],
+        [clearPolling],
     );
 
     const generate = useCallback(
         async (story: string, style: StoryStyle) => {
             setState({ phase: 'submitting' });
             try {
-                const { jobId } = await postGenerateScript({ story, style }, token);
+                const { jobId } = await postGenerateScript({ story, style });
                 setState({ phase: 'polling', jobId, attempts: 0 });
                 startPolling(jobId);
             } catch (err) {
                 setState({ phase: 'error', message: mapApiError(err) });
             }
         },
-        [token, startPolling],
+        [startPolling],
     );
 
     const reset = useCallback(() => {

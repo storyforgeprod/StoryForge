@@ -1,18 +1,16 @@
-import { Controller, Post, Body, HttpCode, HttpStatus, UseGuards, Get, Param } from '@nestjs/common';
+import { Controller, Post, Body, HttpCode, HttpStatus, Get, Param } from '@nestjs/common';
 import { Throttle } from '@nestjs/throttler';
-import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
 import { GenerateService } from './generate.service';
 import { GenerateScriptDto, GenerateScriptResponseDto } from './dto/generate-script.dto';
 import { GenerateImagesDto, GenerateImagesResponseDto } from './dto/generate-images.dto';
 import { GenerateAudioDto, GenerateAudioResponseDto } from './dto/generate-audio.dto';
 import { GenerateVideoDto, GenerateVideoResponseDto } from './dto/generate-video.dto';
-import { JwtAuthGuard } from '../common/auth/jwt.guard';
-import { CurrentUser } from '../common/auth/current-user.decorator';
+
+const ANONYMOUS_USER_ID = 'anonymous-user';
 
 @ApiTags('Generate')
 @Controller('generate')
-@UseGuards(JwtAuthGuard)
-@ApiBearerAuth('JWT')
 export class GenerateController {
   constructor(private readonly generateService: GenerateService) {}
 
@@ -33,9 +31,8 @@ export class GenerateController {
   })
   async generateScript(
     @Body() dto: GenerateScriptDto,
-    @CurrentUser() user: any,
   ): Promise<GenerateScriptResponseDto> {
-    return this.generateService.generateScript(user.userId, dto);
+    return this.generateService.generateScript(ANONYMOUS_USER_ID, dto);
   }
 
   @Get('job/:jobId')
@@ -49,9 +46,8 @@ export class GenerateController {
   })
   async getJobStatus(
     @Param('jobId') jobId: string,
-    @CurrentUser() user: any,
   ) {
-    return this.generateService.getJobStatus(jobId, user.userId);
+    return this.generateService.getJobStatus(jobId, ANONYMOUS_USER_ID);
   }
 
   @Post('images')
@@ -67,9 +63,8 @@ export class GenerateController {
   })
   async generateImages(
     @Body() dto: GenerateImagesDto,
-    @CurrentUser() user: any,
   ): Promise<GenerateImagesResponseDto> {
-    return this.generateService.generateImages(user.userId, dto);
+    return this.generateService.generateImages(ANONYMOUS_USER_ID, dto);
   }
 
   @Post('audio')
@@ -85,9 +80,8 @@ export class GenerateController {
   })
   async generateAudio(
     @Body() dto: GenerateAudioDto,
-    @CurrentUser() user: any,
   ): Promise<GenerateAudioResponseDto> {
-    return this.generateService.generateAudio(user.userId, dto);
+    return this.generateService.generateAudio(ANONYMOUS_USER_ID, dto);
   }
 
   @Post('video')
@@ -105,8 +99,7 @@ export class GenerateController {
   @ApiResponse({ status: 403, description: 'Unauthorized' })
   async generateVideo(
     @Body() dto: GenerateVideoDto,
-    @CurrentUser() user: any,
   ): Promise<GenerateVideoResponseDto> {
-    return this.generateService.generateVideo(user.userId, dto);
+    return this.generateService.generateVideo(ANONYMOUS_USER_ID, dto);
   }
 }

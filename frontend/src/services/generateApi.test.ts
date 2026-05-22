@@ -1,8 +1,6 @@
 import { describe, it, expect, vi, afterEach } from 'vitest';
 import { postGenerateScript, getJobStatus } from './generateApi';
 
-const MOCK_TOKEN = 'test-jwt-token';
-
 afterEach(() => {
     vi.unstubAllGlobals();
 });
@@ -24,7 +22,7 @@ describe('postGenerateScript', () => {
         });
         vi.stubGlobal('fetch', mockFetch);
 
-        const result = await postGenerateScript({ story: 'my story', style: 'anime' }, MOCK_TOKEN);
+        const result = await postGenerateScript({ story: 'my story', style: 'anime' });
 
         expect(mockFetch).toHaveBeenCalledWith(
             expect.stringContaining('/generate/script'),
@@ -32,7 +30,6 @@ describe('postGenerateScript', () => {
                 method: 'POST',
                 headers: expect.objectContaining({
                     'Content-Type': 'application/json',
-                    Authorization: `Bearer ${MOCK_TOKEN}`,
                 }),
                 body: JSON.stringify({ story: 'my story', style: 'anime' }),
             }),
@@ -48,7 +45,7 @@ describe('postGenerateScript', () => {
         );
 
         await expect(
-            postGenerateScript({ story: 'x', style: 'manga' }, MOCK_TOKEN),
+            postGenerateScript({ story: 'x', style: 'manga' }),
         ).rejects.toMatchObject({ status: 400 });
     });
 
@@ -56,7 +53,7 @@ describe('postGenerateScript', () => {
         vi.stubGlobal('fetch', makeFetchMock(false, 401, { message: 'Unauthorized' }));
 
         await expect(
-            postGenerateScript({ story: 'x', style: 'manga' }, MOCK_TOKEN),
+            postGenerateScript({ story: 'x', style: 'manga' }),
         ).rejects.toMatchObject({ status: 401 });
     });
 
@@ -67,7 +64,7 @@ describe('postGenerateScript', () => {
         );
 
         await expect(
-            postGenerateScript({ story: 'x', style: 'manga' }, MOCK_TOKEN),
+            postGenerateScript({ story: 'x', style: 'manga' }),
         ).rejects.toMatchObject({ status: 429 });
     });
 
@@ -78,13 +75,13 @@ describe('postGenerateScript', () => {
         );
 
         await expect(
-            postGenerateScript({ story: 'x', style: 'manga' }, MOCK_TOKEN),
+            postGenerateScript({ story: 'x', style: 'manga' }),
         ).rejects.toMatchObject({ status: 500 });
     });
 });
 
 describe('getJobStatus', () => {
-    it('sends GET with correct Authorization header', async () => {
+    it('sends GET to correct URL and returns parsed response', async () => {
         const mockFetch = makeFetchMock(true, 200, {
             jobId: 'job-1',
             status: 'completed',
@@ -92,15 +89,10 @@ describe('getJobStatus', () => {
         });
         vi.stubGlobal('fetch', mockFetch);
 
-        const result = await getJobStatus('job-1', MOCK_TOKEN);
+        const result = await getJobStatus('job-1');
 
         expect(mockFetch).toHaveBeenCalledWith(
             expect.stringContaining('/generate/job/job-1'),
-            expect.objectContaining({
-                headers: expect.objectContaining({
-                    Authorization: `Bearer ${MOCK_TOKEN}`,
-                }),
-            }),
         );
         expect(result.status).toBe('completed');
         expect(result.script).toBe('Generated script');
@@ -112,7 +104,7 @@ describe('getJobStatus', () => {
             makeFetchMock(false, 404, { message: 'Job not found' }),
         );
 
-        await expect(getJobStatus('missing-job', MOCK_TOKEN)).rejects.toMatchObject({
+        await expect(getJobStatus('missing-job')).rejects.toMatchObject({
             status: 404,
         });
     });
