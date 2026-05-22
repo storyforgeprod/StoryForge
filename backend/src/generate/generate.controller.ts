@@ -27,12 +27,12 @@ import {
   GenerateVideoResponseDto,
 } from "./dto/generate-video.dto";
 
-const ANONYMOUS_USER_ID = "anonymous-user";
+const ANONYMOUS_USER_ID = "dev-user";
 
 @ApiTags("Generate")
 @Controller("generate")
 export class GenerateController {
-  constructor(private readonly generateService: GenerateService) {}
+  constructor(private readonly generateService: GenerateService) { }
 
   @Post("script")
   @Throttle({ default: { limit: 5, ttl: 60000 } })
