@@ -22,6 +22,10 @@ export class AzureOpenAIService {
         }
 
         this.client = new OpenAIClient(endpoint, new AzureKeyCredential(apiKey));
+        this.logger.log(`AzureOpenAI configured endpoint=${endpoint} deployment=${this.deployment ? this.deployment : '<none>'}`);
+        if (endpoint.includes('/openai')) {
+            this.logger.warn('AzureOpenAI endpoint contains "/openai" path — consider using the resource root URL without /openai/v1');
+        }
     }
 
     async generateScript(userId: string, story: string): Promise<string> {
@@ -59,6 +63,30 @@ export class AzureOpenAIService {
         } catch (error) {
             const message = error instanceof Error ? error.message : 'Unknown Azure OpenAI error';
             this.logger.error(`AzureOpenAI generateScript failed: ${message}`);
+            if (error && typeof error === 'object') {
+                // log stack and known HTTP response fields if present
+                try {
+                    // @ts-ignore
+                    if (error.stack) this.logger.debug(`Stack: ${error.stack}`);
+                    // @ts-ignore
+                    if (error.statusCode) this.logger.debug(`statusCode: ${error.statusCode}`);
+                    // @ts-ignore
+                    if (error.response) this.logger.debug(`response: ${JSON.stringify(error.response)}`);
+                    // @ts-ignore
+                    if (error.body) this.logger.debug(`body: ${JSON.stringify(error.body)}`);
+                } catch (e) {
+                    this.logger.debug('Failed to stringify error details');
+                }
+            }
+
+            // In development, fall back to a deterministic mock so local testing
+            // can continue even if Azure credentials or network fail.
+            if (process.env.NODE_ENV === 'development') {
+                this.logger.warn('Falling back to mock script in development mode');
+                const mock = `Scene 1: [Establishing shot] ${story.substring(0, 120)}... (mock script)`;
+                return mock;
+            }
+
             throw new Error(`AzureOpenAI script generation failed: ${message}`);
         }
     }

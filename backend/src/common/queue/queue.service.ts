@@ -48,8 +48,8 @@ export class QueueService implements OnModuleDestroy {
     if (urlObj.password) redisOptions.password = urlObj.password;
     if (isTls) redisOptions.tls = { servername: host };
 
-    // Initialize Bull queue
-    this.generateQueue = new Queue('generate', {
+    // Initialize Bull queue (must match processor queue name 'generation')
+    this.generateQueue = new Queue('generation', {
       redis: redisOptions,
       defaultJobOptions: {
         attempts: 3,

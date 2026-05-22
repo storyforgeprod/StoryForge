@@ -22,6 +22,10 @@ export class AzureFoundryImageService {
         }
 
         this.client = new OpenAIClient(endpoint, new AzureKeyCredential(apiKey));
+        this.logger.log(`AzureFoundryImage configured endpoint=${endpoint} deployment=${this.deployment ? this.deployment : '<none>'}`);
+        if (endpoint.includes('/openai')) {
+            this.logger.warn('Azure Foundry image endpoint contains "/openai" path — consider using the resource root URL without /openai/v1');
+        }
     }
 
     async generateImages(
@@ -60,6 +64,20 @@ export class AzureFoundryImageService {
         } catch (error) {
             const message = error instanceof Error ? error.message : 'Unknown Azure Foundry image error';
             this.logger.error(`AzureFoundryImage failed: ${message}`);
+            if (error && typeof error === 'object') {
+                try {
+                    // @ts-ignore
+                    if (error.stack) this.logger.debug(`Stack: ${error.stack}`);
+                    // @ts-ignore
+                    if (error.statusCode) this.logger.debug(`statusCode: ${error.statusCode}`);
+                    // @ts-ignore
+                    if (error.response) this.logger.debug(`response: ${JSON.stringify(error.response)}`);
+                    // @ts-ignore
+                    if (error.body) this.logger.debug(`body: ${JSON.stringify(error.body)}`);
+                } catch (e) {
+                    this.logger.debug('Failed to stringify error details');
+                }
+            }
             throw new Error(`AzureFoundryImage generation failed: ${message}`);
         }
     }

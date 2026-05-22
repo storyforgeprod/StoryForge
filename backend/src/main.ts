@@ -50,19 +50,8 @@ async function bootstrap() {
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('api', app, document);
 
-  // 🆕 Initialize queue processor
-  const queueService = app.get(QueueService);
-  try {
-    queueService.process(1, async (job) => {
-      // Processor is decorated with @Processor and @Process
-      // Bull will automatically route jobs to GenerateQueueProcessor
-      return { processed: true };
-    });
-    console.log('✅ Queue processor initialized');
-  } catch (error) {
-    console.warn('⚠️ Queue processor initialization warning:', error);
-    // Don't exit here - queue is optional for basic functionality
-  }
+  // Queue processors are registered via `@Processor('generation')` decorators
+  // (no manual processor registration here) so Bull/Nest will route jobs.
 
   const port = process.env.PORT || 3000;
   await app.listen(port);
