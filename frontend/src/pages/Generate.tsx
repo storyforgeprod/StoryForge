@@ -3,7 +3,6 @@ import { Link } from 'react-router-dom';
 import { ArrowLeft, ChevronLeft, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { UserMenu } from '@/components/auth/UserMenu';
 import { StoryInput } from '@/components/Input/StoryInput';
 import { StyleSelector } from '@/components/StyleSelector/StyleSelector';
 import { VoiceSelector } from '@/components/VoiceSelector/VoiceSelector';
@@ -17,7 +16,6 @@ import { useGenerateScript } from '@/hooks/useGenerateScript';
 import { useGenerateImages } from '@/hooks/useGenerateImages';
 import { useGenerateAudio } from '@/hooks/useGenerateAudio';
 import { useGenerateVideo } from '@/hooks/useGenerateVideo';
-import { useAuth } from '@/contexts/AuthContext';
 
 type WizardStep = 'story' | 'style' | 'voice';
 
@@ -63,9 +61,6 @@ function deriveStages(
 }
 
 export function Generate() {
-    const { session } = useAuth();
-    const token = session?.access_token ?? '';
-
     const [story, setStory] = useState('');
     const [style, setStyle] = useState<StoryStyle | null>(null);
     const [voiceId, setVoiceId] = useState<string | null>(null);
@@ -76,10 +71,10 @@ export function Generate() {
     const [audioJobId, setAudioJobId] = useState<string | null>(null);
 
     const validation = useMemo(() => validateStory(story), [story]);
-    const { state: genState, generate, reset: resetGeneration } = useGenerateScript(token);
-    const { state: imagesState, generate: generateImages, reset: resetImages } = useGenerateImages(token);
-    const { state: audioState, generate: generateAudio, reset: resetAudio } = useGenerateAudio(token);
-    const { state: videoState, generate: generateVideo, reset: resetVideo } = useGenerateVideo(token);
+    const { state: genState, generate, reset: resetGeneration } = useGenerateScript();
+    const { state: imagesState, generate: generateImages, reset: resetImages } = useGenerateImages();
+    const { state: audioState, generate: generateAudio, reset: resetAudio } = useGenerateAudio();
+    const { state: videoState, generate: generateVideo, reset: resetVideo } = useGenerateVideo();
 
     const stages = useMemo(
         () => deriveStages(genState.phase, imagesState.phase, audioState.phase, videoState.phase),
@@ -202,7 +197,6 @@ export function Generate() {
                         </Button>
                         <h1 className="text-lg font-semibold">Generar video</h1>
                     </div>
-                    <UserMenu />
                 </div>
             </header>
 

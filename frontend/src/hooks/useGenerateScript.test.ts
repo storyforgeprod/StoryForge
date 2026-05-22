@@ -5,8 +5,6 @@ import * as generateApi from '@/services/generateApi';
 
 vi.mock('@/services/generateApi');
 
-const TOKEN = 'test-token';
-
 const mockPost = vi.mocked(generateApi.postGenerateScript);
 const mockPoll = vi.mocked(generateApi.getJobStatus);
 
@@ -21,7 +19,7 @@ afterEach(() => {
 
 describe('useGenerateScript', () => {
     it('starts in idle phase', () => {
-        const { result } = renderHook(() => useGenerateScript(TOKEN));
+        const { result } = renderHook(() => useGenerateScript());
         expect(result.current.state.phase).toBe('idle');
     });
 
@@ -37,7 +35,7 @@ describe('useGenerateScript', () => {
             script: 'Generated script content',
         });
 
-        const { result } = renderHook(() => useGenerateScript(TOKEN));
+        const { result } = renderHook(() => useGenerateScript());
 
         act(() => {
             result.current.generate('My story', 'anime');
@@ -66,7 +64,7 @@ describe('useGenerateScript', () => {
     it('rate-limit error (429) → error state with correct message', async () => {
         mockPost.mockRejectedValue({ status: 429, message: 'Rate limit' });
 
-        const { result } = renderHook(() => useGenerateScript(TOKEN));
+        const { result } = renderHook(() => useGenerateScript());
 
         await act(async () => {
             result.current.generate('My story', 'anime');
@@ -84,7 +82,7 @@ describe('useGenerateScript', () => {
     it('network error → error state with connection message', async () => {
         mockPost.mockRejectedValue(new Error('Network failure'));
 
-        const { result } = renderHook(() => useGenerateScript(TOKEN));
+        const { result } = renderHook(() => useGenerateScript());
 
         await act(async () => {
             result.current.generate('My story', 'anime');
@@ -107,7 +105,7 @@ describe('useGenerateScript', () => {
         });
         mockPoll.mockRejectedValue({ status: 500, message: 'Server error' });
 
-        const { result } = renderHook(() => useGenerateScript(TOKEN));
+        const { result } = renderHook(() => useGenerateScript());
 
         await act(async () => {
             result.current.generate('My story', 'anime');
@@ -133,7 +131,7 @@ describe('useGenerateScript', () => {
             message: 'AI provider unavailable',
         });
 
-        const { result } = renderHook(() => useGenerateScript(TOKEN));
+        const { result } = renderHook(() => useGenerateScript());
 
         await act(async () => {
             result.current.generate('My story', 'anime');
@@ -158,7 +156,7 @@ describe('useGenerateScript', () => {
         });
         mockPoll.mockResolvedValue({ jobId: 'job-4', status: 'processing' });
 
-        const { result } = renderHook(() => useGenerateScript(TOKEN));
+        const { result } = renderHook(() => useGenerateScript());
 
         await act(async () => {
             result.current.generate('My story', 'anime');
@@ -185,7 +183,7 @@ describe('useGenerateScript', () => {
     it('reset() returns to idle state', async () => {
         mockPost.mockRejectedValue({ status: 429, message: 'Rate limit' });
 
-        const { result } = renderHook(() => useGenerateScript(TOKEN));
+        const { result } = renderHook(() => useGenerateScript());
 
         await act(async () => {
             result.current.generate('My story', 'anime');
@@ -213,7 +211,7 @@ describe('useGenerateScript', () => {
             script: 'Done',
         });
 
-        const { result } = renderHook(() => useGenerateScript(TOKEN));
+        const { result } = renderHook(() => useGenerateScript());
 
         await act(async () => {
             result.current.generate('My story', 'anime');

@@ -1,16 +1,9 @@
-import { Link, useLocation } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { Sparkles } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { LoginCard } from '@/components/auth/LoginCard';
-import { UserMenu } from '@/components/auth/UserMenu';
-import { useAuth } from '@/contexts/AuthContext';
 
 export function Landing() {
-  const { user, loading } = useAuth();
-  const location = useLocation();
-  const redirectFrom = (location.state as { from?: string } | null)?.from;
-
   return (
     <div className="min-h-screen">
       <header className="border-b border-border/60">
@@ -19,7 +12,6 @@ export function Landing() {
             <Sparkles className="h-5 w-5 text-primary" />
             StoryForge
           </div>
-          {!loading && user && <UserMenu />}
         </div>
       </header>
 
@@ -32,25 +24,12 @@ export function Landing() {
             Pega tu sinopsis, elige estilo y voz. La IA genera guión, imágenes, narración y video
             9:16 en minutos.
           </p>
-          {user && (
-            <div className="mt-8 flex justify-center gap-3">
-              <Button asChild size="lg">
-                <Link to={redirectFrom ?? '/app'}>Ir al generador</Link>
-              </Button>
-            </div>
-          )}
-        </div>
-
-        {!loading && !user && (
-          <div className="mb-16">
-            {redirectFrom && (
-              <p className="mb-4 text-center text-sm text-muted-foreground">
-                Iniciá sesión para acceder al generador.
-              </p>
-            )}
-            <LoginCard />
+          <div className="mt-8 flex justify-center gap-3">
+            <Button asChild size="lg">
+              <Link to="/app">Ir al generador</Link>
+            </Button>
           </div>
-        )}
+        </div>
 
         <div className="grid gap-4 sm:grid-cols-3">
           {[

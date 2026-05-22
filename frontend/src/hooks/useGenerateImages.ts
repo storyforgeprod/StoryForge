@@ -27,7 +27,7 @@ function mapApiError(err: unknown): string {
     return NETWORK_ERROR;
 }
 
-export function useGenerateImages(token: string): UseGenerateImagesReturn {
+export function useGenerateImages(): UseGenerateImagesReturn {
     const [state, setState] = useState<GenerateImagesState>({ phase: 'idle' });
     const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
     const attemptsRef = useRef(0);
@@ -54,7 +54,7 @@ export function useGenerateImages(token: string): UseGenerateImagesReturn {
                     return;
                 }
                 try {
-                    const job = await getJobStatus(jobId, token);
+                    const job = await getJobStatus(jobId);
                     if (job.status === 'completed') {
                         clearPolling();
                         const result = job.result as ImageGenerationResult | undefined;
@@ -75,7 +75,7 @@ export function useGenerateImages(token: string): UseGenerateImagesReturn {
                 }
             }, POLL_INTERVAL_MS);
         },
-        [token, clearPolling],
+        [clearPolling],
     );
 
     const generate = useCallback(
@@ -84,7 +84,7 @@ export function useGenerateImages(token: string): UseGenerateImagesReturn {
             inFlightRef.current = true;
             setState({ phase: 'submitting' });
             try {
-                const { jobId } = await postGenerateImages({ scriptId, style }, token);
+                const { jobId } = await postGenerateImages({ scriptId, style });
                 setState({ phase: 'polling', jobId });
                 startPolling(jobId);
             } catch (err) {
@@ -92,7 +92,7 @@ export function useGenerateImages(token: string): UseGenerateImagesReturn {
                 setState({ phase: 'error', message: mapApiError(err) });
             }
         },
-        [token, startPolling],
+        [startPolling],
     );
 
     const reset = useCallback(() => {
