@@ -25,19 +25,32 @@ export class QueueService {
   private redis: Redis;
 
   constructor() {
-    // Initialize Redis
-    this.redis = new Redis({
-      host: process.env.REDIS_URL?.split('@')[1]?.split(':')[0] || 'localhost',
-      port: parseInt(process.env.REDIS_URL?.split(':').pop() || '6379'),
+    // Parse REDIS_URL and initialize Redis/Bull with TLS support when needed
+    const redisUrl = process.env.REDIS_URL || 'redis://localhost:6379';
+    let urlObj: URL;
+    try {
+      urlObj = new URL(redisUrl);
+    } catch (err) {
+      urlObj = new URL('redis://localhost:6379');
+    }
+
+    const host = urlObj.hostname || 'localhost';
+    const port = parseInt(urlObj.port || '6379', 10) || 6379;
+    const isTls = urlObj.protocol === 'rediss:' || urlObj.protocol === 'rediss';
+
+    // Initialize ioredis using the full URL (handles TLS automatically)
+    this.redis = new Redis(redisUrl, {
       retryStrategy: (times) => Math.min(times * 50, 2000),
     });
 
+    // Prepare redis options for Bull (include tls when using rediss)
+    const redisOptions: any = { host, port };
+    if (urlObj.password) redisOptions.password = urlObj.password;
+    if (isTls) redisOptions.tls = { servername: host };
+
     // Initialize Bull queue
     this.generateQueue = new Queue('generate', {
-      redis: {
-        host: process.env.REDIS_URL?.split('@')[1]?.split(':')[0] || 'localhost',
-        port: parseInt(process.env.REDIS_URL?.split(':').pop() || '6379'),
-      },
+      redis: redisOptions,
       defaultJobOptions: {
         attempts: 3,
         backoff: {

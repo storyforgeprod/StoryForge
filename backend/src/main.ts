@@ -50,7 +50,7 @@ async function bootstrap() {
   // 🆕 Initialize queue processor
   const queueService = app.get(QueueService);
   try {
-    await queueService.process(1, async (job) => {
+    queueService.process(1, async (job) => {
       // Processor is decorated with @Processor and @Process
       // Bull will automatically route jobs to GenerateQueueProcessor
       return { processed: true };
