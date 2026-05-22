@@ -11,6 +11,9 @@ async function bootstrap() {
     logger: new LoggerService(),
   });
 
+  // Enable graceful shutdown hooks for Nest and providers
+  app.enableShutdownHooks();
+
   // CORS configuration
   app.enableCors({
     origin: process.env.CORS_ORIGIN || 'http://localhost:5173',

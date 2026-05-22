@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, OnModuleDestroy } from '@nestjs/common';
 import Queue from 'bull';
 import Redis from 'ioredis';
 
@@ -20,7 +20,7 @@ export interface GenerationJobData {
 }
 
 @Injectable()
-export class QueueService {
+export class QueueService implements OnModuleDestroy {
   private generateQueue: Queue.Queue<GenerationJobData>;
   private redis: Redis;
 
@@ -159,5 +159,9 @@ export class QueueService {
   async close() {
     await this.generateQueue.close();
     await this.redis.quit();
+  }
+
+  async onModuleDestroy() {
+    await this.close();
   }
 }
