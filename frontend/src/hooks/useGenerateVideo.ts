@@ -28,7 +28,7 @@ function mapApiError(err: unknown): string {
     return NETWORK_ERROR;
 }
 
-export function useGenerateVideo(token: string): UseGenerateVideoReturn {
+export function useGenerateVideo(): UseGenerateVideoReturn {
     const [state, setState] = useState<GenerateVideoState>({ phase: 'idle' });
     const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
     const attemptsRef = useRef(0);
@@ -55,7 +55,7 @@ export function useGenerateVideo(token: string): UseGenerateVideoReturn {
                     return;
                 }
                 try {
-                    const job = await getJobStatus(jobId, token);
+                    const job = await getJobStatus(jobId);
                     if (job.status === 'completed') {
                         clearPolling();
                         const result = job.result as VideoAssemblyResult | undefined;
@@ -81,7 +81,7 @@ export function useGenerateVideo(token: string): UseGenerateVideoReturn {
                 }
             }, POLL_INTERVAL_MS);
         },
-        [token, clearPolling],
+        [clearPolling],
     );
 
     const generate = useCallback(
@@ -94,10 +94,7 @@ export function useGenerateVideo(token: string): UseGenerateVideoReturn {
             inFlightRef.current = true;
             setState({ phase: 'submitting' });
             try {
-                const { jobId } = await postGenerateVideo(
-                    { imageJobId, audioJobId, ...opts },
-                    token,
-                );
+                const { jobId } = await postGenerateVideo({ imageJobId, audioJobId, ...opts });
                 setState({ phase: 'polling', jobId });
                 startPolling(jobId);
             } catch (err) {
@@ -105,7 +102,7 @@ export function useGenerateVideo(token: string): UseGenerateVideoReturn {
                 setState({ phase: 'error', message: mapApiError(err) });
             }
         },
-        [token, startPolling],
+        [startPolling],
     );
 
     const reset = useCallback(() => {

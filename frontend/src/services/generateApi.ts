@@ -19,14 +19,10 @@ async function handleResponse<T>(res: Response): Promise<T> {
 
 export async function postGenerateScript(
     body: { story: string; style: StoryStyle },
-    token: string,
 ): Promise<{ jobId: string; status: string; createdAt: string }> {
     const res = await fetch(`${API_BASE}/generate/script`, {
         method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${token}`,
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(body),
     });
     return handleResponse(res);
@@ -34,7 +30,6 @@ export async function postGenerateScript(
 
 export async function getJobStatus(
     jobId: string,
-    token: string,
 ): Promise<{
     jobId: string;
     status: string;
@@ -45,22 +40,16 @@ export async function getJobStatus(
     message?: string;
     completedAt?: string;
 }> {
-    const res = await fetch(`${API_BASE}/generate/job/${jobId}`, {
-        headers: { Authorization: `Bearer ${token}` },
-    });
+    const res = await fetch(`${API_BASE}/generate/job/${jobId}`);
     return handleResponse(res);
 }
 
 export async function postGenerateImages(
     body: { scriptId: string; style: StoryStyle; imageDescription?: string },
-    token: string,
 ): Promise<{ jobId: string; status: string; createdAt: string }> {
     const res = await fetch(`${API_BASE}/generate/images`, {
         method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${token}`,
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(body),
     });
     return handleResponse(res);
@@ -68,14 +57,10 @@ export async function postGenerateImages(
 
 export async function postGenerateAudio(
     body: { scriptId: string; voiceId?: string },
-    token: string,
 ): Promise<{ jobId: string; status: string; createdAt: string }> {
     const res = await fetch(`${API_BASE}/generate/audio`, {
         method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${token}`,
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(body),
     });
     return handleResponse(res);
@@ -83,14 +68,10 @@ export async function postGenerateAudio(
 
 export async function postGenerateVideo(
     body: { imageJobId: string; audioJobId: string; fps?: number; bitrate?: string },
-    token: string,
 ): Promise<{ jobId: string; status: string; createdAt: string }> {
     const res = await fetch(`${API_BASE}/generate/video`, {
         method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${token}`,
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(body),
     });
     return handleResponse(res);
