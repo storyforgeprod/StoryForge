@@ -3,33 +3,28 @@ import { GenerateScriptDto, GenerateScriptResponseDto } from './dto/generate-scr
 import { GenerateImagesDto, GenerateImagesResponseDto, ImageGenerationResult } from './dto/generate-images.dto';
 import { GenerateAudioDto, GenerateAudioResponseDto, AudioGenerationResult } from './dto/generate-audio.dto';
 import { GenerateVideoDto, GenerateVideoResponseDto, VideoAssemblyResult } from './dto/generate-video.dto';
-import { Anthropic } from '@anthropic-ai/sdk';
 import { PrismaService } from '../common/prisma/prisma.service';
 import { QueueService } from '../common/queue/queue.service';
-import { ReplicateService } from '../integrations/replicate.service';
+import { AzureOpenAIService } from '../integrations/azure-openai.service';
+import { AzureFoundryImageService } from '../integrations/azure-foundry-image.service';
 import { ElevenLabsService } from '../integrations/elevenlabs.service';
 import { VideoService } from '../integrations/video.service';
 
 @Injectable()
 export class GenerateService {
-  private client: Anthropic;
-
   constructor(
     private prisma: PrismaService,
     private queue: QueueService,
-    private replicateService: ReplicateService,
+    private azureOpenAIService: AzureOpenAIService,
+    private azureFoundryImageService: AzureFoundryImageService,
     private elevenLabsService: ElevenLabsService,
     private videoService: VideoService,
-  ) {
-    this.client = new Anthropic({
-      apiKey: process.env.ANTHROPIC_API_KEY,
-    });
-  }
+  ) { }
 
   /**
    * Generate script from story text
    * Creates Job (pending) + adds to queue, returns immediately
-   * Queue processor handles Claude API call asynchronously
+   * Queue processor handles Azure OpenAI call asynchronously
    */
   async generateScript(
     userId: string,
@@ -79,7 +74,7 @@ export class GenerateService {
       throw new BadRequestException('Failed to queue generation job');
     }
 
-    // 3. Return immediately (client doesn't wait for Claude)
+    // 3. Return immediately (client doesn't wait for async processing)
     return {
       jobId: job.id,
       status: 'pending',
@@ -90,27 +85,13 @@ export class GenerateService {
 
   /**
    * Generate script content (used by queue processor)
-   * This is the actual async logic that calls Claude API
+   * This is the actual async logic that calls Azure OpenAI
    */
   async generateScriptContent(
     userId: string,
     data: { story: string },
   ): Promise<{ script: string }> {
-    const prompt = this._buildScriptPrompt(data.story, 'anime', 60);
-
-    const response = await this.client.messages.create({
-      model: 'claude-3-5-sonnet-20241022',
-      max_tokens: 2048,
-      messages: [
-        {
-          role: 'user',
-          content: prompt,
-        },
-      ],
-    });
-
-    const script = this._extractTextFromResponse(response);
-
+    const script = await this.azureOpenAIService.generateScript(userId, data.story);
     return { script };
   }
 
@@ -141,37 +122,11 @@ export class GenerateService {
     };
   }
 
-  private _buildScriptPrompt(story: string, style: string, duration: number = 60): string {
-    return `You are a professional screenwriter specializing in short-form video content for YouTube Shorts.
-
-Convert the following story into a script suitable for a video lasting approximately ${duration} seconds. The visual style should be ${style}.
-
-IMPORTANT REQUIREMENTS:
-1. Keep scenes SHORT and PUNCHY (2-3 seconds each)
-2. Include vivid visual descriptions
-3. Add sound effects in [BRACKETS]
-4. Include suggested music tone
-5. Format: Scene number, description, and duration
-
-Story to adapt:
-"""
-${story}
-"""
-
-Provide only the script, no additional commentary.`;
-  }
-
-  private _extractTextFromResponse(response: any): string {
-    if (response.content && response.content.length > 0) {
-      return response.content[0].text || '';
-    }
-    return '';
-  }
 
   /**
    * Generate images from script
    * Creates Job (pending) + adds to queue, returns immediately
-   * Queue processor handles Replicate API call asynchronously
+   * Queue processor handles Azure Foundry image generation asynchronously
    */
   async generateImages(
     userId: string,
@@ -247,11 +202,11 @@ Provide only the script, no additional commentary.`;
 
   /**
    * Generate image content (used by queue processor)
-   * This is the actual async logic that calls Replicate API
+   * This is the actual async logic that calls Azure Foundry
    */
   async generateImageContent(
     userId: string,
-    data: { jobId: string; scriptId: string; style?: string },
+    data: { jobId: string; scriptId: string; style?: string; imageDescription?: string },
   ): Promise<ImageGenerationResult> {
     // 1. Fetch original script Job to get the generated script
     const scriptJob = await this.prisma.job.findUnique({
@@ -271,13 +226,9 @@ Provide only the script, no additional commentary.`;
       scriptContent = scriptJob.result;
     }
 
-    // 3. Generate image prompt from script using Claude
-    const imagePrompt = await this._buildImagePrompt(scriptContent, data.style);
+    const imagePrompt = this._buildImagePrompt(scriptContent, data.style, data.imageDescription);
 
-    // 4. Call Replicate to generate image
-    const imageUrls = await this.replicateService.generateImage(imagePrompt, {
-      numImages: 1,
-    });
+    const imageUrls = await this.azureFoundryImageService.generateImages(userId, imagePrompt, 1);
 
     return {
       imageUrls,
@@ -286,24 +237,15 @@ Provide only the script, no additional commentary.`;
     };
   }
 
-  private async _buildImagePrompt(scriptContent: string, style?: string): Promise<string> {
-    // Use Claude to create a detailed image prompt from script
-    const message = await this.client.messages.create({
-      model: 'claude-3-5-sonnet-20241022',
-      max_tokens: 256,
-      messages: [
-        {
-          role: 'user',
-          content: `Based on this story script, create a concise visual description for generating a cover image (max 100 words, use vivid descriptive language):
+  private _buildImagePrompt(
+    scriptContent: string,
+    style?: string,
+    imageDescription?: string,
+  ): string {
+    const description = imageDescription
+      ? imageDescription
+      : `Create a vivid cover image description for this script: ${scriptContent}`;
 
-${scriptContent}
-
-Respond with ONLY the visual description, no explanations.`,
-        },
-      ],
-    });
-
-    const description = this._extractTextFromResponse(message);
     return style ? `${style} style, ${description}` : description;
   }
 

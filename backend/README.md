@@ -36,8 +36,9 @@ src/
 └── generate/               # Main feature module
     ├── generate.module.ts  # Module definition
     ├── generate.controller.ts  # HTTP endpoints
-    ├── generate.service.ts     # Business logic (Claude integration)
-    ├── replicate.service.ts    # Image generation (Replicate)
+    ├── generate.service.ts     # Business logic (Azure AI provider layer)
+    ├── integrations/azure-openai.service.ts     # Script generation (Azure OpenAI GPT-4.1)
+    ├── integrations/azure-foundry-image.service.ts     # Image generation (Azure Foundry Flux.2-pro)
     ├── elevenlabs.service.ts   # Text-to-speech (ElevenLabs)
     ├── video.service.ts        # Video assembly (FFmpeg/Modal)
     └── dto/                    # Data Transfer Objects
@@ -55,7 +56,7 @@ dist/                       # Compiled output (after npm run build)
 ## 🔌 API Endpoints
 
 ### POST `/generate/script`
-Convert story text to video script using Claude AI
+Convert story text to video script using Azure OpenAI GPT-4.1
 
 **Request:**
 ```json
@@ -77,7 +78,7 @@ Convert story text to video script using Claude AI
 ```
 
 ### POST `/generate/images` (TODO)
-Generate scene images using Replicate (status: `202 Accepted`)
+Generate scene images using Azure Foundry Flux.2-pro (status: `202 Accepted`)
 
 ### POST `/generate/audio` (TODO)
 Generate narration audio using ElevenLabs (status: `202 Accepted`)
@@ -97,8 +98,13 @@ PORT=3000
 LOG_LEVEL=debug
 
 # AI Services
-ANTHROPIC_API_KEY=sk-ant-...
-REPLICATE_API_TOKEN=...
+AZURE_OPENAI_ENDPOINT=https://<region>.openai.azure.com/
+AZURE_OPENAI_API_KEY=...
+AZURE_OPENAI_DEPLOYMENT_GPT41=...
+AZURE_OPENAI_API_VERSION=2024-02-15-preview
+AZURE_FOUNDRY_IMAGE_ENDPOINT=https://<region>.openai.azure.com/
+AZURE_FOUNDRY_IMAGE_API_KEY=...
+AZURE_FOUNDRY_FLUX_DEPLOYMENT=...
 ELEVENLABS_API_KEY=...
 
 # Database (Supabase)
@@ -159,7 +165,8 @@ Schema is in `prisma/schema.prisma` (currently empty, to be populated).
 | Package | Version | Purpose |
 |---------|---------|---------|
 | `@nestjs/core` | ^10.3 | NestJS framework |
-| `@anthropic-ai/sdk` | ^0.30 | Claude AI API |
+| `@azure/openai` | ^2.0 | Azure OpenAI GPT and image generation |
+| `@azure/core-auth` | ^3.0 | Azure credential support |
 | `@prisma/client` | ^5.21 | Database ORM |
 | `ioredis` | ^5.4 | Redis client |
 | `bull` | ^4.14 | Job queue |
@@ -172,8 +179,8 @@ Schema is in `prisma/schema.prisma` (currently empty, to be populated).
 
 - [x] NestJS scaffold complete
 - [x] POST `/generate/script` endpoint implemented
-- [x] Claude AI service integration (ready to test)
-- [ ] Replicate image generation service (stub)
+- [x] Azure OpenAI GPT-4.1 script generation integration (ready to test)
+- [x] Azure Foundry Flux.2-pro image generation integration (ready to test)
 - [ ] ElevenLabs TTS service (stub)
 - [ ] Video assembly service (stub)
 - [ ] Supabase/Prisma integration (pending)
@@ -184,7 +191,7 @@ Schema is in `prisma/schema.prisma` (currently empty, to be populated).
 
 ## 🚀 Next Steps (Semana 1.6-1.7)
 
-1. **Test `/generate/script` endpoint** with real Claude API key
+1. **Test `/generate/script` endpoint** with real Azure OpenAI credentials
 2. **Implement Prisma schema** (User, Project, Job models)
 3. **Integrate Supabase** for authentication and storage
 4. **Add job queue** for async processing

@@ -5,7 +5,8 @@ import { GenerateService } from './generate.service';
 import { GenerateQueueProcessor } from './generate.queue.processor';
 import { PrismaModule } from '../common/prisma/prisma.module';
 import { QueueModule } from '../common/queue/queue.module';
-import { ReplicateService } from '../integrations/replicate.service';
+import { AzureOpenAIService } from '../integrations/azure-openai.service';
+import { AzureFoundryImageService } from '../integrations/azure-foundry-image.service';
 import { ElevenLabsService } from '../integrations/elevenlabs.service';
 import { VideoService } from '../integrations/video.service';
 
@@ -21,10 +22,11 @@ import { VideoService } from '../integrations/video.service';
   providers: [
     GenerateService,
     GenerateQueueProcessor,
-    ReplicateService,
+    AzureOpenAIService,
+    AzureFoundryImageService,
     ElevenLabsService,
     VideoService,
   ],
-  exports: [GenerateService, ReplicateService, ElevenLabsService, VideoService],
+  exports: [GenerateService, AzureOpenAIService, AzureFoundryImageService, ElevenLabsService, VideoService],
 })
-export class GenerateModule {}
+export class GenerateModule { }
