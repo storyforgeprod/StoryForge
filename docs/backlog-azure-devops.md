@@ -99,17 +99,17 @@
 - **Criterios de Aceptación:**
   - [ ] Repositorio configurado con frontend React (Vite) y backend NestJS.
   - [ ] Supabase conectado con Auth (Google OAuth), PostgreSQL y Storage habilitados.
-  - [ ] Variables de entorno definidas y documentadas para todas las API keys (Claude, ElevenLabs, Replicate, Stripe).
+  - [ ] Variables de entorno definidas y documentadas para todas las API keys (Azure foundry GPT4.1, ElevenLabs, Azure foundry Flux.2-PRO, Stripe).
   - [ ] Pipeline de CI/CD básico: push a main despliega automáticamente en Vercel (frontend) y Railway (backend).
 
 #### Historia de Usuario 3.2 — Integración del pipeline de IA
-- **Título:** Integrar Claude API, Replicate y ElevenLabs en el backend NestJS
+- **Título:** Integrar Azure foundry GPT4.1, Azure foundry Flux.2-PRO y ElevenLabs en el backend NestJS
 - **Descripción:** "Como equipo de desarrollo, quiero tener los tres servicios de IA integrados y testeados de forma aislada, para componer el pipeline de generación con confianza."
 - **Prioridad:** Alta
 - **Estimación:** 8 SP
 - **Criterios de Aceptación:**
-  - [ ] Endpoint POST `/generate/script` recibe texto y retorna guión estructurado (JSON) usando Claude API.
-  - [ ] Endpoint POST `/generate/images` recibe descripción de escena + estilo y retorna URL de imagen usando Replicate.
+  - [ ] Endpoint POST `/generate/script` recibe texto y retorna guión estructurado (JSON) usando Azure foundry GPT4.1 API.
+  - [ ] Endpoint POST `/generate/images` recibe descripción de escena + estilo y retorna URL de imagen usando Azure foudnry Flux.2-PRO.
   - [ ] Endpoint POST `/generate/audio` recibe texto del guión + voice_id y retorna URL de audio usando ElevenLabs.
   - [ ] Cada endpoint tiene manejo de errores, timeout y logging estructurado.
   - [ ] Rate limiting aplicado: máximo 1 generación simultánea por usuario.
