@@ -1,89 +1,77 @@
 # CLAUDE.md
 
-Guidance: Claude Code (claude.ai/code) working in this repository.
+Guidance for Claude Code working in the StoryForge repository.
 
-## 🚀 Project Overview
+## Project
 
-**StoryForge:** SaaS MVP converts long-form story text (webtoons, manhwas, web novels) → short-form narrated videos (YouTube Shorts, <5 min). AI-powered.
+StoryForge: SaaS MVP that converts long-form story text (webtoons, manhwas, web novels) into short-form narrated videos (YouTube Shorts, <5 min). AI-powered.
 
-**Status:** MVP Implementation (Weeks 1-6)  
-**Tech:** React + Vite + NestJS + Supabase + Claude + Replicate + ElevenLabs + FFmpeg  
-**Launch:** Week 6 (staging ready for validation)
+**Stack:** React 18 + Vite 5 + TailwindCSS + shadcn/ui | NestJS + Prisma + Bull | Supabase (DB + Storage) | Azure OpenAI + Azure Foundry + ElevenLabs + FFmpeg
 
-## 🔑 Azure DevOps
+## Azure DevOps
 
-**Repo:**
-```
-https://dev.azure.com/ia-aplicada-grupo-04/StoryForge
-```
+- **Repo:** `https://dev.azure.com/ia-aplicada-grupo-04/StoryForge`
+- **PAT:** Windows Credential Manager (workspace: ia-aplicada-grupo-04, project: StoryForge)
+- **Backlog:** 3 epics, 9 user stories, 66 story points
 
-**PAT Token:**
-```
-✅ Windows Credential Manager
-✅ Workspace: ia-aplicada-grupo-04
-✅ Project: StoryForge
-```
+## Architecture
 
-**Backlog:**
-- Épicas, Historias, Criterios de Aceptación ready in ADO
-- Bidirectional sync: GitHub ↔ Azure DevOps
-- Weekly burn-downs + velocity tracking
+    Frontend (React :5173) --fetch--> NestJS (:3000)
+      GenerateController -> GenerateService -> Bull Queue -> QueueProcessor
+        Azure OpenAI (script) | Azure Foundry (images) | ElevenLabs (audio) | FFmpeg (video)
+      Prisma (Supabase PostgreSQL) + Redis (Bull queue)
 
-## 📚 Documentation
+**Async pattern:** POST /generate/{type} -> Job created (pending) -> 202 + jobId -> Queue processor runs -> Client polls GET /generate/job/:jobId
 
-**Start:**
-1. [QUICK_START.md](QUICK_START.md) — 10 min local setup
-2. [IMPLEMENTATION_PLAN.md](IMPLEMENTATION_PLAN.md) — 6-week roadmap + tracking
-3. [STACK_INIT.md](STACK_INIT.md) — Tech stack, versions, directory structure
-5. [AZURE_DEVOPS_CONFIG.md](AZURE_DEVOPS_CONFIG.md) — ADO setup + backlog
-6. [OPTIONAL_COMPONENTS.md](OPTIONAL_COMPONENTS.md) — Removable/modifiable components
+**Key paths:**
+- Backend entry: `backend/src/generate/` (controller, service, queue processor, DTOs)
+- Integrations: `backend/src/integrations/` (azure-openai, azure-foundry-image, elevenlabs, video)
+- Auth: `backend/src/common/auth/` (JWT strategy + guards)
+- Frontend: `frontend/src/` (pages, components, hooks, services, types)
 
-**Reference:**
-- `etapa4-brief-final.md` — Product Brief (JTBD, North Star Metric, exit criteria)
-- `backlog-azure-devops.md` — 3 épicas, 9 historias, 66 story points
+## Environment
 
-## 🎯 Claude Commands & Skills
+**Prerequisites:** Node.js 18+, PostgreSQL 14+ (Supabase), Redis 6+, FFmpeg 4+
 
-### `.claude/commands/` — Slash commands ejecutables
-| Command | Role | Phase |
-|---|---|---|
-| `/product-analyst` | Research + validation | Pre-MVP ✅ |
-| `/product-strategist` | Strategy + metrics | Pre-MVP ✅ |
-| `/product-architect` | Technical planning | Pre-MVP ✅ |
-| `/product-writer` | Documentation | Pre-MVP ✅ |
-| `/product-pipeline` | Orchestrator | Pre-MVP ✅ |
+**Run locally:**
 
-**Status:** Discovery ✅ COMPLETE. Implementation now.
+    cd backend && npm install && npm run start:dev   # :3000
+    cd frontend && npm install && npm run dev         # :5173
 
-### `.claude/skills/` — Skills de desarrollo StoryForge
-Standards de código y patrones obligatorios para el MVP. Se activan automáticamente según el tipo de tarea.
+**Backend env vars** (backend/.env.local):
+SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, SUPABASE_JWT_SECRET, REDIS_URL, AZURE_OPENAI_ENDPOINT, AZURE_OPENAI_API_KEY, AZURE_OPENAI_API_VERSION, AZURE_OPENAI_DEPLOYMENT_GPT41
 
-| Skill | Cuándo activa | Cubre |
-|---|---|---|
-| `storyforge-frontend/` | Componentes, páginas, hooks, estilos, formularios, cualquier `.tsx` | File naming, typed components, custom hooks, estados UI, testing (Vitest + RTL), PostHog, checklist |
-| `storyforge-backend/` | Endpoints, controllers, services, DTOs, módulos NestJS, integraciones IA | File naming + folder structure (`controllers/` / `services/`), arquitectura modular, validación, rate limiting, logging, tests (Jest) |
-| `sdd-spec-creator/` | Al pegar una historia de ADO y pedir spec, tasks o arquitectura | Convierte historias en paquetes SDD: `spec.md` / `plan.md` / `tasks.md` con criterios EARS |
-| `spec-runner/` | "implement task X.X", "run the tasks", "implement spec X.X", o al señalar un `tasks.md` | Implementa tareas del spec en orden, marca `[x]` al completar, deja `[ ]` si hay error, corre build + tests al final |
+**Frontend env vars** (frontend/.env.local):
+VITE_API_URL
 
----
+**Database setup:** `cd backend && npx prisma generate && npx prisma migrate dev`
 
-## 🔄 Latest Status (May 19, 2026)
+## Auth Flow
 
-**Week 2 backend:** ✅ COMPLETE (Tasks 2.1–2.8)  
-**Completed this phase:**
-- ✅ Full async generation pipeline (Claude, Replicate, ElevenLabs, FFmpeg)
-- ✅ Rate limiting + JWT auth + Prisma job tracking
-- ✅ Task 2.8: API/deploy/troubleshooting documentation
+Auth guard exists but controllers currently use hardcoded `dev-user`. No login/signup routes implemented yet. Frontend has no auth integration (Supabase SDK installed but unused).
 
-**Current Progress:** ~87% MVP (story input done; 3.4 deferred)
+## Skills (auto-activated)
 
-**Quick Links for Continuation:**
-- [NEXT_STEPS.md](NEXT_STEPS.md) — Task 3.6 (style selector) ⭐
-- [instructions/TASK_3_5_COMPLETE.md](instructions/TASK_3_5_COMPLETE.md) — Story input
-- [instructions/TASK_3_2_3_COMPLETE.md](instructions/TASK_3_2_3_COMPLETE.md) — Auth setup
-- [instructions/HANDOFF_2_8.md](instructions/HANDOFF_2_8.md) — Detailed handoff
-- [PROGRESS.md](PROGRESS.md) — Weekly status
-- [HANDOFF.md](HANDOFF.md) — Setup + context
-- [IMPLEMENTATION_PLAN.md](IMPLEMENTATION_PLAN.md) — 6-week roadmap
+| Skill | Activates on | Enforces |
+|-------|-------------|----------|
+| `storyforge-frontend` | Any .tsx, component/page/hook/form task | React patterns, Tailwind, typed props, custom hooks, 4-state UI, Vitest + RTL |
+| `storyforge-backend` | Any endpoint/service/DTO/module task | NestJS architecture, DTOs + class-validator, guards, Logger, Jest |
+| `sdd-spec-creator` | "create spec for this story" or pasting ADO story | Produces spec.md + plan.md + tasks.md with EARS criteria |
+| `spec-runner` | "implement task X.X" or pointing at tasks.md | Implements tasks in order, marks [x] after build+test pass |
 
-**Governance Note:** All technical decisions must now respect STACK_INIT.md. Unauthorized changes = technical debt. Future developers MUST update PROGRESS.md + HANDOFF.md after each session. See IMPLEMENTATION_PLAN.md for mandatory developer guidelines.
+## Product Discovery Commands (completed phase)
+
+The `/product-analyst`, `/product-strategist`, `/product-architect`, `/product-writer`, `/product-pipeline` commands in `.claude/commands/` were used for pre-MVP discovery. That phase is complete. They remain available for future product ideas.
+
+## Documentation
+
+- [docs/architecture.md](docs/architecture.md) -- System design, tech stack, env vars, deploy targets
+- `docs/backlog-azure-devops.md` -- 3 epics, 9 stories, 66 story points
+
+## Rules
+
+- All technical decisions must respect the authorized stack in docs/architecture.md
+- Update CLAUDE.md after each development session
+- Specs live in `.claude/specs/<task-id>/`; completed specs archived in `.claude/specs/_done/`
+- Never bypass auth guards or rate limiting
+- Follow skill standards when they activate
