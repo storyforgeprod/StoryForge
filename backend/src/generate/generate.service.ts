@@ -202,22 +202,22 @@ export class GenerateService {
 
   /**
    * Generate image content (used by queue processor)
-   * This is the actual async logic that calls ImageService (fallback chain)
+   * Extracts scenes from script and generates one image per scene
    */
   async generateImageContent(
     userId: string,
     data: { jobId: string; scriptId: string; style?: string; imageDescription?: string },
   ): Promise<ImageGenerationResult> {
-    // 1. Fetch original script Job to get the generated script
+    // 1. Fetch script result
     const scriptJob = await this.prisma.job.findUnique({
       where: { id: data.scriptId },
     });
 
-    if (!scriptJob || !scriptJob.result) {
+    if (!scriptJob?.result) {
       throw new BadRequestException('Script job not found or incomplete');
     }
 
-    // 2. Parse script result to extract visual description
+    // 2. Parse script text
     let scriptContent: string;
     try {
       const parsed = JSON.parse(scriptJob.result);
@@ -226,39 +226,55 @@ export class GenerateService {
       scriptContent = scriptJob.result;
     }
 
-    const imagePrompt = this._buildImagePrompt(scriptContent, data.style, data.imageDescription);
+    // 3. Extract scenes
+    const scenes = this._extractScenes(scriptContent);
 
-    // 3. Use ImageService with fallback chain (FLUX → DALL·E → placeholder)
-    const imageUrl = await this.imageService.generateImage(userId, imagePrompt);
+    if (!scenes.length) {
+      throw new BadRequestException('No scenes found in script');
+    }
+
+    // 4. Generate one image per scene (sequential to avoid rate limits)
+    const imageUrls: string[] = [];
+    const prompts: string[] = [];
+
+    for (const scene of scenes) {
+      const prompt = this._buildScenePrompt(scene, data.style);
+      prompts.push(prompt);
+
+      const imageUrl = await this.imageService.generateImage(userId, prompt);
+      imageUrls.push(imageUrl);
+    }
 
     return {
-      imageUrls: [imageUrl],
-      prompt: imagePrompt,
+      imageUrls,
+      prompt: prompts.join('\n---\n'),
       generatedAt: new Date(),
     };
   }
 
-  private _buildImagePrompt(
-    scriptContent: string,
-    style?: string,
-    imageDescription?: string,
-  ): string {
-    // If custom image description provided, use it
-    if (imageDescription) {
-      return style ? `${style} style, ${imageDescription}` : imageDescription;
+  /**
+   * Extract scene blocks from script (Scene 1, Scene 2, etc.)
+   */
+  private _extractScenes(script: string): string[] {
+    const matches = script.match(/(?:Scene\s+\d+[:\-]?.*?)(?=Scene\s+\d+|$)/gis);
+
+    if (!matches?.length) {
+      return [script];
     }
 
-    // Extract visual summary from script (avoid screenplay markup, keep it short)
-    const cleanScript = scriptContent
-      .split('\n')
-      .find(line => line.trim().length > 10)
-      ?.replace(/[*_#\[\]()]/g, '')
-      .substring(0, 100) || 'Cinematic scene';
+    return matches.map(scene => scene.trim());
+  }
 
-    // Build short, visual prompt optimized for FLUX (not the full screenplay)
-    const visualPrompt = `Cinematic ${style || 'novel'} style, ${cleanScript}, dramatic lighting, high detail, 4k composition, YouTube thumbnail style`;
+  /**
+   * Build visual prompt from a single scene
+   */
+  private _buildScenePrompt(scene: string, style?: string): string {
+    const cleaned = scene
+      .replace(/[*_#\[\]()]/g, '')
+      .replace(/\s+/g, ' ')
+      .substring(0, 400);
 
-    return visualPrompt;
+    return `Cinematic ${style || 'novel'} style, ${cleaned}, dramatic lighting, high detail, 4k composition, cinematic framing, YouTube Shorts visual`;
   }
 
   /**

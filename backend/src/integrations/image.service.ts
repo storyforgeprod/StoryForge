@@ -58,8 +58,8 @@ export class ImageService {
   }
 
   private getPlaceholder(prompt: string): string {
-    // URL-safe placeholder service
+    // Use picsum.photos (stable, seeded by prompt for consistency)
     const encoded = encodeURIComponent(prompt.substring(0, 50));
-    return `https://via.placeholder.com/1024x1024.png?text=${encoded}`;
+    return `https://picsum.photos/seed/${encoded}/1024/1024`;
   }
 }
