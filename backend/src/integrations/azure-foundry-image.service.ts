@@ -70,6 +70,7 @@ export class AzureFoundryImageService {
         } catch (error) {
             const message = error instanceof Error ? error.message : String(error ?? 'Unknown Azure Foundry image error');
             this.logger.error(`AzureFoundryImage failed: ${message}`);
+            this.logger.debug(`[AzureFoundryImage] FULL ERROR for diagnostics:`, error);
             try {
                 this.logger.debug(`Error details: ${util.inspect(error, { depth: 10 })}`);
             } catch (e) {
@@ -95,7 +96,8 @@ export class AzureFoundryImageService {
                 }
             }
 
-            throw new Error(`AzureFoundryImage generation failed: ${message}`);
+            // Re-throw original error instead of wrapping (better for fallback chain)
+            throw error;
         }
     }
 }

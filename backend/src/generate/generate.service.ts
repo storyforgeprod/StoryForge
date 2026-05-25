@@ -6,7 +6,7 @@ import { GenerateVideoDto, GenerateVideoResponseDto, VideoAssemblyResult } from 
 import { PrismaService } from '../common/prisma/prisma.service';
 import { QueueService } from '../common/queue/queue.service';
 import { AzureOpenAIService } from '../integrations/azure-openai.service';
-import { AzureFoundryImageService } from '../integrations/azure-foundry-image.service';
+import { ImageService } from '../integrations/image.service';
 import { ElevenLabsService } from '../integrations/elevenlabs.service';
 import { VideoService } from '../integrations/video.service';
 
@@ -16,7 +16,7 @@ export class GenerateService {
     private prisma: PrismaService,
     private queue: QueueService,
     private azureOpenAIService: AzureOpenAIService,
-    private azureFoundryImageService: AzureFoundryImageService,
+    private imageService: ImageService,
     private elevenLabsService: ElevenLabsService,
     private videoService: VideoService,
   ) { }
@@ -202,7 +202,7 @@ export class GenerateService {
 
   /**
    * Generate image content (used by queue processor)
-   * This is the actual async logic that calls Azure Foundry
+   * This is the actual async logic that calls ImageService (fallback chain)
    */
   async generateImageContent(
     userId: string,
@@ -228,10 +228,11 @@ export class GenerateService {
 
     const imagePrompt = this._buildImagePrompt(scriptContent, data.style, data.imageDescription);
 
-    const imageUrls = await this.azureFoundryImageService.generateImages(userId, imagePrompt, 1);
+    // 3. Use ImageService with fallback chain (FLUX → DALL·E → placeholder)
+    const imageUrl = await this.imageService.generateImage(userId, imagePrompt);
 
     return {
-      imageUrls,
+      imageUrls: [imageUrl],
       prompt: imagePrompt,
       generatedAt: new Date(),
     };

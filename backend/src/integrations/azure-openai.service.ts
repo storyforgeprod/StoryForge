@@ -91,6 +91,52 @@ export class AzureOpenAIService {
         }
     }
 
+    async generateImage(userId: string, prompt: string): Promise<string> {
+        if (!prompt || prompt.trim().length === 0) {
+            throw new Error('Image prompt cannot be empty');
+        }
+
+        const start = Date.now();
+        this.logger.log(`AzureOpenAI generateImage (DALL·E) request for user=${userId}`);
+        this.logger.debug(`AzureOpenAI image prompt preview: ${prompt.substring(0, 200)}`);
+
+        try {
+            const response = await this.client.getImages(this.deployment, prompt, {
+                size: '1024x1024',
+                n: 1,
+                responseFormat: 'url',
+            });
+
+            const latency = Date.now() - start;
+            this.logger.log(`AzureOpenAI generateImage completed for user=${userId} latency=${latency}ms`);
+
+            const imageUrl = response.data?.[0]?.url;
+            if (!imageUrl) {
+                throw new Error('Azure OpenAI returned no image URL');
+            }
+
+            this.logger.debug(`AzureOpenAI image generated successfully`);
+            return imageUrl;
+        } catch (error) {
+            const message = error instanceof Error ? error.message : 'Unknown Azure OpenAI image error';
+            this.logger.error(`AzureOpenAI generateImage failed: ${message}`);
+            if (error && typeof error === 'object') {
+                try {
+                    // @ts-ignore
+                    if (error.statusCode) this.logger.debug(`statusCode: ${error.statusCode}`);
+                    // @ts-ignore
+                    if (error.code) this.logger.debug(`code: ${error.code}`);
+                    // @ts-ignore
+                    if (error.response) this.logger.debug(`response: ${JSON.stringify(error.response)}`);
+                } catch (e) {
+                    this.logger.debug('Failed to log error details');
+                }
+            }
+
+            throw error;
+        }
+    }
+
     private buildScriptPrompt(story: string): string {
         return `You are a professional screenwriter specializing in short-form video content for YouTube Shorts.
 
