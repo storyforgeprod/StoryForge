@@ -7,7 +7,7 @@ import {
   Get,
   Param,
 } from "@nestjs/common";
-import { Throttle } from "@nestjs/throttler";
+import { Throttle, SkipThrottle } from "@nestjs/throttler";
 import { ApiTags, ApiOperation, ApiResponse } from "@nestjs/swagger";
 import { GenerateService } from "./generate.service";
 import {
@@ -57,6 +57,7 @@ export class GenerateController {
   }
 
   @Get("job/:jobId")
+  @SkipThrottle()
   @ApiOperation({
     summary: "Get job status",
     description: "Retrieve the status and result of a generation job",
