@@ -63,12 +63,22 @@ export class AzureFoundryImageService {
         }),
       });
 
-      const json = await response.json() as any;
+      // Read raw response for diagnostics
+      const rawText = await response.text();
+      this.logger.debug(`FLUX RAW RESPONSE (first 2000 chars): ${rawText.substring(0, 2000)}`);
 
       if (!response.ok) {
         this.logger.error(`FLUX request failed status=${response.status}`);
-        this.logger.debug(`FLUX error response: ${JSON.stringify(json, null, 2)}`);
-        throw new Error(json?.error?.message ?? 'FLUX generation failed');
+        throw new Error(rawText || 'FLUX generation failed');
+      }
+
+      // Parse JSON manually (to catch parse errors properly)
+      let json: any;
+      try {
+        json = JSON.parse(rawText);
+      } catch (parseError) {
+        this.logger.error(`Failed to parse FLUX response as JSON`);
+        throw new Error(`Invalid JSON response from FLUX: ${parseError instanceof Error ? parseError.message : 'Unknown error'}`);
       }
 
       const images: string[] =

@@ -243,11 +243,22 @@ export class GenerateService {
     style?: string,
     imageDescription?: string,
   ): string {
-    const description = imageDescription
-      ? imageDescription
-      : `Create a vivid cover image description for this script: ${scriptContent}`;
+    // If custom image description provided, use it
+    if (imageDescription) {
+      return style ? `${style} style, ${imageDescription}` : imageDescription;
+    }
 
-    return style ? `${style} style, ${description}` : description;
+    // Extract visual summary from script (avoid screenplay markup, keep it short)
+    const cleanScript = scriptContent
+      .split('\n')
+      .find(line => line.trim().length > 10)
+      ?.replace(/[*_#\[\]()]/g, '')
+      .substring(0, 100) || 'Cinematic scene';
+
+    // Build short, visual prompt optimized for FLUX (not the full screenplay)
+    const visualPrompt = `Cinematic ${style || 'novel'} style, ${cleanScript}, dramatic lighting, high detail, 4k composition, YouTube thumbnail style`;
+
+    return visualPrompt;
   }
 
   /**
