@@ -421,25 +421,11 @@ export class GenerateService {
     }
 
     // 2. Verify image job exists and belongs to user
-    let imageJob = await this.prisma.job.findUnique({
+    const imageJob = await this.prisma.job.findUnique({
       where: { id: dto.imageJobId },
     });
 
-    // If image job doesn't exist, create it as completed (for testing/presets)
-    if (!imageJob) {
-      imageJob = await this.prisma.job.create({
-        data: {
-          userId,
-          projectId: null,
-          type: 'images',
-          status: 'completed',
-          progress: 100,
-          result: 'preset_or_test_job',
-          createdAt: new Date(),
-          updatedAt: new Date(),
-        },
-      });
-    } else if (imageJob.userId !== userId) {
+    if (!imageJob || imageJob.userId !== userId) {
       throw new ForbiddenException('Unauthorized access to this image job');
     }
 
@@ -450,25 +436,11 @@ export class GenerateService {
     }
 
     // 3. Verify audio job exists and belongs to user
-    let audioJob = await this.prisma.job.findUnique({
+    const audioJob = await this.prisma.job.findUnique({
       where: { id: dto.audioJobId },
     });
 
-    // If audio job doesn't exist, create it as completed (for testing/presets)
-    if (!audioJob) {
-      audioJob = await this.prisma.job.create({
-        data: {
-          userId,
-          projectId: null,
-          type: 'audio',
-          status: 'completed',
-          progress: 100,
-          result: 'preset_or_test_job',
-          createdAt: new Date(),
-          updatedAt: new Date(),
-        },
-      });
-    } else if (audioJob.userId !== userId) {
+    if (!audioJob || audioJob.userId !== userId) {
       throw new ForbiddenException('Unauthorized access to this audio job');
     }
 
