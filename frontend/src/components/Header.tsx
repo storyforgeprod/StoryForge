@@ -3,7 +3,6 @@ import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 
 export function Header() {
-  const { user } = useAuth();
   const navigate = useNavigate();
 
   return (
