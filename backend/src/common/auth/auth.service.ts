@@ -52,18 +52,13 @@ export class AuthService {
     email: string,
     password: string,
   ): Promise<{ access_token: string; user: User }> {
-    const user = await this.usersService.findByEmail(email);
-    if (!user) {
+    const user = await this.usersService.findByEmail(email) as any;
+
+    if (!user || !user.userPassword?.passwordHash) {
       throw new UnauthorizedException('Invalid credentials');
     }
 
-    // Retrieve and verify password (simplified; needs proper implementation)
-    const passwordHash = await this.usersService.getPasswordHash(user.id);
-    if (!passwordHash) {
-      throw new UnauthorizedException('Invalid credentials');
-    }
-
-    const isPasswordValid = await bcrypt.compare(password, passwordHash);
+    const isPasswordValid = await bcrypt.compare(password, user.userPassword.passwordHash);
     if (!isPasswordValid) {
       throw new UnauthorizedException('Invalid credentials');
     }

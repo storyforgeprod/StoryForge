@@ -1,8 +1,23 @@
 import type { StoryStyle, ImageGenerationResult, AudioGenerationResult } from '@/types/generate';
+import { getAuthToken } from '@/contexts/AuthContext';
 
 const API_BASE = import.meta.env.VITE_API_URL ?? 'http://localhost:3000';
 
 type ApiError = { status: number; message: string };
+
+function getHeaders(additionalHeaders: Record<string, string> = {}) {
+  const headers: Record<string, string> = {
+    'Content-Type': 'application/json',
+    ...additionalHeaders,
+  };
+
+  const token = getAuthToken();
+  if (token) {
+    headers.Authorization = `Bearer ${token}`;
+  }
+
+  return headers;
+}
 
 async function handleResponse<T>(res: Response): Promise<T> {
     if (res.ok) return res.json() as Promise<T>;
@@ -22,7 +37,7 @@ export async function postGenerateScript(
 ): Promise<{ jobId: string; status: string; createdAt: string }> {
     const res = await fetch(`${API_BASE}/generate/script`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: getHeaders(),
         body: JSON.stringify(body),
     });
     return handleResponse(res);
@@ -40,7 +55,9 @@ export async function getJobStatus(
     message?: string;
     completedAt?: string;
 }> {
-    const res = await fetch(`${API_BASE}/generate/job/${jobId}`);
+    const res = await fetch(`${API_BASE}/generate/job/${jobId}`, {
+        headers: getHeaders(),
+    });
     return handleResponse(res);
 }
 
@@ -49,7 +66,7 @@ export async function postGenerateImages(
 ): Promise<{ jobId: string; status: string; createdAt: string }> {
     const res = await fetch(`${API_BASE}/generate/images`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: getHeaders(),
         body: JSON.stringify(body),
     });
     return handleResponse(res);
@@ -60,7 +77,7 @@ export async function postGenerateAudio(
 ): Promise<{ jobId: string; status: string; createdAt: string }> {
     const res = await fetch(`${API_BASE}/generate/audio`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: getHeaders(),
         body: JSON.stringify(body),
     });
     return handleResponse(res);
@@ -71,7 +88,7 @@ export async function postGenerateVideo(
 ): Promise<{ jobId: string; status: string; createdAt: string }> {
     const res = await fetch(`${API_BASE}/generate/video`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: getHeaders(),
         body: JSON.stringify(body),
     });
     return handleResponse(res);

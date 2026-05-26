@@ -79,8 +79,11 @@ export class UsersService {
     return this.prisma.user.findUnique({ where: { googleId } });
   }
 
-  async findByEmail(email: string): Promise<User | null> {
-    return this.prisma.user.findUnique({ where: { email } });
+  async findByEmail(email: string) {
+    return this.prisma.user.findUnique({
+      where: { email },
+      include: { userPassword: true },
+    });
   }
 
   async findById(id: string): Promise<User | null> {

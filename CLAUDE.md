@@ -48,7 +48,45 @@ VITE_API_URL
 
 ## Auth Flow
 
-Auth guard exists but controllers currently use hardcoded `dev-user`. No login/signup routes implemented yet. Frontend has no auth integration (Supabase SDK installed but unused).
+**JWT + Multi-provider (Supabase, Google, Local)**
+
+- Local auth: POST /auth/register (email/password) → bcrypt hash
+- Local auth: POST /auth/login (email/password) → verify hash
+- Google OAuth: GET /auth/google → Passport Google Strategy
+- Token refresh: POST /auth/refresh → new JWT from expired token
+- Profile: GET /auth/me (requires JWT) → current user
+
+**Protected routes:** @UseGuards(AuthGuard('jwt')) on GenerateController
+**Token storage:** localStorage (storyforge_token, storyforge_user)
+**JWT expiration:** 7 days
+**Password hash:** bcrypt 10 rounds
+
+**Models:**
+- User: id, email, name, role (ADMIN|USER), supabaseId?, googleId?, provider, passwordHash?, ...
+- UserPassword: userId, passwordHash (separate for flexibility)
+
+**Frontend auth:**
+- AuthContext + useAuth() hook
+- LoginPage, RegisterPage, Header, ProtectedRoute components
+- authApi.ts service with register, login, refreshToken calls
+- generateApi.ts auto-includes Authorization header
+
+## Authentication Status (May 25, 2026)
+
+✅ **Completed**
+- Backend: JWT + Google OAuth + local auth (email/password)
+- Frontend: Login/Register pages, Header with username, Protected routes
+- RBAC: RolesGuard for endpoint access control
+- Corrección 7: login() blindado against non-existent users
+- Database: UserPassword table + User.role/googleId/provider fields
+- Integration: generateApi.ts includes JWT in all requests
+
+🔲 **Pending**
+- Google OAuth frontend button + callback handling
+- Testing (manual & automated)
+- Email verification, password reset
+- Rate limiting on /auth/login
+
 
 ## Skills (auto-activated)
 
