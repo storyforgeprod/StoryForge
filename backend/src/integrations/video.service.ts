@@ -120,15 +120,15 @@ export class VideoService implements OnModuleInit {
       const outputSize = fs.statSync(outputPath).size;
       this.logger.log(`[VideoAssembly] 📦 Output video: ${(outputSize / 1024 / 1024).toFixed(2)}MB`);
 
-      // Upload to Supabase
+      // Upload to Supabase using stream to avoid loading entire file into RAM
       const storagePath = `${jobId}/${jobId}.mp4`;
       const uploadStart = Date.now();
-      const fileBuffer = fs.readFileSync(outputPath);
-      this.logger.log(`[VideoAssembly] ☁️  Uploading ${(fileBuffer.length / 1024).toFixed(0)}KB to Supabase...`);
+      const fileStream = fs.createReadStream(outputPath);
+      this.logger.log(`[VideoAssembly] ☁️  Uploading ${(outputSize / 1024).toFixed(0)}KB to Supabase...`);
 
       const { error: uploadError } = await this.supabase.storage
         .from(BUCKET)
-        .upload(storagePath, fileBuffer, { contentType: 'video/mp4', upsert: true });
+        .upload(storagePath, fileStream as any, { contentType: 'video/mp4', upsert: true });
 
       if (uploadError) throw new Error(`Supabase upload failed: ${uploadError.message}`);
       this.logger.log(`[VideoAssembly] ✅ Uploaded: ${storagePath} (${Date.now() - uploadStart}ms)`);
@@ -239,7 +239,7 @@ export class VideoService implements OnModuleInit {
     options: { fps?: number; bitrate?: string },
   ): string[] {
     const fps = options?.fps ?? 30;
-    const bitrate = options?.bitrate ?? '2000k';
+    const bitrate = options?.bitrate ?? '1200k';
     this.logger.log(`[VideoAssembly] 🎞️  FFmpeg config: ${fps}fps, ${bitrate} bitrate, ${secPerImage.toFixed(2)}s/img`);
     const args: string[] = [];
 
@@ -261,7 +261,7 @@ export class VideoService implements OnModuleInit {
       '-filter_complex', scaleParts.join(';'),
       '-map', '[outv]',
       '-map', `${numImages}:a`,
-      '-c:v', 'libx264', '-preset', 'fast', '-crf', '23', '-b:v', bitrate,
+      '-c:v', 'libx264', '-preset', 'ultrafast', '-crf', '23', '-b:v', bitrate, '-threads', '1',
       '-c:a', 'aac', '-b:a', '128k',
       '-t', '60',
       '-r', String(fps),

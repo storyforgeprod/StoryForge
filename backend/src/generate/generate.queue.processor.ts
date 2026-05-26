@@ -32,7 +32,7 @@ export class GenerateQueueProcessor {
     this.logger.log('✅ Queue processor initialized for "generation" queue');
   }
 
-  @Process()
+  @Process({ concurrency: 1 })
   async processGenerationJob(job: Job<GenerationJobData>) {
     const { jobId, userId, type, story } = job.data;
     const queueWaitTime = Date.now() - job.data._startTime;
