@@ -112,9 +112,9 @@ export function Generate() {
                 setIsPresetMode(true);
                 // Set default style for preset mode (ANIME)
                 setStyle('anime' as StoryStyle);
-                // Set default voice if not already set
+                // Set default voice if not already set (use valid voice ID: Sarah)
                 if (!voiceId) {
-                    setVoiceId('nova');
+                    setVoiceId('EXAVITQu4vr4xnSDxMaL');
                 }
                 // Reset generation states to avoid showing old UI
                 resetGeneration();
@@ -126,10 +126,18 @@ export function Generate() {
             // Load image and audio job IDs
             if (state.imageJobId) {
                 setImageJobId(state.imageJobId);
+                setIsPresetMode(true);
+                // Set default style and voice for preset mode
+                if (!style) setStyle('anime' as StoryStyle);
+                if (!voiceId) setVoiceId('EXAVITQu4vr4xnSDxMaL');
                 resetImages();
             }
             if (state.audioJobId) {
                 setAudioJobId(state.audioJobId);
+                setIsPresetMode(true);
+                // Set default style and voice for preset mode
+                if (!style) setStyle('anime' as StoryStyle);
+                if (!voiceId) setVoiceId('EXAVITQu4vr4xnSDxMaL');
                 resetAudio();
             }
             
