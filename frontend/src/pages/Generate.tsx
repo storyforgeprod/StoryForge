@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, ChevronLeft, Loader2 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
@@ -78,6 +78,11 @@ export function Generate() {
     const [scriptJobId, setScriptJobId] = useState<string | null>(null);
     const [imageJobId, setImageJobId] = useState<string | null>(null);
     const [audioJobId, setAudioJobId] = useState<string | null>(null);
+    
+    // Refs for auto-scrolling to sections
+    const imagesRef = useRef<HTMLDivElement>(null);
+    const audioRef = useRef<HTMLDivElement>(null);
+    const videoRef = useRef<HTMLDivElement>(null);
     
     // Preset dialog states
     const [presetDialogOpen, setPresetDialogOpen] = useState<PresetDialogState>('closed');
@@ -224,6 +229,10 @@ export function Generate() {
         const styleToUse = style || (isPresetMode ? 'anime' as StoryStyle : null);
         if (!styleToUse) return;
         generateImages(scriptJobId, styleToUse);
+        // Auto-scroll to images section
+        setTimeout(() => {
+            imagesRef.current?.scrollIntoView({ behavior: 'smooth' });
+        }, 100);
     };
 
     const handleImagesRetry = () => {
@@ -233,6 +242,10 @@ export function Generate() {
     const handleGenerateAudio = () => {
         if (!scriptJobId || !voiceId) return;
         generateAudio(scriptJobId, voiceId);
+        // Auto-scroll to audio section
+        setTimeout(() => {
+            audioRef.current?.scrollIntoView({ behavior: 'smooth' });
+        }, 100);
     };
 
     const handleAudioRetry = () => {
@@ -242,6 +255,10 @@ export function Generate() {
     const handleGenerateVideo = () => {
         if (!imageJobId || !audioJobId) return;
         generateVideo(imageJobId, audioJobId);
+        // Auto-scroll to video section
+        setTimeout(() => {
+            videoRef.current?.scrollIntoView({ behavior: 'smooth' });
+        }, 100);
     };
 
     const handleVideoRetry = () => {
@@ -555,7 +572,7 @@ export function Generate() {
 
                 {/* Image generation — loading */}
                 {isGeneratingImages && (
-                    <Card>
+                    <Card ref={imagesRef}>
                         <CardContent className="flex flex-col items-center gap-4 py-16">
                             <Loader2 className="h-10 w-10 animate-spin text-primary" />
                             <p className="text-sm text-muted-foreground">
@@ -567,7 +584,7 @@ export function Generate() {
 
                 {/* Image generation — done */}
                 {imagesState.phase === 'completed' && !isPresetMode && (
-                    <Card>
+                    <Card ref={imagesRef}>
                         <CardHeader>
                             <CardTitle>Imágenes generadas</CardTitle>
                             <CardDescription>
@@ -582,7 +599,7 @@ export function Generate() {
 
                 {/* Audio generation — loading */}
                 {isGeneratingAudio && (
-                    <Card>
+                    <Card ref={audioRef}>
                         <CardContent className="flex flex-col items-center gap-4 py-16">
                             <Loader2 className="h-10 w-10 animate-spin text-primary" />
                             <p className="text-sm text-muted-foreground">
@@ -594,7 +611,7 @@ export function Generate() {
 
                 {/* Audio generation — done; video not yet started */}
                 {(audioState.phase === 'completed' || audioJobId) && videoState.phase === 'idle' && (
-                    <Card>
+                    <Card ref={audioRef}>
                         <CardHeader>
                             <CardTitle>Narración generada</CardTitle>
                             <CardDescription>
@@ -623,7 +640,7 @@ export function Generate() {
                                 )}
                                 <Button
                                     type="button"
-                                    disabled={!imageJobId || !audioJobId}
+                                    disabled={!imageJobId || !audioJobId || isGeneratingAudio}
                                     onClick={handleGenerateVideo}
                                 >
                                     Generar video
@@ -647,7 +664,7 @@ export function Generate() {
 
                 {/* Audio generation — idle (show button to start) */}
                 {(imagesState.phase === 'completed' || imageJobId) && audioState.phase === 'idle' && (
-                    <Card>
+                    <Card ref={audioRef}>
                         <CardHeader>
                             <CardTitle>Listo para generar narración</CardTitle>
                             <CardDescription>
@@ -665,7 +682,11 @@ export function Generate() {
                                         Usar preset
                                     </Button>
                                 )}
-                                <Button type="button" onClick={handleGenerateAudio}>
+                                <Button 
+                                    type="button" 
+                                    disabled={isGeneratingImages}
+                                    onClick={handleGenerateAudio}
+                                >
                                     Generar narración
                                 </Button>
                             </div>
@@ -687,7 +708,7 @@ export function Generate() {
 
                 {/* Video generation — loading */}
                 {isGeneratingVideo && (
-                    <Card>
+                    <Card ref={videoRef}>
                         <CardContent className="flex flex-col items-center gap-4 py-16">
                             <Loader2 className="h-10 w-10 animate-spin text-primary" />
                             <p className="text-sm text-muted-foreground">
@@ -699,7 +720,7 @@ export function Generate() {
 
                 {/* Video generation — done */}
                 {videoState.phase === 'completed' && (
-                    <div className="space-y-4">
+                    <div ref={videoRef} className="space-y-4">
                         <DownloadCard
                             videoUrl={videoState.videoUrl}
                             durationSeconds={videoState.duration}
