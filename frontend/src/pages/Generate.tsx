@@ -627,28 +627,6 @@ export function Generate() {
 
                 {/* AUDIO STAGE */}
 
-                {/* Audio generation — idle (show button to start) */}
-                {(imagesState.phase === 'completed' || imageJobId) && audioState.phase === 'idle' && !isGeneratingAudio && (
-                    <Card ref={audioRef}>
-                        <CardContent className="space-y-4">
-                            <div className="flex justify-end gap-2">
-                                {isDeveloper && (
-                                    <Button
-                                        type="button"
-                                        variant="outline"
-                                        onClick={() => handleOpenPresetDialog('audio')}
-                                    >
-                                        Usar preset
-                                    </Button>
-                                )}
-                                <Button type="button" onClick={handleGenerateAudio}>
-                                    Generar narración
-                                </Button>
-                            </div>
-                        </CardContent>
-                    </Card>
-                )}
-
                 {/* Audio generation — loading */}
                 {isGeneratingAudio && (
                     <Card ref={audioRef}>
