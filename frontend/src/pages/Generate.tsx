@@ -83,6 +83,9 @@ export function Generate() {
     const [scriptPresetContent, setScriptPresetContent] = useState('');
     const [imagesPresetInput, setImagesPresetInput] = useState('');
     const [audioPresetInput, setAudioPresetInput] = useState('');
+    
+    // Track if we're in preset mode (skip wizard)
+    const [isPresetMode, setIsPresetMode] = useState(false);
 
     const validation = useMemo(() => validateStory(story), [story]);
     const { state: genState, generate, reset: resetGeneration } = useGenerateScript();
@@ -101,27 +104,32 @@ export function Generate() {
                 setStory(state.story);
             }
             
-            // Auto-advance wizard steps if we have preset content
+            // If we have script preset content, enter preset mode
             if (state.scriptContent) {
-                // We need to mark story and style as complete to get to voice step
-                setStory(state.story || '');
-                setStep('voice');
                 setScriptPresetContent(state.scriptContent);
-                // Auto-apply script preset
                 const fakeJobId = 'preset_script_' + Date.now();
                 setScriptJobId(fakeJobId);
+                setIsPresetMode(true);
+                // Reset generation states to avoid showing old UI
+                resetGeneration();
+                resetImages();
+                resetAudio();
+                resetVideo();
             }
             
+            // Load image and audio job IDs
             if (state.imageJobId) {
                 setImageJobId(state.imageJobId);
+                resetImages();
             }
             if (state.audioJobId) {
                 setAudioJobId(state.audioJobId);
+                resetAudio();
             }
             
             sessionStorage.removeItem('devState');
         }
-    }, []);
+    }, [resetGeneration, resetImages, resetAudio, resetVideo]);
 
     const stages = useMemo(
         () => deriveStages(genState.phase, imagesState.phase, audioState.phase, videoState.phase),
@@ -236,6 +244,7 @@ export function Generate() {
         setScriptPresetContent('');
         setImagesPresetInput('');
         setAudioPresetInput('');
+        setIsPresetMode(false);
     };
 
     const isGeneratingScript =
@@ -399,7 +408,7 @@ export function Generate() {
 
             <main className="mx-auto max-w-3xl px-4 py-8">
                 {/* Script generation — loading */}
-                {isGeneratingScript && (
+                {!isPresetMode && isGeneratingScript && (
                     <Card>
                         <CardContent className="flex flex-col items-center gap-4 py-16">
                             <Loader2 className="h-10 w-10 animate-spin text-primary" />
@@ -411,7 +420,7 @@ export function Generate() {
                 )}
 
                 {/* Script generation — error */}
-                {genState.phase === 'error' && imagesState.phase === 'idle' && (
+                {!isPresetMode && genState.phase === 'error' && imagesState.phase === 'idle' && (
                     <Card>
                         <CardContent className="flex flex-col items-center gap-4 py-16">
                             <p className="text-sm text-destructive">{genState.message}</p>
@@ -423,7 +432,7 @@ export function Generate() {
                 )}
 
                 {/* Script done — prompt to start image generation */}
-                {genState.phase === 'completed' && imagesState.phase === 'idle' && (
+                {!isPresetMode && genState.phase === 'completed' && imagesState.phase === 'idle' && (
                     <Card>
                         <CardHeader>
                             <CardTitle>Guión generado</CardTitle>
@@ -458,7 +467,7 @@ export function Generate() {
                 )}
 
                 {/* Script preset — show preset content when applied */}
-                {scriptPresetContent && scriptJobId && genState.phase === 'idle' && imagesState.phase === 'idle' && (
+                {isPresetMode && scriptPresetContent && scriptJobId && imagesState.phase === 'idle' && (
                     <Card>
                         <CardHeader>
                             <CardTitle>Guión (preset)</CardTitle>
@@ -482,7 +491,7 @@ export function Generate() {
                                 )}
                                 <Button
                                     type="button"
-                                    disabled={!scriptJobId || !style}
+                                    disabled={!scriptJobId || !story}
                                     onClick={handleGenerateImages}
                                 >
                                     Generar imágenes
@@ -505,7 +514,7 @@ export function Generate() {
                 )}
 
                 {/* Image generation — done */}
-                {imagesState.phase === 'completed' && (
+                {imagesState.phase === 'completed' && !isPresetMode && (
                     <Card>
                         <CardHeader>
                             <CardTitle>Imágenes generadas</CardTitle>
@@ -532,7 +541,7 @@ export function Generate() {
                 )}
 
                 {/* Audio generation — done; video not yet started */}
-                {audioState.phase === 'completed' && videoState.phase === 'idle' && (
+                {(audioState.phase === 'completed' || audioJobId) && videoState.phase === 'idle' && (
                     <Card>
                         <CardHeader>
                             <CardTitle>Narración generada</CardTitle>
@@ -585,7 +594,7 @@ export function Generate() {
                 )}
 
                 {/* Audio generation — idle (show button to start) */}
-                {imagesState.phase === 'completed' && audioState.phase === 'idle' && (
+                {(imagesState.phase === 'completed' || imageJobId) && audioState.phase === 'idle' && (
                     <Card>
                         <CardHeader>
                             <CardTitle>Listo para generar narración</CardTitle>
@@ -664,8 +673,8 @@ export function Generate() {
                     </Card>
                 )}
 
-                {/* Wizard — story / style / voice steps */}
-                {genState.phase === 'idle' && (
+                {/* Wizard — story / style / voice steps (hidden in preset mode) */}
+                {!isPresetMode && genState.phase === 'idle' && (
                     <Card>
                         <CardHeader>
                             <div className="flex items-center justify-between">
