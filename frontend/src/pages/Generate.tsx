@@ -110,6 +110,12 @@ export function Generate() {
                 const fakeJobId = 'preset_script_' + Date.now();
                 setScriptJobId(fakeJobId);
                 setIsPresetMode(true);
+                // Set default style for preset mode (ANIME)
+                setStyle('anime' as StoryStyle);
+                // Set default voice if not already set
+                if (!voiceId) {
+                    setVoiceId('nova');
+                }
                 // Reset generation states to avoid showing old UI
                 resetGeneration();
                 resetImages();
@@ -129,7 +135,7 @@ export function Generate() {
             
             sessionStorage.removeItem('devState');
         }
-    }, [resetGeneration, resetImages, resetAudio, resetVideo]);
+    }, [resetGeneration, resetImages, resetAudio, resetVideo, voiceId]);
 
     const stages = useMemo(
         () => deriveStages(genState.phase, imagesState.phase, audioState.phase, videoState.phase),
@@ -190,8 +196,11 @@ export function Generate() {
     };
 
     const handleGenerateImages = () => {
-        if (!scriptJobId || !style) return;
-        generateImages(scriptJobId, style);
+        if (!scriptJobId) return;
+        // In preset mode, use default style if not set
+        const styleToUse = style || (isPresetMode ? 'anime' as StoryStyle : null);
+        if (!styleToUse) return;
+        generateImages(scriptJobId, styleToUse);
     };
 
     const handleImagesRetry = () => {
