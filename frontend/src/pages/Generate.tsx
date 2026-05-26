@@ -570,6 +570,8 @@ export function Generate() {
                     </Card>
                 )}
 
+                {/* IMAGES STAGE */}
+
                 {/* Image generation — loading */}
                 {isGeneratingImages && (
                     <Card ref={imagesRef}>
@@ -583,7 +585,7 @@ export function Generate() {
                 )}
 
                 {/* Image generation — done */}
-                {imagesState.phase === 'completed' && !isPresetMode && (
+                {imagesState.phase === 'completed' && audioState.phase === 'idle' && (
                     <Card ref={imagesRef}>
                         <CardHeader>
                             <CardTitle>Imágenes generadas</CardTitle>
@@ -593,6 +595,62 @@ export function Generate() {
                         </CardHeader>
                         <CardContent className="space-y-4">
                             <ImageGrid imageUrls={imagesState.imageUrls} />
+                            <div className="flex justify-end gap-2">
+                                {isDeveloper && (
+                                    <Button
+                                        type="button"
+                                        variant="outline"
+                                        onClick={() => handleOpenPresetDialog('audio')}
+                                    >
+                                        Usar preset
+                                    </Button>
+                                )}
+                                <Button type="button" onClick={handleGenerateAudio}>
+                                    Generar narración
+                                </Button>
+                            </div>
+                        </CardContent>
+                    </Card>
+                )}
+
+                {/* Image generation — error */}
+                {imagesState.phase === 'error' && (
+                    <Card>
+                        <CardContent className="flex flex-col items-center gap-4 py-16">
+                            <p className="text-sm text-destructive">{imagesState.message}</p>
+                            <Button type="button" variant="outline" onClick={handleImagesRetry}>
+                                Reintentar
+                            </Button>
+                        </CardContent>
+                    </Card>
+                )}
+
+                {/* AUDIO STAGE */}
+
+                {/* Audio generation — idle (show button to start) */}
+                {(imagesState.phase === 'completed' || imageJobId) && audioState.phase === 'idle' && !isGeneratingAudio && (
+                    <Card ref={audioRef}>
+                        <CardHeader>
+                            <CardTitle>Listo para generar narración</CardTitle>
+                            <CardDescription>
+                                Haz clic para generar el audio con la voz que seleccionaste.
+                            </CardDescription>
+                        </CardHeader>
+                        <CardContent className="space-y-4">
+                            <div className="flex justify-end gap-2">
+                                {isDeveloper && (
+                                    <Button
+                                        type="button"
+                                        variant="outline"
+                                        onClick={() => handleOpenPresetDialog('audio')}
+                                    >
+                                        Usar preset
+                                    </Button>
+                                )}
+                                <Button type="button" onClick={handleGenerateAudio}>
+                                    Generar narración
+                                </Button>
+                            </div>
                         </CardContent>
                     </Card>
                 )}
@@ -609,8 +667,8 @@ export function Generate() {
                     </Card>
                 )}
 
-                {/* Audio generation — done; video not yet started */}
-                {(audioState.phase === 'completed' || audioJobId) && videoState.phase === 'idle' && (
+                {/* Audio generation — done */}
+                {audioState.phase === 'completed' && videoState.phase === 'idle' && !isGeneratingVideo && (
                     <Card ref={audioRef}>
                         <CardHeader>
                             <CardTitle>Narración generada</CardTitle>
@@ -640,7 +698,7 @@ export function Generate() {
                                 )}
                                 <Button
                                     type="button"
-                                    disabled={!imageJobId || !audioJobId || isGeneratingAudio}
+                                    disabled={!imageJobId || !audioJobId}
                                     onClick={handleGenerateVideo}
                                 >
                                     Generar video
@@ -662,49 +720,9 @@ export function Generate() {
                     </Card>
                 )}
 
-                {/* Audio generation — idle (show button to start) */}
-                {(imagesState.phase === 'completed' || imageJobId) && audioState.phase === 'idle' && (
-                    <Card ref={audioRef}>
-                        <CardHeader>
-                            <CardTitle>Listo para generar narración</CardTitle>
-                            <CardDescription>
-                                Haz clic para generar el audio con la voz que seleccionaste.
-                            </CardDescription>
-                        </CardHeader>
-                        <CardContent className="space-y-4">
-                            <div className="flex justify-end gap-2">
-                                {isDeveloper && (
-                                    <Button
-                                        type="button"
-                                        variant="outline"
-                                        onClick={() => handleOpenPresetDialog('audio')}
-                                    >
-                                        Usar preset
-                                    </Button>
-                                )}
-                                <Button 
-                                    type="button" 
-                                    disabled={isGeneratingImages}
-                                    onClick={handleGenerateAudio}
-                                >
-                                    Generar narración
-                                </Button>
-                            </div>
-                        </CardContent>
-                    </Card>
-                )}
+                {/* VIDEO STAGE */}
 
-                {/* Image generation — error */}
-                {imagesState.phase === 'error' && (
-                    <Card>
-                        <CardContent className="flex flex-col items-center gap-4 py-16">
-                            <p className="text-sm text-destructive">{imagesState.message}</p>
-                            <Button type="button" variant="outline" onClick={handleImagesRetry}>
-                                Reintentar
-                            </Button>
-                        </CardContent>
-                    </Card>
-                )}
+                                {/* VIDEO STAGE */}
 
                 {/* Video generation — loading */}
                 {isGeneratingVideo && (
