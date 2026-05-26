@@ -9,6 +9,7 @@ import { AzureOpenAIService } from '../integrations/azure-openai.service';
 import { AzureFoundryImageService } from '../integrations/azure-foundry-image.service';
 import { ImageService } from '../integrations/image.service';
 import { ElevenLabsService } from '../integrations/elevenlabs.service';
+import { AudioGenerationService } from '../integrations/audio-generation.service';
 import { VideoService } from '../integrations/video.service';
 
 @Module({
@@ -27,8 +28,9 @@ import { VideoService } from '../integrations/video.service';
     AzureFoundryImageService,
     ImageService,
     ElevenLabsService,
+    AudioGenerationService,
     VideoService,
   ],
-  exports: [GenerateService, AzureOpenAIService, AzureFoundryImageService, ImageService, ElevenLabsService, VideoService],
+  exports: [GenerateService, AzureOpenAIService, AzureFoundryImageService, ImageService, ElevenLabsService, AudioGenerationService, VideoService],
 })
 export class GenerateModule { }

@@ -7,7 +7,7 @@ import { PrismaService } from '../common/prisma/prisma.service';
 import { QueueService } from '../common/queue/queue.service';
 import { AzureOpenAIService } from '../integrations/azure-openai.service';
 import { ImageService } from '../integrations/image.service';
-import { ElevenLabsService } from '../integrations/elevenlabs.service';
+import { AudioGenerationService } from '../integrations/audio-generation.service';
 import { VideoService } from '../integrations/video.service';
 
 @Injectable()
@@ -17,7 +17,7 @@ export class GenerateService {
     private queue: QueueService,
     private azureOpenAIService: AzureOpenAIService,
     private imageService: ImageService,
-    private elevenLabsService: ElevenLabsService,
+    private audioGenerationService: AudioGenerationService,
     private videoService: VideoService,
   ) { }
 
@@ -361,7 +361,7 @@ export class GenerateService {
 
   /**
    * Generate audio content (used by queue processor)
-   * This is the actual async logic that calls ElevenLabs API
+   * This is the actual async logic that calls TTS with fallback (ElevenLabs → Azure Speech)
    */
   async generateAudioContent(
     userId: string,
@@ -385,10 +385,11 @@ export class GenerateService {
       scriptText = scriptJob.result;
     }
 
-    // 3. Generate audio via ElevenLabs
-    const audioUrl = await this.elevenLabsService.generateAudio(scriptText, {
-      voiceId: data.voiceId,
-    });
+    // 3. Generate audio with fallback (ElevenLabs → Azure Speech)
+    const audioUrl = await this.audioGenerationService.generateTextToSpeech(
+      scriptText,
+      data.voiceId,
+    );
 
     // 4. Calculate audio length (rough estimate: 150 words per minute)
     const wordCount = scriptText.split(' ').length;
