@@ -18,6 +18,7 @@ import { useGenerateScript } from '@/hooks/useGenerateScript';
 import { useGenerateImages } from '@/hooks/useGenerateImages';
 import { useGenerateAudio } from '@/hooks/useGenerateAudio';
 import { useGenerateVideo } from '@/hooks/useGenerateVideo';
+import { postPreset } from '@/services/generateApi';
 
 type WizardStep = 'story' | 'style' | 'voice';
 
@@ -95,55 +96,69 @@ export function Generate() {
 
     // Load dev state if coming from dev mode
     useEffect(() => {
-        const devState = sessionStorage.getItem('devState');
-        if (devState) {
-            const state = JSON.parse(devState);
-            
-            // Set story
-            if (state.story) {
-                setStory(state.story);
-            }
-            
-            // If we have script preset content, enter preset mode
-            if (state.scriptContent) {
-                setScriptPresetContent(state.scriptContent);
-                const fakeJobId = 'preset_script_' + Date.now();
-                setScriptJobId(fakeJobId);
-                setIsPresetMode(true);
-                // Set default style for preset mode (ANIME)
-                setStyle('anime' as StoryStyle);
-                // Set default voice if not already set (use valid voice ID: Sarah)
-                if (!voiceId) {
-                    setVoiceId('EXAVITQu4vr4xnSDxMaL');
+        const loadDevState = async () => {
+            const devState = sessionStorage.getItem('devState');
+            if (!devState) return;
+
+            try {
+                const state = JSON.parse(devState);
+                
+                // Set story
+                if (state.story) {
+                    setStory(state.story);
                 }
-                // Reset generation states to avoid showing old UI
-                resetGeneration();
-                resetImages();
-                resetAudio();
-                resetVideo();
+                
+                // If we have script preset content, save it to backend to get a real job ID
+                if (state.scriptContent) {
+                    try {
+                        const result = await postPreset('script', { content: state.scriptContent });
+                        setScriptJobId(result.jobId);
+                    } catch (error) {
+                        console.error('Error saving script preset from DevMode:', error);
+                        // Fallback: use fake ID if API fails
+                        setScriptJobId('preset_script_' + Date.now());
+                    }
+                    setIsPresetMode(true);
+                    // Set default style for preset mode (ANIME)
+                    setStyle('anime' as StoryStyle);
+                    // Set default voice if not already set (use valid voice ID: Sarah)
+                    if (!voiceId) {
+                        setVoiceId('EXAVITQu4vr4xnSDxMaL');
+                    }
+                    // Reset generation states to avoid showing old UI
+                    resetGeneration();
+                    resetImages();
+                    resetAudio();
+                    resetVideo();
+                }
+                
+                // Load image and audio job IDs
+                if (state.imageJobId) {
+                    setImageJobId(state.imageJobId);
+                    setIsPresetMode(true);
+                    // Set default style and voice for preset mode
+                    if (!style) setStyle('anime' as StoryStyle);
+                    if (!voiceId) setVoiceId('EXAVITQu4vr4xnSDxMaL');
+                    resetImages();
+                }
+                if (state.audioJobId) {
+                    setAudioJobId(state.audioJobId);
+                    setIsPresetMode(true);
+                    // Set default style and voice for preset mode
+                    if (!style) setStyle('anime' as StoryStyle);
+                    if (!voiceId) setVoiceId('EXAVITQu4vr4xnSDxMaL');
+                    resetAudio();
+                }
+                
+                sessionStorage.removeItem('devState');
+            } catch (error) {
+                console.error('Error loading dev state:', error);
             }
-            
-            // Load image and audio job IDs
-            if (state.imageJobId) {
-                setImageJobId(state.imageJobId);
-                setIsPresetMode(true);
-                // Set default style and voice for preset mode
-                if (!style) setStyle('anime' as StoryStyle);
-                if (!voiceId) setVoiceId('EXAVITQu4vr4xnSDxMaL');
-                resetImages();
-            }
-            if (state.audioJobId) {
-                setAudioJobId(state.audioJobId);
-                setIsPresetMode(true);
-                // Set default style and voice for preset mode
-                if (!style) setStyle('anime' as StoryStyle);
-                if (!voiceId) setVoiceId('EXAVITQu4vr4xnSDxMaL');
-                resetAudio();
-            }
-            
-            sessionStorage.removeItem('devState');
-        }
+        };
+
+        loadDevState();
     }, [resetGeneration, resetImages, resetAudio, resetVideo, voiceId]);
+
 
     const stages = useMemo(
         () => deriveStages(genState.phase, imagesState.phase, audioState.phase, videoState.phase),
@@ -285,35 +300,55 @@ export function Generate() {
         setAudioPresetInput('');
     };
 
-    const handleApplyScriptPreset = () => {
+    const handleApplyScriptPreset = async () => {
         if (!scriptPresetContent.trim()) {
             alert('Por favor ingresa contenido para el guión');
             return;
         }
-        // Mark script as completed by setting a fake job ID
-        const fakeJobId = 'preset_script_' + Date.now();
-        setScriptJobId(fakeJobId);
-        handleClosePresetDialog();
+        try {
+            // Save preset to backend to get a real job ID
+            const result = await postPreset('script', { content: scriptPresetContent });
+            setScriptJobId(result.jobId);
+            setScriptPresetContent('');
+            handleClosePresetDialog();
+        } catch (error) {
+            console.error('Error saving script preset:', error);
+            alert('Error al guardar el preset del guión');
+        }
     };
 
-    const handleApplyImagesPreset = () => {
+    const handleApplyImagesPreset = async () => {
         if (!imagesPresetInput.trim()) {
             alert('Por favor ingresa un Job ID válido o carga imágenes');
             return;
         }
-        // Use the input as a job ID
-        setImageJobId(imagesPresetInput);
-        handleClosePresetDialog();
+        try {
+            // Save images preset to backend to get a real job ID
+            const result = await postPreset('images', { content: imagesPresetInput });
+            setImageJobId(result.jobId);
+            setImagesPresetInput('');
+            handleClosePresetDialog();
+        } catch (error) {
+            console.error('Error saving images preset:', error);
+            alert('Error al guardar el preset de imágenes');
+        }
     };
 
-    const handleApplyAudioPreset = () => {
+    const handleApplyAudioPreset = async () => {
         if (!audioPresetInput.trim()) {
             alert('Por favor ingresa un Job ID válido');
             return;
         }
-        // Use the input as a job ID
-        setAudioJobId(audioPresetInput);
-        handleClosePresetDialog();
+        try {
+            // Save audio preset to backend to get a real job ID
+            const result = await postPreset('audio', { content: audioPresetInput });
+            setAudioJobId(result.jobId);
+            setAudioPresetInput('');
+            handleClosePresetDialog();
+        } catch (error) {
+            console.error('Error saving audio preset:', error);
+            alert('Error al guardar el preset de audio');
+        }
     };
 
     return (

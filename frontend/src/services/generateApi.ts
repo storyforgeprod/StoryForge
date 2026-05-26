@@ -93,3 +93,15 @@ export async function postGenerateVideo(
     });
     return handleResponse(res);
 }
+
+export async function postPreset(
+    type: 'script' | 'images' | 'audio',
+    body: { content?: string; jobId?: string },
+): Promise<{ jobId: string; type: string }> {
+    const res = await fetch(`${API_BASE}/generate/preset/${type}`, {
+        method: 'POST',
+        headers: getHeaders(),
+        body: JSON.stringify(body),
+    });
+    return handleResponse(res);
+}

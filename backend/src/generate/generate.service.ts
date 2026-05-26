@@ -560,4 +560,47 @@ export class GenerateService {
       generatedAt: new Date(),
     };
   }
+
+  /**
+   * Save preset content (script, images, audio) as a completed job
+   * Allows developers to skip generation steps for testing/preset flows
+   */
+  async savePreset(
+    userId: string,
+    type: string,
+    body: { content?: string; jobId?: string },
+  ): Promise<{ jobId: string; type: string }> {
+    const validTypes = ['script', 'images', 'audio'];
+    if (!validTypes.includes(type)) {
+      throw new BadRequestException(`Invalid preset type. Must be one of: ${validTypes.join(', ')}`);
+    }
+
+    if (!body.content && !body.jobId) {
+      throw new BadRequestException('Either "content" or "jobId" must be provided');
+    }
+
+    try {
+      // Create a completed job for the preset
+      const job = await this.prisma.job.create({
+        data: {
+          userId,
+          projectId: null,
+          type,
+          status: 'completed',
+          progress: 100,
+          result: body.content || body.jobId || '',
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        },
+      });
+
+      return {
+        jobId: job.id,
+        type,
+      };
+    } catch (error) {
+      console.error('Failed to save preset:', error);
+      throw new BadRequestException('Failed to save preset job');
+    }
+  }
 }

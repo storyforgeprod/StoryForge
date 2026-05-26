@@ -150,4 +150,31 @@ export class GenerateController {
   ): Promise<GenerateVideoResponseDto> {
     return this.generateService.generateVideo(user.sub, dto);
   }
+
+  @Post("preset/:type")
+  @Throttle({ default: { limit: 10, ttl: 60000 } })
+  @HttpCode(HttpStatus.CREATED)
+  @ApiOperation({
+    summary: "Save preset content as a job",
+    description: "Saves preset script, images, or audio content directly as a job in the system",
+  })
+  @ApiResponse({
+    status: 201,
+    description: "Preset job created successfully",
+  })
+  @ApiResponse({
+    status: 400,
+    description: "Invalid preset type or content",
+  })
+  @ApiResponse({
+    status: 401,
+    description: "Unauthorized - JWT token required",
+  })
+  async savePreset(
+    @CurrentUser() user: any,
+    @Param("type") type: string,
+    @Body() body: { content?: string; jobId?: string },
+  ): Promise<{ jobId: string; type: string }> {
+    return this.generateService.savePreset(user.sub, type, body);
+  }
 }
