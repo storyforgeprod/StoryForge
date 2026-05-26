@@ -4,7 +4,8 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import type { PipelineStage } from '@/types/pipeline';
 
-const STAGES: { value: PipelineStage; label: string }[] = [
+const STAGES: { value: PipelineStage | 'wizard'; label: string }[] = [
+  { value: 'wizard', label: 'Wizard Completo' },
   { value: 'story', label: 'Historia' },
   { value: 'script', label: 'Guión' },
   { value: 'images', label: 'Imágenes' },
@@ -14,24 +15,40 @@ const STAGES: { value: PipelineStage; label: string }[] = [
 
 export function DevMode() {
   const navigate = useNavigate();
-  const [selectedStage, setSelectedStage] = useState<PipelineStage>('story');
-  const [content, setContent] = useState('');
-  const [jobId, setJobId] = useState('');
+  const [selectedStage, setSelectedStage] = useState<PipelineStage | 'wizard'>('wizard');
+  const [storyContent, setStoryContent] = useState('');
+  const [scriptContent, setScriptContent] = useState('');
+  const [imagesJobId, setImagesJobId] = useState('');
+  const [audioJobId, setAudioJobId] = useState('');
 
   const handleJumpToStage = () => {
-    if (!content && selectedStage !== 'story') {
-      alert('Por favor ingresa contenido o un Job ID');
+    // Validate based on stage
+    if (selectedStage === 'story' && !storyContent.trim()) {
+      alert('Por favor ingresa una historia');
+      return;
+    }
+    
+    if (selectedStage === 'script' && !scriptContent.trim()) {
+      alert('Por favor ingresa contenido para el guión');
+      return;
+    }
+    
+    if (selectedStage === 'images' && !imagesJobId.trim()) {
+      alert('Por favor ingresa un Job ID válido para imágenes');
+      return;
+    }
+    
+    if (selectedStage === 'audio' && !audioJobId.trim()) {
+      alert('Por favor ingresa un Job ID válido para audio');
       return;
     }
 
     // Guardar en session storage para que Generate.tsx lo lea
     const devState = {
-      stage: selectedStage,
-      story: selectedStage === 'story' ? content : '',
-      scriptContent: selectedStage === 'script' ? content : '',
-      imageJobId: selectedStage === 'images' ? jobId : '',
-      audioJobId: selectedStage === 'audio' ? jobId : '',
-      videoJobId: selectedStage === 'video' ? jobId : '',
+      story: storyContent,
+      scriptContent: selectedStage === 'script' ? scriptContent : '',
+      imageJobId: selectedStage === 'images' ? imagesJobId : '',
+      audioJobId: selectedStage === 'audio' ? audioJobId : '',
       devMode: true,
     };
 
@@ -65,14 +82,12 @@ export function DevMode() {
             <label className="block text-sm font-medium text-gray-700 mb-3">
               Selecciona la etapa
             </label>
-            <div className="grid grid-cols-2 md:grid-cols-5 gap-2">
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
               {STAGES.map((stage) => (
                 <button
                   key={stage.value}
                   onClick={() => {
-                    setSelectedStage(stage.value);
-                    setContent('');
-                    setJobId('');
+                    setSelectedStage(stage.value as any);
                   }}
                   className={`py-2 px-3 rounded-lg text-sm font-medium transition-colors ${
                     selectedStage === stage.value
@@ -86,65 +101,93 @@ export function DevMode() {
             </div>
           </div>
 
-          {/* Input Section */}
-          {selectedStage === 'story' && (
+          {/* Story Input */}
+          {(selectedStage === 'story' || selectedStage === 'wizard' || selectedStage === 'script') && (
             <div className="mb-6">
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Ingresa tu historia
+                Historia
               </label>
               <textarea
-                value={content}
-                onChange={(e) => setContent(e.target.value)}
-                placeholder="Escribe la historia aquí..."
-                className="w-full h-32 p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-600"
+                value={storyContent}
+                onChange={(e) => setStoryContent(e.target.value)}
+                placeholder="Pega la historia aquí..."
+                className="w-full h-24 p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-600 text-gray-900 placeholder-gray-400 resize-none"
               />
+              <p className="text-xs text-gray-500 mt-1">Mínimo 50 caracteres</p>
             </div>
           )}
 
-          {selectedStage === 'script' && (
+          {/* Script Input */}
+          {(selectedStage === 'script' || selectedStage === 'wizard') && (
             <div className="mb-6">
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Ingresa el guión (JSON o texto)
+                Guión (opcional para wizard)
               </label>
               <textarea
-                value={content}
-                onChange={(e) => setContent(e.target.value)}
-                placeholder="Pega el guión aquí..."
-                className="w-full h-32 p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-600"
+                value={scriptContent}
+                onChange={(e) => setScriptContent(e.target.value)}
+                placeholder="Pega el guión aquí (JSON o texto)..."
+                className="w-full h-24 p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-600 text-gray-900 placeholder-gray-400 resize-none"
               />
+              <p className="text-xs text-gray-500 mt-1">Si lo dejas vacío, se generará automáticamente</p>
             </div>
           )}
 
-          {['images', 'audio', 'video'].includes(selectedStage) && (
+          {/* Images Job ID */}
+          {(selectedStage === 'images' || selectedStage === 'wizard') && (
             <div className="mb-6">
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Ingresa el Job ID {selectedStage === 'images' && '(de imágenes)'}
-                {selectedStage === 'audio' && '(de audio)'}
-                {selectedStage === 'video' && '(de video)'}
+                Job ID de Imágenes (opcional para wizard)
               </label>
               <Input
-                value={jobId}
-                onChange={(e) => setJobId(e.target.value)}
+                value={imagesJobId}
+                onChange={(e) => setImagesJobId(e.target.value)}
                 placeholder="ej: job_abc123xyz..."
                 type="text"
+                className="text-gray-900 placeholder-gray-400"
               />
+              <p className="text-xs text-gray-500 mt-1">Si lo dejas vacío, se generarán automáticamente</p>
             </div>
           )}
 
-          {/* Preset Info */}
-          <div className="bg-indigo-50 border border-indigo-200 rounded-lg p-4 mb-6">
-            <p className="text-sm text-indigo-900">
-              <strong>Usar Preset:</strong> Después de ingresar el contenido, presiona "Saltar a Etapa". 
-              El sistema validará que el contenido sea válido.
+          {/* Audio Job ID */}
+          {(selectedStage === 'audio' || selectedStage === 'wizard') && (
+            <div className="mb-6">
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Job ID de Audio (opcional para wizard)
+              </label>
+              <Input
+                value={audioJobId}
+                onChange={(e) => setAudioJobId(e.target.value)}
+                placeholder="ej: job_abc123xyz..."
+                type="text"
+                className="text-gray-900 placeholder-gray-400"
+              />
+              <p className="text-xs text-gray-500 mt-1">Si lo dejas vacío, se generará automáticamente</p>
+            </div>
+          )}
+
+          {/* Info */}
+          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
+            <p className="text-sm text-blue-900">
+              <strong>ℹ️ Instrucciones:</strong>
+              <br />
+              • <strong>Wizard Completo:</strong> Ingresa historia y sigue todo el flujo normal
+              <br />
+              • <strong>Historia:</strong> Salta directamente al paso 1 (Historia)
+              <br />
+              • <strong>Guión:</strong> Completa historia y luego salta al guión (con o sin contenido preestablecido)
+              <br />
+              • <strong>Imágenes/Audio:</strong> Ingresa un Job ID para reutilizar trabajos existentes
             </p>
           </div>
 
           {/* Action Button */}
           <Button
             onClick={handleJumpToStage}
-            className="w-full bg-indigo-600 hover:bg-indigo-700 text-white"
+            className="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-2"
           >
-            Saltar a {STAGES.find((s) => s.value === selectedStage)?.label}
+            {selectedStage === 'wizard' ? 'Ir al Wizard' : `Saltar a ${STAGES.find((s) => s.value === selectedStage)?.label}`}
           </Button>
         </div>
 

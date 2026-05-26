@@ -4,6 +4,7 @@ import { ArrowLeft, ChevronLeft, Loader2 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { StoryInput } from '@/components/Input/StoryInput';
 import { StyleSelector } from '@/components/StyleSelector/StyleSelector';
 import { VoiceSelector } from '@/components/VoiceSelector/VoiceSelector';
@@ -76,9 +77,12 @@ export function Generate() {
     const [scriptJobId, setScriptJobId] = useState<string | null>(null);
     const [imageJobId, setImageJobId] = useState<string | null>(null);
     const [audioJobId, setAudioJobId] = useState<string | null>(null);
-    // const [presetDialogOpen, setPresetDialogOpen] = useState<PresetDialogState>('closed');
-    // TODO: Implement preset content loading for developers
-    // const [presetContent, setPresetContent] = useState<string>('');
+    
+    // Preset dialog states
+    const [presetDialogOpen, setPresetDialogOpen] = useState<PresetDialogState>('closed');
+    const [scriptPresetContent, setScriptPresetContent] = useState('');
+    const [imagesPresetInput, setImagesPresetInput] = useState('');
+    const [audioPresetInput, setAudioPresetInput] = useState('');
 
     const validation = useMemo(() => validateStory(story), [story]);
     const { state: genState, generate, reset: resetGeneration } = useGenerateScript();
@@ -91,15 +95,30 @@ export function Generate() {
         const devState = sessionStorage.getItem('devState');
         if (devState) {
             const state = JSON.parse(devState);
-            setStory(state.story || '');
+            
+            // Set story
+            if (state.story) {
+                setStory(state.story);
+            }
+            
+            // Auto-advance wizard steps if we have preset content
+            if (state.scriptContent) {
+                // We need to mark story and style as complete to get to voice step
+                setStory(state.story || '');
+                setStep('voice');
+                setScriptPresetContent(state.scriptContent);
+                // Auto-apply script preset
+                const fakeJobId = 'preset_script_' + Date.now();
+                setScriptJobId(fakeJobId);
+            }
+            
             if (state.imageJobId) {
                 setImageJobId(state.imageJobId);
             }
             if (state.audioJobId) {
                 setAudioJobId(state.audioJobId);
             }
-            // Note: scriptContent would be set through the generate hook's completion
-            // Dev mode can inject content via setting the initial state
+            
             sessionStorage.removeItem('devState');
         }
     }, []);
@@ -213,6 +232,10 @@ export function Generate() {
         setVoiceId(null);
         setStep('story');
         setSubmitAttempted(false);
+        setPresetDialogOpen('closed');
+        setScriptPresetContent('');
+        setImagesPresetInput('');
+        setAudioPresetInput('');
     };
 
     const isGeneratingScript =
@@ -224,15 +247,48 @@ export function Generate() {
     const isGeneratingVideo =
         videoState.phase === 'submitting' || videoState.phase === 'polling';
 
-    // TODO: Implement preset content loading for developers
-    const handleOpenPresetDialog = (_stage: Exclude<PresetDialogState, 'closed'>) => {
-        // setPresetDialogOpen(stage);
-        // Placeholder for future preset loading functionality
+    // Preset dialog handlers
+    const handleOpenPresetDialog = (stage: Exclude<PresetDialogState, 'closed'>) => {
+        setPresetDialogOpen(stage);
     };
 
-    // TODO: Implement preset content loading
-    // This will allow developers to upload or provide preset content
-    // instead of generating through the pipeline
+    const handleClosePresetDialog = () => {
+        setPresetDialogOpen('closed');
+        setScriptPresetContent('');
+        setImagesPresetInput('');
+        setAudioPresetInput('');
+    };
+
+    const handleApplyScriptPreset = () => {
+        if (!scriptPresetContent.trim()) {
+            alert('Por favor ingresa contenido para el guión');
+            return;
+        }
+        // Mark script as completed by setting a fake job ID
+        const fakeJobId = 'preset_script_' + Date.now();
+        setScriptJobId(fakeJobId);
+        handleClosePresetDialog();
+    };
+
+    const handleApplyImagesPreset = () => {
+        if (!imagesPresetInput.trim()) {
+            alert('Por favor ingresa un Job ID válido o carga imágenes');
+            return;
+        }
+        // Use the input as a job ID
+        setImageJobId(imagesPresetInput);
+        handleClosePresetDialog();
+    };
+
+    const handleApplyAudioPreset = () => {
+        if (!audioPresetInput.trim()) {
+            alert('Por favor ingresa un Job ID válido');
+            return;
+        }
+        // Use the input as a job ID
+        setAudioJobId(audioPresetInput);
+        handleClosePresetDialog();
+    };
 
     return (
         <div className="min-h-screen">
@@ -248,6 +304,98 @@ export function Generate() {
             </header>
 
             <PipelineProgress stages={stages} />
+
+            {/* Script Preset Dialog */}
+            <Dialog open={presetDialogOpen === 'script'} onOpenChange={(open: boolean) => {
+                if (!open) handleClosePresetDialog();
+            }}>
+                <DialogContent className="max-w-md">
+                    <DialogHeader>
+                        <DialogTitle>Usar preset - Guión</DialogTitle>
+                        <DialogDescription>
+                            Pega o escribe el contenido del guión que deseas usar
+                        </DialogDescription>
+                    </DialogHeader>
+                    <div className="space-y-4">
+                        <textarea
+                            value={scriptPresetContent}
+                            onChange={(e) => setScriptPresetContent(e.target.value)}
+                            placeholder="Pega el guión aquí (JSON o texto)..."
+                            className="w-full h-40 p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-600 text-gray-900 placeholder-gray-500 resize-none"
+                        />
+                        <div className="flex gap-2 justify-end">
+                            <Button variant="outline" onClick={handleClosePresetDialog}>
+                                Cancelar
+                            </Button>
+                            <Button onClick={handleApplyScriptPreset}>
+                                Aplicar preset
+                            </Button>
+                        </div>
+                    </div>
+                </DialogContent>
+            </Dialog>
+
+            {/* Images Preset Dialog */}
+            <Dialog open={presetDialogOpen === 'images'} onOpenChange={(open: boolean) => {
+                if (!open) handleClosePresetDialog();
+            }}>
+                <DialogContent className="max-w-md">
+                    <DialogHeader>
+                        <DialogTitle>Usar preset - Imágenes</DialogTitle>
+                        <DialogDescription>
+                            Ingresa el Job ID de un trabajo de imágenes existente
+                        </DialogDescription>
+                    </DialogHeader>
+                    <div className="space-y-4">
+                        <input
+                            type="text"
+                            value={imagesPresetInput}
+                            onChange={(e) => setImagesPresetInput(e.target.value)}
+                            placeholder="ej: job_abc123xyz..."
+                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-600 text-gray-900 placeholder-gray-500"
+                        />
+                        <div className="flex gap-2 justify-end">
+                            <Button variant="outline" onClick={handleClosePresetDialog}>
+                                Cancelar
+                            </Button>
+                            <Button onClick={handleApplyImagesPreset}>
+                                Aplicar preset
+                            </Button>
+                        </div>
+                    </div>
+                </DialogContent>
+            </Dialog>
+
+            {/* Audio Preset Dialog */}
+            <Dialog open={presetDialogOpen === 'audio'} onOpenChange={(open: boolean) => {
+                if (!open) handleClosePresetDialog();
+            }}>
+                <DialogContent className="max-w-md">
+                    <DialogHeader>
+                        <DialogTitle>Usar preset - Audio</DialogTitle>
+                        <DialogDescription>
+                            Ingresa el Job ID de un trabajo de audio existente
+                        </DialogDescription>
+                    </DialogHeader>
+                    <div className="space-y-4">
+                        <input
+                            type="text"
+                            value={audioPresetInput}
+                            onChange={(e) => setAudioPresetInput(e.target.value)}
+                            placeholder="ej: job_abc123xyz..."
+                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-600 text-gray-900 placeholder-gray-500"
+                        />
+                        <div className="flex gap-2 justify-end">
+                            <Button variant="outline" onClick={handleClosePresetDialog}>
+                                Cancelar
+                            </Button>
+                            <Button onClick={handleApplyAudioPreset}>
+                                Aplicar preset
+                            </Button>
+                        </div>
+                    </div>
+                </DialogContent>
+            </Dialog>
 
             <main className="mx-auto max-w-3xl px-4 py-8">
                 {/* Script generation — loading */}
@@ -286,6 +434,41 @@ export function Generate() {
                         <CardContent className="space-y-4">
                             <pre className="max-h-64 overflow-y-auto rounded-lg bg-muted p-4 text-sm whitespace-pre-wrap">
                                 {genState.script}
+                            </pre>
+                            <div className="flex justify-end gap-2">
+                                {isDeveloper && (
+                                    <Button
+                                        type="button"
+                                        variant="outline"
+                                        onClick={() => handleOpenPresetDialog('images')}
+                                    >
+                                        Usar preset
+                                    </Button>
+                                )}
+                                <Button
+                                    type="button"
+                                    disabled={!scriptJobId || !style}
+                                    onClick={handleGenerateImages}
+                                >
+                                    Generar imágenes
+                                </Button>
+                            </div>
+                        </CardContent>
+                    </Card>
+                )}
+
+                {/* Script preset — show preset content when applied */}
+                {scriptPresetContent && scriptJobId && genState.phase === 'idle' && imagesState.phase === 'idle' && (
+                    <Card>
+                        <CardHeader>
+                            <CardTitle>Guión (preset)</CardTitle>
+                            <CardDescription>
+                                Revisá el guión y generá las imágenes para tu historia.
+                            </CardDescription>
+                        </CardHeader>
+                        <CardContent className="space-y-4">
+                            <pre className="max-h-64 overflow-y-auto rounded-lg bg-muted p-4 text-sm whitespace-pre-wrap">
+                                {scriptPresetContent}
                             </pre>
                             <div className="flex justify-end gap-2">
                                 {isDeveloper && (
