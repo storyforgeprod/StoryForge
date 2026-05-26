@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, ChevronLeft, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -10,6 +10,7 @@ import { AudioPlayer } from '@/components/AudioPlayer/AudioPlayer';
 import { ImageGrid } from '@/components/ImageGrid/ImageGrid';
 import { DownloadCard } from '@/components/DownloadCard/DownloadCard';
 import { PipelineProgress, type PipelineStage } from '@/components/PipelineProgress/PipelineProgress';
+import { PipelineNavigation } from '@/components/PipelineNavigation';
 import { validateStory } from '@/utils/validation';
 import { StoryStyle } from '@/types/generate';
 import { useGenerateScript } from '@/hooks/useGenerateScript';
@@ -61,7 +62,9 @@ function deriveStages(
 }
 
 export function Generate() {
+    const navigate = useNavigate();
     const [story, setStory] = useState('');
+    const [lastScriptStory, setLastScriptStory] = useState('');
     const [style, setStyle] = useState<StoryStyle | null>(null);
     const [voiceId, setVoiceId] = useState<string | null>(null);
     const [step, setStep] = useState<WizardStep>('story');
@@ -75,6 +78,24 @@ export function Generate() {
     const { state: imagesState, generate: generateImages, reset: resetImages } = useGenerateImages();
     const { state: audioState, generate: generateAudio, reset: resetAudio } = useGenerateAudio();
     const { state: videoState, generate: generateVideo, reset: resetVideo } = useGenerateVideo();
+
+    // Load dev state if coming from dev mode
+    useEffect(() => {
+        const devState = sessionStorage.getItem('devState');
+        if (devState) {
+            const state = JSON.parse(devState);
+            setStory(state.story || '');
+            if (state.imageJobId) {
+                setImageJobId(state.imageJobId);
+            }
+            if (state.audioJobId) {
+                setAudioJobId(state.audioJobId);
+            }
+            // Note: scriptContent would be set through the generate hook's completion
+            // Dev mode can inject content via setting the initial state
+            sessionStorage.removeItem('devState');
+        }
+    }, []);
 
     const stages = useMemo(
         () => deriveStages(genState.phase, imagesState.phase, audioState.phase, videoState.phase),
@@ -118,8 +139,19 @@ export function Generate() {
         if (step === 'voice') setStep('style');
     };
 
+    const handleBackToHome = () => {
+        resetAll();
+        navigate('/home');
+    };
+
     const handleGenerateScript = () => {
         if (!style || !voiceId) return;
+        // Check if story changed from last script generation
+        if (genState.phase === 'completed' && story === lastScriptStory) {
+            // Story hasn't changed, skip regeneration
+            return;
+        }
+        setLastScriptStory(story);
         generate(story, style);
     };
 
@@ -185,15 +217,64 @@ export function Generate() {
     const isGeneratingVideo =
         videoState.phase === 'submitting' || videoState.phase === 'polling';
 
+    // Determine current pipeline stage
+    const currentStage: 'story' | 'script' | 'images' | 'audio' | 'video' = useMemo(() => {
+        if (videoState.phase !== 'idle') return 'video';
+        if (audioState.phase !== 'idle') return 'audio';
+        if (imagesState.phase !== 'idle') return 'images';
+        if (genState.phase !== 'idle') return 'script';
+        return 'story';
+    }, [genState.phase, imagesState.phase, audioState.phase, videoState.phase]);
+
+    // Handle navigation between stages
+    const handlePreviousStage = () => {
+        // Move back one stage
+        if (currentStage === 'video') {
+            // Go back to audio - reset video
+            resetVideo();
+        } else if (currentStage === 'audio') {
+            // Go back to images - reset audio
+            resetAudio();
+        } else if (currentStage === 'images') {
+            // Go back to script - reset images
+            resetImages();
+        } else if (currentStage === 'script') {
+            // Go back to story - reset script
+            resetGeneration();
+        }
+    };
+
+    const handleNextStage = () => {
+        // Move forward one stage
+        if (currentStage === 'story') {
+            handleGenerateScript();
+        } else if (currentStage === 'script' && genState.phase === 'completed') {
+            handleGenerateImages();
+        } else if (currentStage === 'images' && imagesState.phase === 'completed') {
+            handleGenerateAudio();
+        } else if (currentStage === 'audio' && audioState.phase === 'completed') {
+            handleGenerateVideo();
+        }
+    };
+
+    const canGoNext = useMemo(() => {
+        if (currentStage === 'story') return !!(validation.valid && style && voiceId);
+        if (currentStage === 'script') return genState.phase === 'completed';
+        if (currentStage === 'images') return imagesState.phase === 'completed';
+        if (currentStage === 'audio') return audioState.phase === 'completed';
+        if (currentStage === 'video') return videoState.phase === 'completed';
+        return false;
+    }, [currentStage, validation.valid, style, voiceId, genState.phase, imagesState.phase, audioState.phase, videoState.phase]);
+
+    const canGoPrevious = currentStage !== 'story';
+
     return (
         <div className="min-h-screen">
             <header className="border-b border-border/60">
                 <div className="mx-auto flex max-w-3xl items-center justify-between gap-4 px-4 py-4">
                     <div className="flex items-center gap-4">
-                        <Button asChild variant="ghost" size="icon">
-                            <Link to="/" aria-label="Volver">
-                                <ArrowLeft className="h-4 w-4" />
-                            </Link>
+                        <Button variant="ghost" size="icon" onClick={handleBackToHome}>
+                            <ArrowLeft className="h-4 w-4" />
                         </Button>
                         <h1 className="text-lg font-semibold">Generar video</h1>
                     </div>
@@ -201,6 +282,14 @@ export function Generate() {
             </header>
 
             <PipelineProgress stages={stages} />
+
+            <PipelineNavigation
+                currentStage={currentStage}
+                onPrevious={handlePreviousStage}
+                onNext={handleNextStage}
+                canGoNext={canGoNext}
+                canGoPrevious={canGoPrevious}
+            />
 
             <main className="mx-auto max-w-3xl px-4 py-8">
                 {/* Script generation — loading */}

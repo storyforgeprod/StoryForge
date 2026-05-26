@@ -2,7 +2,7 @@ export interface User {
   id: string;
   email: string;
   name?: string;
-  role: 'ADMIN' | 'USER';
+  role: 'USER' | 'DEVELOPER';
   provider?: 'supabase' | 'google' | 'local';
   createdAt?: string;
 }
