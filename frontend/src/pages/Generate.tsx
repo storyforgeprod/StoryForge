@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, ChevronLeft, Loader2 } from 'lucide-react';
+import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { StoryInput } from '@/components/Input/StoryInput';
@@ -10,7 +11,6 @@ import { AudioPlayer } from '@/components/AudioPlayer/AudioPlayer';
 import { ImageGrid } from '@/components/ImageGrid/ImageGrid';
 import { DownloadCard } from '@/components/DownloadCard/DownloadCard';
 import { PipelineProgress, type PipelineStage } from '@/components/PipelineProgress/PipelineProgress';
-import { PipelineNavigation } from '@/components/PipelineNavigation';
 import { validateStory } from '@/utils/validation';
 import { StoryStyle } from '@/types/generate';
 import { useGenerateScript } from '@/hooks/useGenerateScript';
@@ -19,6 +19,8 @@ import { useGenerateAudio } from '@/hooks/useGenerateAudio';
 import { useGenerateVideo } from '@/hooks/useGenerateVideo';
 
 type WizardStep = 'story' | 'style' | 'voice';
+
+type PresetDialogState = 'closed' | 'story' | 'script' | 'images' | 'audio' | 'video';
 
 function deriveStages(
     genPhase: string,
@@ -67,11 +69,16 @@ export function Generate() {
     const [lastScriptStory, setLastScriptStory] = useState('');
     const [style, setStyle] = useState<StoryStyle | null>(null);
     const [voiceId, setVoiceId] = useState<string | null>(null);
+    const { user } = useAuth();
+    const isDeveloper = user?.role === 'DEVELOPER';
     const [step, setStep] = useState<WizardStep>('story');
     const [submitAttempted, setSubmitAttempted] = useState(false);
     const [scriptJobId, setScriptJobId] = useState<string | null>(null);
     const [imageJobId, setImageJobId] = useState<string | null>(null);
     const [audioJobId, setAudioJobId] = useState<string | null>(null);
+    // const [presetDialogOpen, setPresetDialogOpen] = useState<PresetDialogState>('closed');
+    // TODO: Implement preset content loading for developers
+    // const [presetContent, setPresetContent] = useState<string>('');
 
     const validation = useMemo(() => validateStory(story), [story]);
     const { state: genState, generate, reset: resetGeneration } = useGenerateScript();
@@ -217,56 +224,15 @@ export function Generate() {
     const isGeneratingVideo =
         videoState.phase === 'submitting' || videoState.phase === 'polling';
 
-    // Determine current pipeline stage
-    const currentStage: 'story' | 'script' | 'images' | 'audio' | 'video' = useMemo(() => {
-        if (videoState.phase !== 'idle') return 'video';
-        if (audioState.phase !== 'idle') return 'audio';
-        if (imagesState.phase !== 'idle') return 'images';
-        if (genState.phase !== 'idle') return 'script';
-        return 'story';
-    }, [genState.phase, imagesState.phase, audioState.phase, videoState.phase]);
-
-    // Handle navigation between stages
-    const handlePreviousStage = () => {
-        // Move back one stage
-        if (currentStage === 'video') {
-            // Go back to audio - reset video
-            resetVideo();
-        } else if (currentStage === 'audio') {
-            // Go back to images - reset audio
-            resetAudio();
-        } else if (currentStage === 'images') {
-            // Go back to script - reset images
-            resetImages();
-        } else if (currentStage === 'script') {
-            // Go back to story - reset script
-            resetGeneration();
-        }
+    // TODO: Implement preset content loading for developers
+    const handleOpenPresetDialog = (_stage: Exclude<PresetDialogState, 'closed'>) => {
+        // setPresetDialogOpen(stage);
+        // Placeholder for future preset loading functionality
     };
 
-    const handleNextStage = () => {
-        // Move forward one stage
-        if (currentStage === 'story') {
-            handleGenerateScript();
-        } else if (currentStage === 'script' && genState.phase === 'completed') {
-            handleGenerateImages();
-        } else if (currentStage === 'images' && imagesState.phase === 'completed') {
-            handleGenerateAudio();
-        } else if (currentStage === 'audio' && audioState.phase === 'completed') {
-            handleGenerateVideo();
-        }
-    };
-
-    const canGoNext = useMemo(() => {
-        if (currentStage === 'story') return !!(validation.valid && style && voiceId);
-        if (currentStage === 'script') return genState.phase === 'completed';
-        if (currentStage === 'images') return imagesState.phase === 'completed';
-        if (currentStage === 'audio') return audioState.phase === 'completed';
-        if (currentStage === 'video') return videoState.phase === 'completed';
-        return false;
-    }, [currentStage, validation.valid, style, voiceId, genState.phase, imagesState.phase, audioState.phase, videoState.phase]);
-
-    const canGoPrevious = currentStage !== 'story';
+    // TODO: Implement preset content loading
+    // This will allow developers to upload or provide preset content
+    // instead of generating through the pipeline
 
     return (
         <div className="min-h-screen">
@@ -282,14 +248,6 @@ export function Generate() {
             </header>
 
             <PipelineProgress stages={stages} />
-
-            <PipelineNavigation
-                currentStage={currentStage}
-                onPrevious={handlePreviousStage}
-                onNext={handleNextStage}
-                canGoNext={canGoNext}
-                canGoPrevious={canGoPrevious}
-            />
 
             <main className="mx-auto max-w-3xl px-4 py-8">
                 {/* Script generation — loading */}
@@ -329,7 +287,16 @@ export function Generate() {
                             <pre className="max-h-64 overflow-y-auto rounded-lg bg-muted p-4 text-sm whitespace-pre-wrap">
                                 {genState.script}
                             </pre>
-                            <div className="flex justify-end">
+                            <div className="flex justify-end gap-2">
+                                {isDeveloper && (
+                                    <Button
+                                        type="button"
+                                        variant="outline"
+                                        onClick={() => handleOpenPresetDialog('images')}
+                                    >
+                                        Usar preset
+                                    </Button>
+                                )}
                                 <Button
                                     type="button"
                                     disabled={!scriptJobId || !style}
@@ -400,7 +367,16 @@ export function Generate() {
                             <p className="text-sm text-muted-foreground">
                                 Puede tardar hasta 3 minutos.
                             </p>
-                            <div className="flex justify-end">
+                            <div className="flex justify-end gap-2">
+                                {isDeveloper && (
+                                    <Button
+                                        type="button"
+                                        variant="outline"
+                                        onClick={() => handleOpenPresetDialog('video')}
+                                    >
+                                        Usar preset
+                                    </Button>
+                                )}
                                 <Button
                                     type="button"
                                     disabled={!imageJobId || !audioJobId}
@@ -435,7 +411,16 @@ export function Generate() {
                             </CardDescription>
                         </CardHeader>
                         <CardContent className="space-y-4">
-                            <div className="flex justify-end">
+                            <div className="flex justify-end gap-2">
+                                {isDeveloper && (
+                                    <Button
+                                        type="button"
+                                        variant="outline"
+                                        onClick={() => handleOpenPresetDialog('audio')}
+                                    >
+                                        Usar preset
+                                    </Button>
+                                )}
                                 <Button type="button" onClick={handleGenerateAudio}>
                                     Generar narración
                                 </Button>
@@ -584,13 +569,24 @@ export function Generate() {
                                             <ChevronLeft className="mr-2 h-4 w-4" />
                                             Atrás
                                         </Button>
-                                        <Button
-                                            type="button"
-                                            disabled={!voiceId}
-                                            onClick={handleGenerateScript}
-                                        >
-                                            Generar guión
-                                        </Button>
+                                        <div className="flex gap-2">
+                                            {isDeveloper && (
+                                                <Button
+                                                    type="button"
+                                                    variant="outline"
+                                                    onClick={() => handleOpenPresetDialog('script')}
+                                                >
+                                                    Usar preset
+                                                </Button>
+                                            )}
+                                            <Button
+                                                type="button"
+                                                disabled={!voiceId}
+                                                onClick={handleGenerateScript}
+                                            >
+                                                Generar guión
+                                            </Button>
+                                        </div>
                                     </div>
                                 </>
                             )}
