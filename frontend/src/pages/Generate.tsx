@@ -630,12 +630,6 @@ export function Generate() {
                 {/* Audio generation — idle (show button to start) */}
                 {(imagesState.phase === 'completed' || imageJobId) && audioState.phase === 'idle' && !isGeneratingAudio && (
                     <Card ref={audioRef}>
-                        <CardHeader>
-                            <CardTitle>Listo para generar narración</CardTitle>
-                            <CardDescription>
-                                Haz clic para generar el audio con la voz que seleccionaste.
-                            </CardDescription>
-                        </CardHeader>
                         <CardContent className="space-y-4">
                             <div className="flex justify-end gap-2">
                                 {isDeveloper && (
