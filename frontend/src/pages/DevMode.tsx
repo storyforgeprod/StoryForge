@@ -23,22 +23,22 @@ export function DevMode() {
 
   const handleJumpToStage = () => {
     // Validate based on stage
-    if (selectedStage === 'story' && !storyContent.trim()) {
+    if ((selectedStage === 'story' || selectedStage === 'video') && !storyContent.trim()) {
       alert('Por favor ingresa una historia');
       return;
     }
     
-    if (selectedStage === 'script' && !scriptContent.trim()) {
+    if ((selectedStage === 'script' || selectedStage === 'video') && !scriptContent.trim()) {
       alert('Por favor ingresa contenido para el guión');
       return;
     }
     
-    if (selectedStage === 'images' && !imagesJobId.trim()) {
+    if ((selectedStage === 'images' || selectedStage === 'video') && !imagesJobId.trim()) {
       alert('Por favor ingresa un Job ID válido para imágenes');
       return;
     }
     
-    if (selectedStage === 'audio' && !audioJobId.trim()) {
+    if ((selectedStage === 'audio' || selectedStage === 'video') && !audioJobId.trim()) {
       alert('Por favor ingresa un Job ID válido para audio');
       return;
     }
@@ -46,9 +46,9 @@ export function DevMode() {
     // Guardar en session storage para que Generate.tsx lo lea
     const devState = {
       story: storyContent,
-      scriptContent: selectedStage === 'script' ? scriptContent : '',
-      imageJobId: selectedStage === 'images' ? imagesJobId : '',
-      audioJobId: selectedStage === 'audio' ? audioJobId : '',
+      scriptContent: (selectedStage === 'script' || selectedStage === 'video') ? scriptContent : '',
+      imageJobId: (selectedStage === 'images' || selectedStage === 'video') ? imagesJobId : '',
+      audioJobId: (selectedStage === 'audio' || selectedStage === 'video') ? audioJobId : '',
       devMode: true,
     };
 
@@ -102,7 +102,7 @@ export function DevMode() {
           </div>
 
           {/* Story Input */}
-          {(selectedStage === 'story' || selectedStage === 'wizard' || selectedStage === 'script') && (
+          {(selectedStage === 'story' || selectedStage === 'wizard' || selectedStage === 'script' || selectedStage === 'video') && (
             <div className="mb-6">
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 Historia
@@ -118,7 +118,7 @@ export function DevMode() {
           )}
 
           {/* Script Input */}
-          {(selectedStage === 'script' || selectedStage === 'wizard') && (
+          {(selectedStage === 'script' || selectedStage === 'wizard' || selectedStage === 'video') && (
             <div className="mb-6">
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 Guión (opcional para wizard)
@@ -134,7 +134,7 @@ export function DevMode() {
           )}
 
           {/* Images Job ID */}
-          {(selectedStage === 'images' || selectedStage === 'wizard') && (
+          {(selectedStage === 'images' || selectedStage === 'wizard' || selectedStage === 'video') && (
             <div className="mb-6">
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 Job ID de Imágenes (opcional para wizard)
@@ -151,7 +151,7 @@ export function DevMode() {
           )}
 
           {/* Audio Job ID */}
-          {(selectedStage === 'audio' || selectedStage === 'wizard') && (
+          {(selectedStage === 'audio' || selectedStage === 'wizard' || selectedStage === 'video') && (
             <div className="mb-6">
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 Job ID de Audio (opcional para wizard)
