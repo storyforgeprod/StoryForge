@@ -16,10 +16,6 @@ export function Header() {
           >
             StoryForge
           </button>
-          <div>
-            <p className="font-semibold text-gray-900 text-sm">{user?.name || user?.email}</p>
-            <p className="text-xs text-gray-500 capitalize">{user?.role?.toLowerCase() || 'usuario'}</p>
-          </div>
         </div>
         <Button
           onClick={() => navigate('/home')}
