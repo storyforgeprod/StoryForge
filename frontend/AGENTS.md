@@ -1,6 +1,6 @@
-# Frontend — CLAUDE.md
+# Frontend — AGENTS.md
 
-Frontend-specific guidance for the StoryForge React SPA. Cross-cutting rules live in the root [CLAUDE.md](../CLAUDE.md).
+Frontend-specific guidance for the StoryForge React SPA. Cross-cutting rules live in the root [AGENTS.md](../AGENTS.md).
 
 ## Stack
 
@@ -71,7 +71,7 @@ Migration from the current technical-layer structure is phased in [docs/frontend
 ### Components
 - Co-locate: `Component.tsx` + `Component.test.tsx` in the same folder.
 - Typed props via explicit `type` or `interface`. No `any`.
-- Default to `export function X()` for components; reserve `const X = () => {}` only when forwarding refs.
+- Declare components as named arrow functions: `export const X = (props: Props) => …`. Use a block body only when there's logic before the return. (Hooks stay as `export function useX()` — the asymmetry helps the reader tell them apart at a glance.)
 
 ### Hooks
 - Custom hooks own polling/async state and return discriminated-union state (`{ phase: 'idle' | 'submitting' | 'polling' | 'completed' | 'error', ... }`). Components stay dumb.
