@@ -1,5 +1,5 @@
 import type { StoryStyle, ImageGenerationResult, AudioGenerationResult } from '@/types/generate';
-import { getAuthToken } from '@/contexts/AuthContext';
+import { getAuthToken } from '@/features/auth';
 
 const API_BASE = import.meta.env.VITE_API_URL ?? 'http://localhost:3000';
 

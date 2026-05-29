@@ -1,24 +1,25 @@
-import { createContext, useContext, useState, useEffect, useCallback, ReactNode } from 'react';
-import type { User, AuthContextType } from '@/types/auth';
-import { loginUser, registerUser, refreshToken as refreshTokenApi } from '@/services/authApi';
+import { createContext, useContext, useState, useEffect, useCallback, type ReactNode } from 'react';
+import type { User, AuthContextType } from '../types';
+import { loginUser, registerUser, refreshToken as refreshTokenApi } from '../api/authApi';
+import {
+  getAuthToken,
+  setAuthToken,
+  clearAuthToken,
+  getStoredUser,
+  setStoredUser,
+  clearStoredUser,
+} from '../api/tokenStore';
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
-
-const STORAGE_KEY = 'storyforge_token';
-const USER_STORAGE_KEY = 'storyforge_user';
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  // Cargar usuario del localStorage al montar
   useEffect(() => {
-    const token = localStorage.getItem(STORAGE_KEY);
-    const savedUser = localStorage.getItem(USER_STORAGE_KEY);
-
-    if (token && savedUser) {
-      setUser(JSON.parse(savedUser));
-    }
+    const token = getAuthToken();
+    const savedUser = getStoredUser<User>();
+    if (token && savedUser) setUser(savedUser);
     setIsLoading(false);
   }, []);
 
@@ -26,8 +27,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setIsLoading(true);
     try {
       const response = await loginUser(email, password);
-      localStorage.setItem(STORAGE_KEY, response.access_token);
-      localStorage.setItem(USER_STORAGE_KEY, JSON.stringify(response.user));
+      setAuthToken(response.access_token);
+      setStoredUser(response.user);
       setUser(response.user);
     } finally {
       setIsLoading(false);
@@ -38,8 +39,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setIsLoading(true);
     try {
       const response = await registerUser(email, password, name);
-      localStorage.setItem(STORAGE_KEY, response.access_token);
-      localStorage.setItem(USER_STORAGE_KEY, JSON.stringify(response.user));
+      setAuthToken(response.access_token);
+      setStoredUser(response.user);
       setUser(response.user);
     } finally {
       setIsLoading(false);
@@ -47,13 +48,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const logout = useCallback(() => {
-    localStorage.removeItem(STORAGE_KEY);
-    localStorage.removeItem(USER_STORAGE_KEY);
+    clearAuthToken();
+    clearStoredUser();
     setUser(null);
   }, []);
 
   const refreshToken = useCallback(async () => {
-    const token = localStorage.getItem(STORAGE_KEY);
+    const token = getAuthToken();
     if (!token) {
       logout();
       return;
@@ -61,11 +62,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     try {
       const response = await refreshTokenApi(token);
-      localStorage.setItem(STORAGE_KEY, response.access_token);
-      localStorage.setItem(USER_STORAGE_KEY, JSON.stringify(response.user));
+      setAuthToken(response.access_token);
+      setStoredUser(response.user);
       setUser(response.user);
     } catch (error) {
-      // Si no se puede renovar, desloguea
       logout();
       throw error;
     }
@@ -90,8 +90,4 @@ export function useAuth() {
     throw new Error('useAuth debe usarse dentro de AuthProvider');
   }
   return context;
-}
-
-export function getAuthToken() {
-  return localStorage.getItem(STORAGE_KEY);
 }

@@ -1,5 +1,5 @@
 import { useNavigate } from 'react-router-dom';
-import { useAuth } from '@/contexts/AuthContext';
+import { useAuth } from '@/features/auth';
 import { Button } from '@/components/ui/button';
 
 export function Home() {

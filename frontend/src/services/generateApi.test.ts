@@ -93,6 +93,7 @@ describe('getJobStatus', () => {
 
         expect(mockFetch).toHaveBeenCalledWith(
             expect.stringContaining('/generate/job/job-1'),
+            expect.any(Object),
         );
         expect(result.status).toBe('completed');
         expect(result.script).toBe('Generated script');

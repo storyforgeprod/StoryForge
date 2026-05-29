@@ -55,7 +55,7 @@ describe('useGenerateAudio', () => {
         expect(result.current.state.phase).toBe('polling');
 
         await act(async () => {
-            await vi.advanceTimersByTimeAsync(3000);
+            await vi.advanceTimersByTimeAsync(5000);
         });
 
         expect(result.current.state.phase).toBe('completed');
@@ -92,7 +92,7 @@ describe('useGenerateAudio', () => {
         });
 
         await act(async () => {
-            await vi.advanceTimersByTimeAsync(3000);
+            await vi.advanceTimersByTimeAsync(5000);
         });
 
         expect(result.current.state.phase).toBe('error');
@@ -113,7 +113,7 @@ describe('useGenerateAudio', () => {
         });
 
         await act(async () => {
-            await vi.advanceTimersByTimeAsync(3000);
+            await vi.advanceTimersByTimeAsync(5000);
         });
 
         expect(result.current.state.phase).toBe('error');
@@ -151,7 +151,7 @@ describe('useGenerateAudio', () => {
         }
     });
 
-    it('timeout fires at 10 attempts (30 s) → correct error message', async () => {
+    it('timeout fires at 200 attempts (1000 s) → correct error message', async () => {
         mockPost.mockResolvedValue({ jobId: 'job-7', status: 'pending', createdAt: '2026-01-01T00:00:00Z' });
         mockPoll.mockResolvedValue({ jobId: 'job-7', status: 'processing' });
 
@@ -165,7 +165,7 @@ describe('useGenerateAudio', () => {
         expect(result.current.state.phase).toBe('polling');
 
         act(() => {
-            vi.advanceTimersByTime(33000); // 11 ticks × 3000 ms
+            vi.advanceTimersByTime(201 * 5000); // 201 ticks × 5000 ms (MAX_ATTEMPTS=200)
         });
 
         expect(result.current.state.phase).toBe('error');
@@ -223,7 +223,7 @@ describe('useGenerateAudio', () => {
             await Promise.resolve();
         });
 
-        await act(async () => { await vi.advanceTimersByTimeAsync(3000); });
+        await act(async () => { await vi.advanceTimersByTimeAsync(5000); });
 
         expect(result.current.state.phase).toBe('completed');
 

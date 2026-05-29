@@ -1,13 +1,16 @@
 import { BrowserRouter, Route, Routes, Navigate } from 'react-router-dom';
-import { AuthProvider, useAuth } from '@/contexts/AuthContext';
+import {
+  AuthProvider,
+  useAuth,
+  ProtectedRoute,
+  LoginPage,
+  RegisterPage,
+} from '@/features/auth';
 import { Landing } from '@/pages/Landing';
 import { Home } from '@/pages/Home';
 import { Generate } from '@/pages/Generate';
 import { DevMode } from '@/pages/DevMode';
-import { Login } from '@/pages/Login';
-import { Register } from '@/pages/Register';
 import { NotFound } from '@/pages/NotFound';
-import { ProtectedRoute } from '@/components/ProtectedRoute';
 import { Header } from '@/components/Header';
 
 function AppRoutes() {
@@ -28,8 +31,8 @@ function AppRoutes() {
     <>
       {isAuthenticated && <Header />}
       <Routes>
-        <Route path="/login" element={!isAuthenticated ? <Login /> : <Navigate to="/home" replace />} />
-        <Route path="/register" element={!isAuthenticated ? <Register /> : <Navigate to="/home" replace />} />
+        <Route path="/login" element={!isAuthenticated ? <LoginPage /> : <Navigate to="/home" replace />} />
+        <Route path="/register" element={!isAuthenticated ? <RegisterPage /> : <Navigate to="/home" replace />} />
         <Route path="/" element={!isAuthenticated ? <Landing /> : <Navigate to="/home" replace />} />
         <Route
           path="/home"

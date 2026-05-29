@@ -45,7 +45,7 @@ describe('useGenerateVideo', () => {
         await act(async () => { await Promise.resolve(); });
         expect(result.current.state.phase).toBe('polling');
 
-        await act(async () => { await vi.advanceTimersByTimeAsync(3000); });
+        await act(async () => { await vi.advanceTimersByTimeAsync(5000); });
 
         expect(result.current.state.phase).toBe('completed');
         if (result.current.state.phase === 'completed') {
@@ -102,7 +102,7 @@ describe('useGenerateVideo', () => {
             await Promise.resolve();
         });
 
-        await act(async () => { await vi.advanceTimersByTimeAsync(3000); });
+        await act(async () => { await vi.advanceTimersByTimeAsync(5000); });
 
         expect(result.current.state.phase).toBe('error');
         if (result.current.state.phase === 'error') {
@@ -110,7 +110,7 @@ describe('useGenerateVideo', () => {
         }
     });
 
-    it('timeout fires after 80 attempts (240 s)', async () => {
+    it('timeout fires after 200 attempts (1000 s)', async () => {
         mockPost.mockResolvedValue({ jobId: 'job-5', status: 'pending', createdAt: '2026-01-01T00:00:00Z' });
         mockPoll.mockResolvedValue({ jobId: 'job-5', status: 'processing' });
 
@@ -123,7 +123,7 @@ describe('useGenerateVideo', () => {
 
         expect(result.current.state.phase).toBe('polling');
 
-        act(() => { vi.advanceTimersByTime(81 * 3000); });
+        act(() => { vi.advanceTimersByTime(201 * 5000); });
 
         expect(result.current.state.phase).toBe('error');
         if (result.current.state.phase === 'error') {
@@ -184,7 +184,7 @@ describe('useGenerateVideo', () => {
             await Promise.resolve();
         });
 
-        await act(async () => { await vi.advanceTimersByTimeAsync(3000); });
+        await act(async () => { await vi.advanceTimersByTimeAsync(5000); });
 
         expect(result.current.state.phase).toBe('completed');
 

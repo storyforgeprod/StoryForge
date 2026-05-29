@@ -52,7 +52,7 @@ describe('useGenerateScript', () => {
 
         // Advance timer to trigger the interval
         await act(async () => {
-            await vi.advanceTimersByTimeAsync(3000);
+            await vi.advanceTimersByTimeAsync(5000);
         });
 
         expect(result.current.state.phase).toBe('completed');
@@ -113,7 +113,7 @@ describe('useGenerateScript', () => {
         });
 
         await act(async () => {
-            await vi.advanceTimersByTimeAsync(3000);
+            await vi.advanceTimersByTimeAsync(5000);
         });
 
         expect(result.current.state.phase).toBe('error');
@@ -139,7 +139,7 @@ describe('useGenerateScript', () => {
         });
 
         await act(async () => {
-            await vi.advanceTimersByTimeAsync(3000);
+            await vi.advanceTimersByTimeAsync(5000);
         });
 
         expect(result.current.state.phase).toBe('error');
@@ -148,7 +148,7 @@ describe('useGenerateScript', () => {
         }
     });
 
-    it('polling timeout after 100 attempts → error state', async () => {
+    it('polling timeout after 200 attempts → error state', async () => {
         mockPost.mockResolvedValue({
             jobId: 'job-4',
             status: 'pending',
@@ -166,10 +166,10 @@ describe('useGenerateScript', () => {
         expect(result.current.state.phase).toBe('polling');
 
         // The timeout guard (attemptsRef > MAX_ATTEMPTS) runs synchronously before any
-        // await inside the interval callback, so all 101 ticks can fire synchronously
-        // without waiting for 100 pending getJobStatus promises to resolve.
+        // await inside the interval callback, so all 201 ticks can fire synchronously
+        // without waiting for 200 pending getJobStatus promises to resolve.
         act(() => {
-            vi.advanceTimersByTime(303000); // 101 ticks × 3000ms
+            vi.advanceTimersByTime(201 * 5000); // 201 ticks × 5000ms (MAX_ATTEMPTS=200)
         });
 
         expect(result.current.state.phase).toBe('error');
@@ -219,7 +219,7 @@ describe('useGenerateScript', () => {
         });
 
         await act(async () => {
-            await vi.advanceTimersByTimeAsync(3000);
+            await vi.advanceTimersByTimeAsync(5000);
         });
 
         expect(result.current.state.phase).toBe('completed');

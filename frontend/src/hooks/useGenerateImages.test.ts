@@ -5,8 +5,6 @@ import * as generateApi from '@/services/generateApi';
 
 vi.mock('@/services/generateApi');
 
-const TOKEN = 'test-token';
-
 const mockPost = vi.mocked(generateApi.postGenerateImages);
 const mockPoll = vi.mocked(generateApi.getJobStatus);
 
@@ -21,7 +19,7 @@ afterEach(() => {
 
 describe('useGenerateImages', () => {
     it('starts in idle phase', () => {
-        const { result } = renderHook(() => useGenerateImages(TOKEN));
+        const { result } = renderHook(() => useGenerateImages());
         expect(result.current.state.phase).toBe('idle');
     });
 
@@ -37,7 +35,7 @@ describe('useGenerateImages', () => {
             result: { imageUrls: ['https://img.example.com/1.png'], prompt: 'test', generatedAt: '2026-01-01T00:00:00Z' },
         });
 
-        const { result } = renderHook(() => useGenerateImages(TOKEN));
+        const { result } = renderHook(() => useGenerateImages());
 
         act(() => {
             result.current.generate('script-1', 'anime');
@@ -52,7 +50,7 @@ describe('useGenerateImages', () => {
         expect(result.current.state.phase).toBe('polling');
 
         await act(async () => {
-            await vi.advanceTimersByTimeAsync(3000);
+            await vi.advanceTimersByTimeAsync(5000);
         });
 
         expect(result.current.state.phase).toBe('completed');
@@ -65,7 +63,7 @@ describe('useGenerateImages', () => {
         mockPost.mockResolvedValue({ jobId: 'job-2', status: 'pending', createdAt: '2026-01-01T00:00:00Z' });
         mockPoll.mockResolvedValue({ jobId: 'job-2', status: 'failed', error: 'Replicate unavailable' });
 
-        const { result } = renderHook(() => useGenerateImages(TOKEN));
+        const { result } = renderHook(() => useGenerateImages());
 
         await act(async () => {
             result.current.generate('script-2', 'manga');
@@ -73,7 +71,7 @@ describe('useGenerateImages', () => {
         });
 
         await act(async () => {
-            await vi.advanceTimersByTimeAsync(3000);
+            await vi.advanceTimersByTimeAsync(5000);
         });
 
         expect(result.current.state.phase).toBe('error');
@@ -86,7 +84,7 @@ describe('useGenerateImages', () => {
         mockPost.mockResolvedValue({ jobId: 'job-3', status: 'pending', createdAt: '2026-01-01T00:00:00Z' });
         mockPoll.mockRejectedValue({ status: 500, message: 'Server error' });
 
-        const { result } = renderHook(() => useGenerateImages(TOKEN));
+        const { result } = renderHook(() => useGenerateImages());
 
         await act(async () => {
             result.current.generate('script-3', 'webtoon');
@@ -94,7 +92,7 @@ describe('useGenerateImages', () => {
         });
 
         await act(async () => {
-            await vi.advanceTimersByTimeAsync(3000);
+            await vi.advanceTimersByTimeAsync(5000);
         });
 
         expect(result.current.state.phase).toBe('error');
@@ -103,7 +101,7 @@ describe('useGenerateImages', () => {
     it('401 error → session expired message', async () => {
         mockPost.mockRejectedValue({ status: 401, message: 'Unauthorized' });
 
-        const { result } = renderHook(() => useGenerateImages(TOKEN));
+        const { result } = renderHook(() => useGenerateImages());
 
         await act(async () => {
             result.current.generate('script-4', 'anime');
@@ -119,7 +117,7 @@ describe('useGenerateImages', () => {
     it('429 error → rate limit message', async () => {
         mockPost.mockRejectedValue({ status: 429, message: 'Rate limit' });
 
-        const { result } = renderHook(() => useGenerateImages(TOKEN));
+        const { result } = renderHook(() => useGenerateImages());
 
         await act(async () => {
             result.current.generate('script-5', 'anime');
@@ -132,11 +130,11 @@ describe('useGenerateImages', () => {
         }
     });
 
-    it('timeout fires at 30 attempts (90 s) → correct error message', async () => {
+    it('timeout fires at 200 attempts (1000 s) → correct error message', async () => {
         mockPost.mockResolvedValue({ jobId: 'job-6', status: 'pending', createdAt: '2026-01-01T00:00:00Z' });
         mockPoll.mockResolvedValue({ jobId: 'job-6', status: 'processing' });
 
-        const { result } = renderHook(() => useGenerateImages(TOKEN));
+        const { result } = renderHook(() => useGenerateImages());
 
         await act(async () => {
             result.current.generate('script-6', 'novel');
@@ -146,7 +144,7 @@ describe('useGenerateImages', () => {
         expect(result.current.state.phase).toBe('polling');
 
         act(() => {
-            vi.advanceTimersByTime(93000); // 31 ticks × 3000 ms
+            vi.advanceTimersByTime(201 * 5000); // 201 ticks × 5000 ms (MAX_ATTEMPTS=200)
         });
 
         expect(result.current.state.phase).toBe('error');
@@ -160,7 +158,7 @@ describe('useGenerateImages', () => {
     it('duplicate generate() while in-flight is ignored', async () => {
         mockPost.mockResolvedValue({ jobId: 'job-7', status: 'pending', createdAt: '2026-01-01T00:00:00Z' });
 
-        const { result } = renderHook(() => useGenerateImages(TOKEN));
+        const { result } = renderHook(() => useGenerateImages());
 
         act(() => {
             result.current.generate('script-7', 'anime');
@@ -180,7 +178,7 @@ describe('useGenerateImages', () => {
     it('reset() returns to idle state', async () => {
         mockPost.mockRejectedValue({ status: 429, message: 'Rate limit' });
 
-        const { result } = renderHook(() => useGenerateImages(TOKEN));
+        const { result } = renderHook(() => useGenerateImages());
 
         await act(async () => {
             result.current.generate('script-9', 'anime');
@@ -202,14 +200,14 @@ describe('useGenerateImages', () => {
             result: { imageUrls: ['https://img.example.com/done.png'], prompt: 'p', generatedAt: '2026-01-01T00:00:00Z' },
         });
 
-        const { result } = renderHook(() => useGenerateImages(TOKEN));
+        const { result } = renderHook(() => useGenerateImages());
 
         await act(async () => {
             result.current.generate('script-10', 'anime');
             await Promise.resolve();
         });
 
-        await act(async () => { await vi.advanceTimersByTimeAsync(3000); });
+        await act(async () => { await vi.advanceTimersByTimeAsync(5000); });
 
         expect(result.current.state.phase).toBe('completed');
 

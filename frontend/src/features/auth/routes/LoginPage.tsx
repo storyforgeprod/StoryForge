@@ -1,16 +1,15 @@
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { useAuth } from '@/contexts/AuthContext';
+import { useAuth } from '../providers/AuthProvider';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 
-export function Register() {
+export function LoginPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [name, setName] = useState('');
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const { register } = useAuth();
+  const { login } = useAuth();
   const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -18,17 +17,11 @@ export function Register() {
     setError('');
     setIsLoading(true);
 
-    if (password.length < 6) {
-      setError('La contraseña debe tener al menos 6 caracteres');
-      setIsLoading(false);
-      return;
-    }
-
     try {
-      await register(email, password, name);
+      await login(email, password);
       navigate('/app');
     } catch (err: unknown) {
-      const message = err instanceof Error ? err.message : 'Error al registrarse';
+      const message = err instanceof Error ? err.message : 'Error al iniciar sesión';
       setError(message);
     } finally {
       setIsLoading(false);
@@ -43,25 +36,10 @@ export function Register() {
             <h1 className="text-3xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
               StoryForge
             </h1>
-            <p className="text-gray-600 mt-2">Crea tu cuenta</p>
+            <p className="text-gray-600 mt-2">Transforma historias en videos</p>
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-4">
-            <div>
-              <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">
-                Nombre
-              </label>
-              <Input
-                id="name"
-                type="text"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                placeholder="Tu nombre"
-                required
-                disabled={isLoading}
-              />
-            </div>
-
             <div>
               <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
                 Email
@@ -86,7 +64,7 @@ export function Register() {
                 type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                placeholder="Mínimo 6 caracteres"
+                placeholder="••••••••"
                 required
                 disabled={isLoading}
               />
@@ -103,15 +81,15 @@ export function Register() {
               className="w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700"
               disabled={isLoading}
             >
-              {isLoading ? 'Creando cuenta...' : 'Registrarse'}
+              {isLoading ? 'Iniciando sesión...' : 'Iniciar sesión'}
             </Button>
           </form>
 
           <div className="mt-6 pt-6 border-t border-gray-200">
             <p className="text-center text-gray-600">
-              ¿Ya tienes cuenta?{' '}
-              <Link to="/login" className="text-purple-600 hover:text-purple-700 font-medium">
-                Inicia sesión
+              ¿No tienes cuenta?{' '}
+              <Link to="/register" className="text-purple-600 hover:text-purple-700 font-medium">
+                Regístrate aquí
               </Link>
             </p>
           </div>

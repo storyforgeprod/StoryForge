@@ -42,6 +42,14 @@ export default {
         md: 'calc(var(--radius) - 2px)',
         sm: 'calc(var(--radius) - 4px)',
       },
+      backgroundImage: {
+        // Brand gradient tokens — replace hardcoded `from-purple-600 to-pink-600`
+        // across pages with `bg-brand-gradient` (+ `hover:bg-brand-gradient-hover`).
+        'brand-gradient': 'linear-gradient(to right, #9333ea, #db2777)',
+        'brand-gradient-hover': 'linear-gradient(to right, #7e22ce, #be185d)',
+        // Light-shade variant for page backgrounds (`from-purple-50 to-pink-50`).
+        'brand-gradient-soft': 'linear-gradient(to bottom right, #faf5ff, #fdf2f8)',
+      },
     },
   },
   plugins: [tailwindcssAnimate],
