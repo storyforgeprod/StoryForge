@@ -76,7 +76,7 @@ describe('StyleSelector', () => {
         animeButton.focus();
         expect(document.activeElement).toBe(animeButton);
 
-        await user.keyboard('{Enter}');
+        await user.keyboard(' ');
         expect(onChange).toHaveBeenCalledWith('anime');
     });
 

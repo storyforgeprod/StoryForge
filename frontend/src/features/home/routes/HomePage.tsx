@@ -14,26 +14,22 @@ export function HomePage() {
   const isDeveloper = user?.role === 'DEVELOPER';
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-50 to-pink-50 p-8">
+    <div className="min-h-screen bg-brand-gradient-soft p-8">
       <div className="max-w-6xl mx-auto">
         {/* Header */}
         <div className="flex items-center justify-between mb-12">
           <div>
-            <h1 className="text-4xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent mb-2">
+            <h1 className="text-4xl font-bold bg-brand-gradient bg-clip-text text-transparent mb-2">
               StoryForge
             </h1>
-            <p className="text-gray-600">Transforma historias en videos</p>
+            <p className="text-muted-foreground">Transforma historias en videos</p>
           </div>
           <div className="flex items-center gap-4">
             <div className="text-right">
-              <p className="font-semibold text-gray-900">{user?.name || user?.email}</p>
-              <p className="text-xs text-gray-500">{isDeveloper ? 'Desarrollador' : 'Usuario'}</p>
+              <p className="font-semibold text-foreground">{user?.name || user?.email}</p>
+              <p className="text-xs text-muted-foreground">{isDeveloper ? 'Desarrollador' : 'Usuario'}</p>
             </div>
-            <Button
-              onClick={handleLogout}
-              variant="outline"
-              className="text-red-600 border-red-200"
-            >
+            <Button onClick={handleLogout} variant="outline" className="text-destructive">
               Logout
             </Button>
           </div>
@@ -42,14 +38,14 @@ export function HomePage() {
         {/* Main Content */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
           {/* Regular Pipeline */}
-          <div className="bg-white rounded-lg shadow-lg p-8">
-            <h2 className="text-2xl font-bold text-gray-900 mb-4">Crear Video</h2>
-            <p className="text-gray-600 mb-6">
+          <div className="bg-background rounded-lg shadow-lg p-8">
+            <h2 className="text-2xl font-bold text-foreground mb-4">Crear Video</h2>
+            <p className="text-muted-foreground mb-6">
               Convierte tu historia en un video narrado paso a paso. Desde el guión hasta el resultado final.
             </p>
             <Button
               onClick={() => navigate('/app')}
-              className="w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700"
+              className="w-full bg-brand-gradient hover:bg-brand-gradient-hover"
             >
               Comenzar Pipeline
             </Button>

@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import {
     Dialog,
@@ -7,6 +8,8 @@ import {
     DialogHeader,
     DialogTitle,
 } from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
 import { postPreset } from '../api/generateApi';
 
 export type PresetDialogState = 'closed' | 'script' | 'images' | 'audio' | 'video';
@@ -43,46 +46,49 @@ export const PresetDialogs = ({
 
     const applyScript = async () => {
         if (!scriptContent.trim()) {
-            alert('Por favor ingresa contenido para el guión');
+            toast.error('Por favor ingresa contenido para el guión');
             return;
         }
         try {
             const result = await postPreset('script', { content: scriptContent });
             onScriptApplied(result.jobId);
+            toast.success('Preset de guión aplicado');
             handleClose();
         } catch (error) {
             console.error('Error saving script preset:', error);
-            alert('Error al guardar el preset del guión');
+            toast.error('Error al guardar el preset del guión');
         }
     };
 
     const applyImages = async () => {
         if (!imagesInput.trim()) {
-            alert('Por favor ingresa un Job ID válido o carga imágenes');
+            toast.error('Por favor ingresa un Job ID válido o carga imágenes');
             return;
         }
         try {
             const result = await postPreset('images', { content: imagesInput });
             onImagesApplied(result.jobId);
+            toast.success('Preset de imágenes aplicado');
             handleClose();
         } catch (error) {
             console.error('Error saving images preset:', error);
-            alert('Error al guardar el preset de imágenes');
+            toast.error('Error al guardar el preset de imágenes');
         }
     };
 
     const applyAudio = async () => {
         if (!audioInput.trim()) {
-            alert('Por favor ingresa un Job ID válido');
+            toast.error('Por favor ingresa un Job ID válido');
             return;
         }
         try {
             const result = await postPreset('audio', { content: audioInput });
             onAudioApplied(result.jobId);
+            toast.success('Preset de audio aplicado');
             handleClose();
         } catch (error) {
             console.error('Error saving audio preset:', error);
-            alert('Error al guardar el preset de audio');
+            toast.error('Error al guardar el preset de audio');
         }
     };
 
@@ -102,11 +108,11 @@ export const PresetDialogs = ({
                         </DialogDescription>
                     </DialogHeader>
                     <div className="space-y-4">
-                        <textarea
+                        <Textarea
                             value={scriptContent}
                             onChange={(e) => setScriptContent(e.target.value)}
                             placeholder="Pega el guión aquí (JSON o texto)..."
-                            className="w-full h-40 p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-600 text-gray-900 placeholder-gray-500 resize-none"
+                            className="h-40 min-h-0"
                         />
                         <div className="flex gap-2 justify-end">
                             <Button variant="outline" onClick={handleClose}>
@@ -132,12 +138,11 @@ export const PresetDialogs = ({
                         </DialogDescription>
                     </DialogHeader>
                     <div className="space-y-4">
-                        <input
+                        <Input
                             type="text"
                             value={imagesInput}
                             onChange={(e) => setImagesInput(e.target.value)}
                             placeholder="ej: job_abc123xyz..."
-                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-600 text-gray-900 placeholder-gray-500"
                         />
                         <div className="flex gap-2 justify-end">
                             <Button variant="outline" onClick={handleClose}>
@@ -163,12 +168,11 @@ export const PresetDialogs = ({
                         </DialogDescription>
                     </DialogHeader>
                     <div className="space-y-4">
-                        <input
+                        <Input
                             type="text"
                             value={audioInput}
                             onChange={(e) => setAudioInput(e.target.value)}
                             placeholder="ej: job_abc123xyz..."
-                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-600 text-gray-900 placeholder-gray-500"
                         />
                         <div className="flex gap-2 justify-end">
                             <Button variant="outline" onClick={handleClose}>

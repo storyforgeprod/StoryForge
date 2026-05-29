@@ -62,7 +62,7 @@ describe('VoiceSelector', () => {
 
         const sarahCard = screen.getByRole('radio', { name: /sarah/i });
         sarahCard.focus();
-        await user.keyboard('{Enter}');
+        await user.keyboard(' ');
 
         expect(onChange).toHaveBeenCalledWith('EXAVITQu4vr4xnSDxMaL');
     });
