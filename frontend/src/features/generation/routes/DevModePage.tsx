@@ -3,6 +3,9 @@ import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import type { PipelineStage } from '../types';
+import type { DevHandoffPayload } from '../hooks/useDevPresetHandoff';
+
+const DEV_HANDOFF_STORAGE_KEY = 'devState';
 
 const STAGES: { value: PipelineStage | 'wizard'; label: string }[] = [
   { value: 'wizard', label: 'Wizard Completo' },
@@ -43,8 +46,7 @@ export function DevModePage() {
       return;
     }
 
-    // Guardar en session storage para que Generate.tsx lo lea
-    const devState = {
+    const payload: DevHandoffPayload = {
       story: storyContent,
       scriptContent: (selectedStage === 'script' || selectedStage === 'video') ? scriptContent : '',
       imageJobId: (selectedStage === 'images' || selectedStage === 'video') ? imagesJobId : '',
@@ -52,12 +54,12 @@ export function DevModePage() {
       devMode: true,
     };
 
-    sessionStorage.setItem('devState', JSON.stringify(devState));
+    sessionStorage.setItem(DEV_HANDOFF_STORAGE_KEY, JSON.stringify(payload));
     navigate('/app');
   };
 
   const handleBack = () => {
-    sessionStorage.removeItem('devState');
+    sessionStorage.removeItem(DEV_HANDOFF_STORAGE_KEY);
     navigate('/home');
   };
 

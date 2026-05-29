@@ -1,13 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { postGenerateScript, getJobStatus } from '../api/generateApi';
-import type { StoryStyle } from '../types';
-
-type GenerateScriptState =
-    | { phase: 'idle' }
-    | { phase: 'submitting' }
-    | { phase: 'polling'; jobId: string; attempts: number }
-    | { phase: 'completed'; script: string }
-    | { phase: 'error'; message: string };
+import type { StoryStyle, GenerateScriptState } from '../types';
 
 export type UseGenerateScriptReturn = {
     state: GenerateScriptState;

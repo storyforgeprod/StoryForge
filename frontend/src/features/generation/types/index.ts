@@ -35,6 +35,13 @@ export type VideoAssemblyResult = {
     generatedAt: string;
 };
 
+export type GenerateScriptState =
+    | { phase: 'idle' }
+    | { phase: 'submitting' }
+    | { phase: 'polling'; jobId: string; attempts: number }
+    | { phase: 'completed'; script: string }
+    | { phase: 'error'; message: string };
+
 export type GenerateImagesState =
     | { phase: 'idle' }
     | { phase: 'submitting' }

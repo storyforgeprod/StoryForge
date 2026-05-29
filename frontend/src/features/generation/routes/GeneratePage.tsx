@@ -1,279 +1,117 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, ChevronLeft, Loader2 } from 'lucide-react';
+import { ArrowLeft } from 'lucide-react';
 import { useAuth } from '@/features/auth';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { StoryInput } from '../components/StoryInput';
-import { StyleSelector } from '../components/StyleSelector';
-import { VoiceSelector } from '../components/VoiceSelector';
-import { AudioPlayer } from '../components/AudioPlayer';
-import { ImageGrid } from '../components/ImageGrid';
-import { DownloadCard } from '../components/DownloadCard';
 import { PipelineProgress } from '../components/PipelineProgress';
-import { validateStory } from '../utils/validation';
-import { StoryStyle, type PipelineStageView } from '../types';
+import { GenerationWizard } from '../components/GenerationWizard';
+import {
+    PresetDialogs,
+    type PresetDialogState,
+} from '../components/PresetDialogs';
+import { ScriptStage } from '../components/stages/ScriptStage';
+import { ImagesStage } from '../components/stages/ImagesStage';
+import { AudioStage } from '../components/stages/AudioStage';
+import { VideoStage } from '../components/stages/VideoStage';
+import { deriveStages } from '../utils/deriveStages';
 import { useGenerateScript } from '../hooks/useGenerateScript';
 import { useGenerateImages } from '../hooks/useGenerateImages';
 import { useGenerateAudio } from '../hooks/useGenerateAudio';
 import { useGenerateVideo } from '../hooks/useGenerateVideo';
-import { postPreset } from '../api/generateApi';
-
-type WizardStep = 'story' | 'style' | 'voice';
-
-type PresetDialogState = 'closed' | 'story' | 'script' | 'images' | 'audio' | 'video';
-
-function deriveStages(
-    genPhase: string,
-    imagesPhase: string,
-    audioPhase: string,
-    videoPhase: string,
-): PipelineStageView[] {
-    const scriptStatus =
-        genPhase === 'completed' ? 'done' : genPhase === 'error' ? 'error' : 'pending';
-    const imagesStatus =
-        imagesPhase === 'completed'
-            ? 'done'
-            : imagesPhase === 'error'
-                ? 'error'
-                : imagesPhase === 'idle'
-                    ? 'pending'
-                    : 'active';
-    const audioStatus =
-        audioPhase === 'completed'
-            ? 'done'
-            : audioPhase === 'error'
-                ? 'error'
-                : audioPhase === 'idle'
-                    ? 'pending'
-                    : 'active';
-    const videoStatus =
-        videoPhase === 'completed'
-            ? 'done'
-            : videoPhase === 'error'
-                ? 'error'
-                : videoPhase === 'idle'
-                    ? 'pending'
-                    : 'active';
-
-    return [
-        { id: 'script', label: 'Guión', status: scriptStatus },
-        { id: 'images', label: 'Imágenes', status: imagesStatus },
-        { id: 'audio', label: 'Audio', status: audioStatus },
-        { id: 'video', label: 'Video', status: videoStatus },
-    ];
-}
+import { useDevPresetHandoff } from '../hooks/useDevPresetHandoff';
+import { StoryStyle } from '../types';
 
 export function GeneratePage() {
     const navigate = useNavigate();
+    const { user } = useAuth();
+    const isDeveloper = user?.role === 'DEVELOPER';
+
     const [story, setStory] = useState('');
     const [lastScriptStory, setLastScriptStory] = useState('');
     const [style, setStyle] = useState<StoryStyle | null>(null);
     const [voiceId, setVoiceId] = useState<string | null>(null);
-    const { user } = useAuth();
-    const isDeveloper = user?.role === 'DEVELOPER';
-    const [step, setStep] = useState<WizardStep>('story');
-    const [submitAttempted, setSubmitAttempted] = useState(false);
     const [scriptJobId, setScriptJobId] = useState<string | null>(null);
     const [imageJobId, setImageJobId] = useState<string | null>(null);
     const [audioJobId, setAudioJobId] = useState<string | null>(null);
-    
-    // Refs for auto-scrolling to sections
+    const [isPresetMode, setIsPresetMode] = useState(false);
+    const [presetDialog, setPresetDialog] = useState<PresetDialogState>('closed');
+
     const imagesRef = useRef<HTMLDivElement>(null);
     const audioRef = useRef<HTMLDivElement>(null);
     const videoRef = useRef<HTMLDivElement>(null);
-    
-    // Preset dialog states
-    const [presetDialogOpen, setPresetDialogOpen] = useState<PresetDialogState>('closed');
-    const [scriptPresetContent, setScriptPresetContent] = useState('');
-    const [imagesPresetInput, setImagesPresetInput] = useState('');
-    const [audioPresetInput, setAudioPresetInput] = useState('');
-    
-    // Track if we're in preset mode (skip wizard)
-    const [isPresetMode, setIsPresetMode] = useState(false);
 
-    const validation = useMemo(() => validateStory(story), [story]);
     const { state: genState, generate, reset: resetGeneration } = useGenerateScript();
     const { state: imagesState, generate: generateImages, reset: resetImages } = useGenerateImages();
     const { state: audioState, generate: generateAudio, reset: resetAudio } = useGenerateAudio();
     const { state: videoState, generate: generateVideo, reset: resetVideo } = useGenerateVideo();
 
-    // Load dev state if coming from dev mode
-    useEffect(() => {
-        const loadDevState = async () => {
-            const devState = sessionStorage.getItem('devState');
-            if (!devState) return;
-
-            try {
-                const state = JSON.parse(devState);
-                
-                // Set story
-                if (state.story) {
-                    setStory(state.story);
-                }
-                
-                // If we have script preset content, save it to backend to get a real job ID
-                if (state.scriptContent) {
-                    try {
-                        const result = await postPreset('script', { content: state.scriptContent });
-                        setScriptJobId(result.jobId);
-                    } catch (error) {
-                        console.error('Error saving script preset from DevMode:', error);
-                        // Fallback: use fake ID if API fails
-                        setScriptJobId('preset_script_' + Date.now());
-                    }
-                    setIsPresetMode(true);
-                    // Set default style for preset mode (ANIME)
-                    setStyle('anime' as StoryStyle);
-                    // Set default voice if not already set (use valid voice ID: Sarah)
-                    if (!voiceId) {
-                        setVoiceId('EXAVITQu4vr4xnSDxMaL');
-                    }
-                    // Reset generation states to avoid showing old UI
+    useDevPresetHandoff(
+        useCallback(
+            (applied) => {
+                setStory(applied.story);
+                if (applied.scriptJobId) setScriptJobId(applied.scriptJobId);
+                if (applied.imageJobId) setImageJobId(applied.imageJobId);
+                if (applied.audioJobId) setAudioJobId(applied.audioJobId);
+                setIsPresetMode(applied.isPresetMode);
+                if (applied.isPresetMode) {
+                    setStyle((prev) => prev ?? applied.style);
+                    setVoiceId((prev) => prev ?? applied.voiceId);
                     resetGeneration();
                     resetImages();
                     resetAudio();
                     resetVideo();
                 }
-                
-                // Load image and audio job IDs
-                if (state.imageJobId) {
-                    setImageJobId(state.imageJobId);
-                    setIsPresetMode(true);
-                    // Set default style and voice for preset mode
-                    if (!style) setStyle('anime' as StoryStyle);
-                    if (!voiceId) setVoiceId('EXAVITQu4vr4xnSDxMaL');
-                    resetImages();
-                }
-                if (state.audioJobId) {
-                    setAudioJobId(state.audioJobId);
-                    setIsPresetMode(true);
-                    // Set default style and voice for preset mode
-                    if (!style) setStyle('anime' as StoryStyle);
-                    if (!voiceId) setVoiceId('EXAVITQu4vr4xnSDxMaL');
-                    resetAudio();
-                }
-                
-                sessionStorage.removeItem('devState');
-            } catch (error) {
-                console.error('Error loading dev state:', error);
-            }
-        };
+            },
+            [resetGeneration, resetImages, resetAudio, resetVideo],
+        ),
+    );
 
-        loadDevState();
-    }, [resetGeneration, resetImages, resetAudio, resetVideo, voiceId]);
+    useEffect(() => {
+        if (genState.phase === 'polling') setScriptJobId(genState.jobId);
+    }, [genState]);
 
+    useEffect(() => {
+        if (imagesState.phase === 'polling') setImageJobId(imagesState.jobId);
+    }, [imagesState]);
+
+    useEffect(() => {
+        if (audioState.phase === 'polling') setAudioJobId(audioState.jobId);
+    }, [audioState]);
 
     const stages = useMemo(
         () => deriveStages(genState.phase, imagesState.phase, audioState.phase, videoState.phase),
         [genState.phase, imagesState.phase, audioState.phase, videoState.phase],
     );
 
-    useEffect(() => {
-        if (genState.phase === 'polling') {
-            setScriptJobId(genState.jobId);
-        }
-    }, [genState]);
-
-    useEffect(() => {
-        if (imagesState.phase === 'polling') {
-            setImageJobId(imagesState.jobId);
-        }
-    }, [imagesState]);
-
-    useEffect(() => {
-        if (audioState.phase === 'polling') {
-            setAudioJobId(audioState.jobId);
-        }
-    }, [audioState]);
-
-    const handleContinue = () => {
-        if (step === 'story') {
-            setSubmitAttempted(true);
-            if (!validation.valid) return;
-            setStep('style');
-            return;
-        }
-        if (step === 'style') {
-            if (!style) return;
-            setStep('voice');
-            return;
-        }
-    };
-
-    const handleBack = () => {
-        if (step === 'style') setStep('story');
-        if (step === 'voice') setStep('style');
-    };
-
-    const handleBackToHome = () => {
-        resetAll();
-        navigate('/home');
+    const scrollSoon = (ref: React.RefObject<HTMLDivElement>) => {
+        setTimeout(() => ref.current?.scrollIntoView({ behavior: 'smooth' }), 100);
     };
 
     const handleGenerateScript = () => {
         if (!style || !voiceId) return;
-        // Check if story changed from last script generation
-        if (genState.phase === 'completed' && story === lastScriptStory) {
-            // Story hasn't changed, skip regeneration
-            return;
-        }
+        if (genState.phase === 'completed' && story === lastScriptStory) return;
         setLastScriptStory(story);
         generate(story, style);
     };
 
     const handleGenerateImages = () => {
         if (!scriptJobId) return;
-        // In preset mode, use default style if not set
-        const styleToUse = style || (isPresetMode ? 'anime' as StoryStyle : null);
+        const styleToUse = style ?? (isPresetMode ? StoryStyle.ANIME : null);
         if (!styleToUse) return;
         generateImages(scriptJobId, styleToUse);
-        // Auto-scroll to images section
-        setTimeout(() => {
-            imagesRef.current?.scrollIntoView({ behavior: 'smooth' });
-        }, 100);
-    };
-
-    const handleImagesRetry = () => {
-        resetImages();
+        scrollSoon(imagesRef);
     };
 
     const handleGenerateAudio = () => {
         if (!scriptJobId || !voiceId) return;
         generateAudio(scriptJobId, voiceId);
-        // Auto-scroll to audio section
-        setTimeout(() => {
-            audioRef.current?.scrollIntoView({ behavior: 'smooth' });
-        }, 100);
-    };
-
-    const handleAudioRetry = () => {
-        resetAudio();
+        scrollSoon(audioRef);
     };
 
     const handleGenerateVideo = () => {
         if (!imageJobId || !audioJobId) return;
         generateVideo(imageJobId, audioJobId);
-        // Auto-scroll to video section
-        setTimeout(() => {
-            videoRef.current?.scrollIntoView({ behavior: 'smooth' });
-        }, 100);
-    };
-
-    const handleVideoRetry = () => {
-        resetVideo();
-    };
-
-    const handleRetry = () => {
-        resetGeneration();
-        resetImages();
-        resetAudio();
-        resetVideo();
-        setScriptJobId(null);
-        setImageJobId(null);
-        setAudioJobId(null);
-        setStep('story');
+        scrollSoon(videoRef);
     };
 
     const resetAll = () => {
@@ -287,85 +125,23 @@ export function GeneratePage() {
         setStory('');
         setStyle(null);
         setVoiceId(null);
-        setStep('story');
-        setSubmitAttempted(false);
-        setPresetDialogOpen('closed');
-        setScriptPresetContent('');
-        setImagesPresetInput('');
-        setAudioPresetInput('');
         setIsPresetMode(false);
+        setPresetDialog('closed');
     };
 
-    const isGeneratingScript =
-        genState.phase === 'submitting' || genState.phase === 'polling';
-    const isGeneratingImages =
-        imagesState.phase === 'submitting' || imagesState.phase === 'polling';
-    const isGeneratingAudio =
-        audioState.phase === 'submitting' || audioState.phase === 'polling';
-    const isGeneratingVideo =
-        videoState.phase === 'submitting' || videoState.phase === 'polling';
-
-    // Preset dialog handlers
-    const handleOpenPresetDialog = (stage: Exclude<PresetDialogState, 'closed'>) => {
-        setPresetDialogOpen(stage);
+    const handleBackToHome = () => {
+        resetAll();
+        navigate('/home');
     };
 
-    const handleClosePresetDialog = () => {
-        setPresetDialogOpen('closed');
-        setScriptPresetContent('');
-        setImagesPresetInput('');
-        setAudioPresetInput('');
-    };
-
-    const handleApplyScriptPreset = async () => {
-        if (!scriptPresetContent.trim()) {
-            alert('Por favor ingresa contenido para el guión');
-            return;
-        }
-        try {
-            // Save preset to backend to get a real job ID
-            const result = await postPreset('script', { content: scriptPresetContent });
-            setScriptJobId(result.jobId);
-            setScriptPresetContent('');
-            handleClosePresetDialog();
-        } catch (error) {
-            console.error('Error saving script preset:', error);
-            alert('Error al guardar el preset del guión');
-        }
-    };
-
-    const handleApplyImagesPreset = async () => {
-        if (!imagesPresetInput.trim()) {
-            alert('Por favor ingresa un Job ID válido o carga imágenes');
-            return;
-        }
-        try {
-            // Save images preset to backend to get a real job ID
-            const result = await postPreset('images', { content: imagesPresetInput });
-            setImageJobId(result.jobId);
-            setImagesPresetInput('');
-            handleClosePresetDialog();
-        } catch (error) {
-            console.error('Error saving images preset:', error);
-            alert('Error al guardar el preset de imágenes');
-        }
-    };
-
-    const handleApplyAudioPreset = async () => {
-        if (!audioPresetInput.trim()) {
-            alert('Por favor ingresa un Job ID válido');
-            return;
-        }
-        try {
-            // Save audio preset to backend to get a real job ID
-            const result = await postPreset('audio', { content: audioPresetInput });
-            setAudioJobId(result.jobId);
-            setAudioPresetInput('');
-            handleClosePresetDialog();
-        } catch (error) {
-            console.error('Error saving audio preset:', error);
-            alert('Error al guardar el preset de audio');
-        }
+    const handleScriptRetry = () => {
+        resetGeneration();
+        resetImages();
+        resetAudio();
+        resetVideo();
+        setScriptJobId(null);
+        setImageJobId(null);
+        setAudioJobId(null);
     };
 
     return (
@@ -383,470 +159,68 @@ export function GeneratePage() {
 
             <PipelineProgress stages={stages} />
 
-            {/* Script Preset Dialog */}
-            <Dialog open={presetDialogOpen === 'script'} onOpenChange={(open: boolean) => {
-                if (!open) handleClosePresetDialog();
-            }}>
-                <DialogContent className="max-w-md">
-                    <DialogHeader>
-                        <DialogTitle>Usar preset - Guión</DialogTitle>
-                        <DialogDescription>
-                            Pega o escribe el contenido del guión que deseas usar
-                        </DialogDescription>
-                    </DialogHeader>
-                    <div className="space-y-4">
-                        <textarea
-                            value={scriptPresetContent}
-                            onChange={(e) => setScriptPresetContent(e.target.value)}
-                            placeholder="Pega el guión aquí (JSON o texto)..."
-                            className="w-full h-40 p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-600 text-gray-900 placeholder-gray-500 resize-none"
-                        />
-                        <div className="flex gap-2 justify-end">
-                            <Button variant="outline" onClick={handleClosePresetDialog}>
-                                Cancelar
-                            </Button>
-                            <Button onClick={handleApplyScriptPreset}>
-                                Aplicar preset
-                            </Button>
-                        </div>
-                    </div>
-                </DialogContent>
-            </Dialog>
-
-            {/* Images Preset Dialog */}
-            <Dialog open={presetDialogOpen === 'images'} onOpenChange={(open: boolean) => {
-                if (!open) handleClosePresetDialog();
-            }}>
-                <DialogContent className="max-w-md">
-                    <DialogHeader>
-                        <DialogTitle>Usar preset - Imágenes</DialogTitle>
-                        <DialogDescription>
-                            Ingresa el Job ID de un trabajo de imágenes existente
-                        </DialogDescription>
-                    </DialogHeader>
-                    <div className="space-y-4">
-                        <input
-                            type="text"
-                            value={imagesPresetInput}
-                            onChange={(e) => setImagesPresetInput(e.target.value)}
-                            placeholder="ej: job_abc123xyz..."
-                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-600 text-gray-900 placeholder-gray-500"
-                        />
-                        <div className="flex gap-2 justify-end">
-                            <Button variant="outline" onClick={handleClosePresetDialog}>
-                                Cancelar
-                            </Button>
-                            <Button onClick={handleApplyImagesPreset}>
-                                Aplicar preset
-                            </Button>
-                        </div>
-                    </div>
-                </DialogContent>
-            </Dialog>
-
-            {/* Audio Preset Dialog */}
-            <Dialog open={presetDialogOpen === 'audio'} onOpenChange={(open: boolean) => {
-                if (!open) handleClosePresetDialog();
-            }}>
-                <DialogContent className="max-w-md">
-                    <DialogHeader>
-                        <DialogTitle>Usar preset - Audio</DialogTitle>
-                        <DialogDescription>
-                            Ingresa el Job ID de un trabajo de audio existente
-                        </DialogDescription>
-                    </DialogHeader>
-                    <div className="space-y-4">
-                        <input
-                            type="text"
-                            value={audioPresetInput}
-                            onChange={(e) => setAudioPresetInput(e.target.value)}
-                            placeholder="ej: job_abc123xyz..."
-                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-600 text-gray-900 placeholder-gray-500"
-                        />
-                        <div className="flex gap-2 justify-end">
-                            <Button variant="outline" onClick={handleClosePresetDialog}>
-                                Cancelar
-                            </Button>
-                            <Button onClick={handleApplyAudioPreset}>
-                                Aplicar preset
-                            </Button>
-                        </div>
-                    </div>
-                </DialogContent>
-            </Dialog>
+            <PresetDialogs
+                open={presetDialog}
+                onClose={() => setPresetDialog('closed')}
+                onScriptApplied={setScriptJobId}
+                onImagesApplied={setImageJobId}
+                onAudioApplied={setAudioJobId}
+            />
 
             <main className="mx-auto max-w-3xl px-4 py-8">
-                {/* Script generation — loading */}
-                {!isPresetMode && isGeneratingScript && (
-                    <Card>
-                        <CardContent className="flex flex-col items-center gap-4 py-16">
-                            <Loader2 className="h-10 w-10 animate-spin text-primary" />
-                            <p className="text-sm text-muted-foreground">
-                                Analizando tu historia…
-                            </p>
-                        </CardContent>
-                    </Card>
-                )}
+                <ScriptStage
+                    state={genState}
+                    isPresetMode={isPresetMode}
+                    isDeveloper={isDeveloper}
+                    imagesIdle={imagesState.phase === 'idle'}
+                    scriptJobId={scriptJobId}
+                    style={style}
+                    onGenerateImages={handleGenerateImages}
+                    onRetry={handleScriptRetry}
+                    onOpenImagesPreset={() => setPresetDialog('images')}
+                />
 
-                {/* Script generation — error */}
-                {!isPresetMode && genState.phase === 'error' && imagesState.phase === 'idle' && (
-                    <Card>
-                        <CardContent className="flex flex-col items-center gap-4 py-16">
-                            <p className="text-sm text-destructive">{genState.message}</p>
-                            <Button type="button" variant="outline" onClick={handleRetry}>
-                                Reintentar
-                            </Button>
-                        </CardContent>
-                    </Card>
-                )}
+                <ImagesStage
+                    ref={imagesRef}
+                    state={imagesState}
+                    audioIdle={audioState.phase === 'idle'}
+                    isDeveloper={isDeveloper}
+                    onGenerateAudio={handleGenerateAudio}
+                    onRetry={resetImages}
+                    onOpenAudioPreset={() => setPresetDialog('audio')}
+                />
 
-                {/* Script done — prompt to start image generation */}
-                {!isPresetMode && genState.phase === 'completed' && imagesState.phase === 'idle' && (
-                    <Card>
-                        <CardHeader>
-                            <CardTitle>Guión generado</CardTitle>
-                            <CardDescription>
-                                Revisá el guión y generá las imágenes para tu historia.
-                            </CardDescription>
-                        </CardHeader>
-                        <CardContent className="space-y-4">
-                            <pre className="max-h-64 overflow-y-auto rounded-lg bg-muted p-4 text-sm whitespace-pre-wrap">
-                                {genState.script}
-                            </pre>
-                            <div className="flex justify-end gap-2">
-                                {isDeveloper && (
-                                    <Button
-                                        type="button"
-                                        variant="outline"
-                                        onClick={() => handleOpenPresetDialog('images')}
-                                    >
-                                        Usar preset
-                                    </Button>
-                                )}
-                                <Button
-                                    type="button"
-                                    disabled={!scriptJobId || !style}
-                                    onClick={handleGenerateImages}
-                                >
-                                    Generar imágenes
-                                </Button>
-                            </div>
-                        </CardContent>
-                    </Card>
-                )}
+                <AudioStage
+                    ref={audioRef}
+                    state={audioState}
+                    videoState={videoState}
+                    isDeveloper={isDeveloper}
+                    imageJobId={imageJobId}
+                    audioJobId={audioJobId}
+                    onGenerateVideo={handleGenerateVideo}
+                    onRetry={resetAudio}
+                    onOpenVideoPreset={() => setPresetDialog('video')}
+                />
 
-                {/* Script preset — show preset content when applied */}
-                {isPresetMode && scriptPresetContent && scriptJobId && imagesState.phase === 'idle' && (
-                    <Card>
-                        <CardHeader>
-                            <CardTitle>Guión (preset)</CardTitle>
-                            <CardDescription>
-                                Revisá el guión y generá las imágenes para tu historia.
-                            </CardDescription>
-                        </CardHeader>
-                        <CardContent className="space-y-4">
-                            <pre className="max-h-64 overflow-y-auto rounded-lg bg-muted p-4 text-sm whitespace-pre-wrap">
-                                {scriptPresetContent}
-                            </pre>
-                            <div className="flex justify-end gap-2">
-                                {isDeveloper && (
-                                    <Button
-                                        type="button"
-                                        variant="outline"
-                                        onClick={() => handleOpenPresetDialog('images')}
-                                    >
-                                        Usar preset
-                                    </Button>
-                                )}
-                                <Button
-                                    type="button"
-                                    disabled={!scriptJobId || !story}
-                                    onClick={handleGenerateImages}
-                                >
-                                    Generar imágenes
-                                </Button>
-                            </div>
-                        </CardContent>
-                    </Card>
-                )}
+                <VideoStage
+                    ref={videoRef}
+                    state={videoState}
+                    onReset={resetAll}
+                    onRetry={resetVideo}
+                />
 
-                {/* IMAGES STAGE */}
-
-                {/* Image generation — loading */}
-                {isGeneratingImages && (
-                    <Card ref={imagesRef}>
-                        <CardContent className="flex flex-col items-center gap-4 py-16">
-                            <Loader2 className="h-10 w-10 animate-spin text-primary" />
-                            <p className="text-sm text-muted-foreground">
-                                Generando imágenes…
-                            </p>
-                        </CardContent>
-                    </Card>
-                )}
-
-                {/* Image generation — done */}
-                {imagesState.phase === 'completed' && audioState.phase === 'idle' && (
-                    <Card ref={imagesRef}>
-                        <CardHeader>
-                            <CardTitle>Imágenes generadas</CardTitle>
-                            <CardDescription>
-                                Revisá las imágenes antes de continuar al audio.
-                            </CardDescription>
-                        </CardHeader>
-                        <CardContent className="space-y-4">
-                            <ImageGrid imageUrls={imagesState.imageUrls} />
-                            <div className="flex justify-end gap-2">
-                                {isDeveloper && (
-                                    <Button
-                                        type="button"
-                                        variant="outline"
-                                        onClick={() => handleOpenPresetDialog('audio')}
-                                    >
-                                        Usar preset
-                                    </Button>
-                                )}
-                                <Button type="button" onClick={handleGenerateAudio}>
-                                    Generar narración
-                                </Button>
-                            </div>
-                        </CardContent>
-                    </Card>
-                )}
-
-                {/* Image generation — error */}
-                {imagesState.phase === 'error' && (
-                    <Card>
-                        <CardContent className="flex flex-col items-center gap-4 py-16">
-                            <p className="text-sm text-destructive">{imagesState.message}</p>
-                            <Button type="button" variant="outline" onClick={handleImagesRetry}>
-                                Reintentar
-                            </Button>
-                        </CardContent>
-                    </Card>
-                )}
-
-                {/* AUDIO STAGE */}
-
-                {/* Audio generation — loading */}
-                {isGeneratingAudio && (
-                    <Card ref={audioRef}>
-                        <CardContent className="flex flex-col items-center gap-4 py-16">
-                            <Loader2 className="h-10 w-10 animate-spin text-primary" />
-                            <p className="text-sm text-muted-foreground">
-                                Generando narración…
-                            </p>
-                        </CardContent>
-                    </Card>
-                )}
-
-                {/* Audio generation — done */}
-                {audioState.phase === 'completed' && videoState.phase === 'idle' && !isGeneratingVideo && (
-                    <Card ref={audioRef}>
-                        <CardHeader>
-                            <CardTitle>Narración generada</CardTitle>
-                            <CardDescription>
-                                Escuchá la narración y generá el video final.
-                            </CardDescription>
-                        </CardHeader>
-                        <CardContent className="space-y-4">
-                            {'audioUrl' in audioState && audioState.audioUrl && (
-                                <AudioPlayer
-                                    src={audioState.audioUrl}
-                                    durationSeconds={'audioLength' in audioState ? audioState.audioLength : undefined}
-                                />
-                            )}
-                            <p className="text-sm text-muted-foreground">
-                                Puede tardar hasta 3 minutos.
-                            </p>
-                            <div className="flex justify-end gap-2">
-                                {isDeveloper && (
-                                    <Button
-                                        type="button"
-                                        variant="outline"
-                                        onClick={() => handleOpenPresetDialog('video')}
-                                    >
-                                        Usar preset
-                                    </Button>
-                                )}
-                                <Button
-                                    type="button"
-                                    disabled={!imageJobId || !audioJobId}
-                                    onClick={handleGenerateVideo}
-                                >
-                                    Generar video
-                                </Button>
-                            </div>
-                        </CardContent>
-                    </Card>
-                )}
-
-                {/* Audio generation — error */}
-                {audioState.phase === 'error' && (
-                    <Card>
-                        <CardContent className="flex flex-col items-center gap-4 py-16">
-                            <p className="text-sm text-destructive">{audioState.message}</p>
-                            <Button type="button" variant="outline" onClick={handleAudioRetry}>
-                                Reintentar
-                            </Button>
-                        </CardContent>
-                    </Card>
-                )}
-
-                {/* VIDEO STAGE */}
-
-                                {/* VIDEO STAGE */}
-
-                {/* Video generation — loading */}
-                {isGeneratingVideo && (
-                    <Card ref={videoRef}>
-                        <CardContent className="flex flex-col items-center gap-4 py-16">
-                            <Loader2 className="h-10 w-10 animate-spin text-primary" />
-                            <p className="text-sm text-muted-foreground">
-                                Ensamblando tu video…
-                            </p>
-                        </CardContent>
-                    </Card>
-                )}
-
-                {/* Video generation — done */}
-                {videoState.phase === 'completed' && (
-                    <div ref={videoRef} className="space-y-4">
-                        <DownloadCard
-                            videoUrl={videoState.videoUrl}
-                            durationSeconds={videoState.duration}
-                            fileSizeBytes={videoState.fileSize}
-                        />
-                        <div className="flex justify-center">
-                            <Button type="button" variant="outline" onClick={resetAll}>
-                                Nueva historia
-                            </Button>
-                        </div>
-                    </div>
-                )}
-
-                {/* Video generation — error */}
-                {videoState.phase === 'error' && (
-                    <Card>
-                        <CardContent className="flex flex-col items-center gap-4 py-16">
-                            <p className="text-sm text-destructive">{videoState.message}</p>
-                            <Button type="button" variant="outline" onClick={handleVideoRetry}>
-                                Reintentar
-                            </Button>
-                        </CardContent>
-                    </Card>
-                )}
-
-                {/* Wizard — story / style / voice steps (hidden in preset mode) */}
                 {!isPresetMode && genState.phase === 'idle' && (
-                    <Card>
-                        <CardHeader>
-                            <div className="flex items-center justify-between">
-                                <div>
-                                    <CardTitle>
-                                        {step === 'story' && 'Tu historia'}
-                                        {step === 'style' && 'Estilo visual'}
-                                        {step === 'voice' && 'Voz y narrador'}
-                                    </CardTitle>
-                                    <CardDescription>
-                                        {step === 'story' &&
-                                            'Pegá el texto que querés convertir en un Short. En los siguientes pasos elegís estilo y voz.'}
-                                        {step === 'style' &&
-                                            'Elegí el estilo visual que mejor refleja tu historia.'}
-                                        {step === 'voice' &&
-                                            'Elegí la voz que narrará tu historia.'}
-                                    </CardDescription>
-                                </div>
-                                <div className="text-right text-xs text-muted-foreground">
-                                    <div className="font-semibold">
-                                        Paso{' '}
-                                        {step === 'story' ? '1' : step === 'style' ? '2' : '3'} de 3
-                                    </div>
-                                </div>
-                            </div>
-                        </CardHeader>
-                        <CardContent className="space-y-6">
-                            {step === 'story' && (
-                                <>
-                                    <StoryInput
-                                        value={story}
-                                        onChange={setStory}
-                                        showErrors={submitAttempted}
-                                    />
-                                    <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-                                        <p className="text-xs text-muted-foreground">
-                                            {validation.valid
-                                                ? 'Texto listo para continuar.'
-                                                : 'Completá el texto para habilitar el siguiente paso.'}
-                                        </p>
-                                        <Button
-                                            type="button"
-                                            disabled={!validation.valid}
-                                            onClick={handleContinue}
-                                        >
-                                            Continuar
-                                        </Button>
-                                    </div>
-                                </>
-                            )}
-
-                            {step === 'style' && (
-                                <>
-                                    <StyleSelector value={style} onChange={setStyle} />
-                                    <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-                                        <Button
-                                            type="button"
-                                            variant="outline"
-                                            onClick={handleBack}
-                                        >
-                                            <ChevronLeft className="mr-2 h-4 w-4" />
-                                            Atrás
-                                        </Button>
-                                        <Button
-                                            type="button"
-                                            disabled={!style}
-                                            onClick={handleContinue}
-                                        >
-                                            Continuar
-                                        </Button>
-                                    </div>
-                                </>
-                            )}
-
-                            {step === 'voice' && (
-                                <>
-                                    <VoiceSelector value={voiceId} onChange={setVoiceId} />
-                                    <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-                                        <Button
-                                            type="button"
-                                            variant="outline"
-                                            onClick={handleBack}
-                                        >
-                                            <ChevronLeft className="mr-2 h-4 w-4" />
-                                            Atrás
-                                        </Button>
-                                        <div className="flex gap-2">
-                                            {isDeveloper && (
-                                                <Button
-                                                    type="button"
-                                                    variant="outline"
-                                                    onClick={() => handleOpenPresetDialog('script')}
-                                                >
-                                                    Usar preset
-                                                </Button>
-                                            )}
-                                            <Button
-                                                type="button"
-                                                disabled={!voiceId}
-                                                onClick={handleGenerateScript}
-                                            >
-                                                Generar guión
-                                            </Button>
-                                        </div>
-                                    </div>
-                                </>
-                            )}
-                        </CardContent>
-                    </Card>
+                    <GenerationWizard
+                        story={story}
+                        onStoryChange={setStory}
+                        style={style}
+                        onStyleChange={setStyle}
+                        voiceId={voiceId}
+                        onVoiceChange={setVoiceId}
+                        isDeveloper={isDeveloper}
+                        onGenerateScript={handleGenerateScript}
+                        onOpenScriptPreset={() => setPresetDialog('script')}
+                    />
                 )}
             </main>
         </div>
