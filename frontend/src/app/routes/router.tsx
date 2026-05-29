@@ -1,18 +1,15 @@
-import { BrowserRouter, Route, Routes, Navigate } from 'react-router-dom';
+import { Navigate, Route, Routes } from 'react-router-dom';
 import {
-  AuthProvider,
-  useAuth,
   ProtectedRoute,
   LoginPage,
   RegisterPage,
+  useAuth,
 } from '@/features/auth';
-import { GeneratePage, DevModePage } from '@/features/generation';
-import { Landing } from '@/pages/Landing';
-import { Home } from '@/pages/Home';
-import { NotFound } from '@/pages/NotFound';
-import { Header } from '@/components/Header';
+import { DevModePage, GeneratePage } from '@/features/generation';
+import { HomePage, LandingPage, NotFoundPage } from '@/features/home';
+import { Header } from '@/components/layout/Header';
 
-function AppRoutes() {
+export const AppRoutes = () => {
   const { isAuthenticated, isLoading } = useAuth();
 
   if (isLoading) {
@@ -30,14 +27,23 @@ function AppRoutes() {
     <>
       {isAuthenticated && <Header />}
       <Routes>
-        <Route path="/login" element={!isAuthenticated ? <LoginPage /> : <Navigate to="/home" replace />} />
-        <Route path="/register" element={!isAuthenticated ? <RegisterPage /> : <Navigate to="/home" replace />} />
-        <Route path="/" element={!isAuthenticated ? <Landing /> : <Navigate to="/home" replace />} />
+        <Route
+          path="/login"
+          element={!isAuthenticated ? <LoginPage /> : <Navigate to="/home" replace />}
+        />
+        <Route
+          path="/register"
+          element={!isAuthenticated ? <RegisterPage /> : <Navigate to="/home" replace />}
+        />
+        <Route
+          path="/"
+          element={!isAuthenticated ? <LandingPage /> : <Navigate to="/home" replace />}
+        />
         <Route
           path="/home"
           element={
             <ProtectedRoute>
-              <Home />
+              <HomePage />
             </ProtectedRoute>
           }
         />
@@ -57,18 +63,8 @@ function AppRoutes() {
             </ProtectedRoute>
           }
         />
-        <Route path="*" element={<NotFound />} />
+        <Route path="*" element={<NotFoundPage />} />
       </Routes>
     </>
   );
-}
-
-export default function App() {
-  return (
-    <BrowserRouter>
-      <AuthProvider>
-        <AppRoutes />
-      </AuthProvider>
-    </BrowserRouter>
-  );
-}
+};

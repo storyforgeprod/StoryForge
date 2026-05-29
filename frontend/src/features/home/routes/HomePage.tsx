@@ -2,7 +2,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/features/auth';
 import { Button } from '@/components/ui/button';
 
-export function Home() {
+export function HomePage() {
   const navigate = useNavigate();
   const { user, logout } = useAuth();
 

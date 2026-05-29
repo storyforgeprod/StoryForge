@@ -1,3 +1,6 @@
-// Public API for the home feature — populated in Phase 5.
-// Consumers must import from this barrel only:  import { … } from '@/features/home';
-export {};
+// Public API for the home feature. Consumers outside this folder import only
+// what's listed below — never deep paths like '@/features/home/routes/...'.
+
+export { LandingPage } from './routes/LandingPage';
+export { HomePage } from './routes/HomePage';
+export { NotFoundPage } from './routes/NotFoundPage';

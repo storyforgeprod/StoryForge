@@ -3,7 +3,7 @@ import { Sparkles } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 
-export function Landing() {
+export function LandingPage() {
   return (
     <div className="min-h-screen">
       <header className="border-b border-border/60">
