@@ -22,10 +22,11 @@ export default tseslint.config(
     rules: {
       ...reactHooks.configs.recommended.rules,
       'react-refresh/only-export-components': ['warn', { allowConstantExport: true }],
-      // Feature isolation — enforce public-API rule once features/ exists.
-      // Raised to 'error' in Phase 7 of the migration plan.
+      // Feature isolation — public-API rule.
+      // Outside-feature consumers must import via @/features/<name> (the root barrel),
+      // never via @/features/<name>/components/..., /hooks/..., etc.
       'import/no-restricted-paths': [
-        'warn',
+        'error',
         {
           zones: [
             {

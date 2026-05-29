@@ -27,7 +27,10 @@ StoryForge: SaaS MVP that converts long-form story text (webtoons, manhwas, web 
 - Backend entry: `backend/src/generate/` (controller, service, queue processor, DTOs)
 - Integrations: `backend/src/integrations/` (azure-openai, azure-foundry-image, elevenlabs, video)
 - Auth: `backend/src/common/auth/` (JWT strategy + guards)
-- Frontend: `frontend/` — see [frontend/CLAUDE.md](frontend/CLAUDE.md)
+- Frontend app shell: `frontend/src/app/` (App.tsx, providers/, routes/)
+- Frontend features: `frontend/src/features/{auth,generation,home}/` (each with api/, components/, hooks/, routes/, types/, index.ts)
+- Frontend shared UI: `frontend/src/components/{ui,layout}/` (shadcn primitives + cross-feature layout)
+- Frontend conventions: see [frontend/CLAUDE.md](frontend/CLAUDE.md)
 
 ## Environment
 

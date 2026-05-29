@@ -58,7 +58,7 @@ export function useGenerateScript(): UseGenerateScriptReturn {
                         const script =
                             job.result && typeof job.result === 'object'
                                 ? (job.result as { script?: string }).script ?? ''
-                                : (job as any).script ?? '';
+                                : (job as { script?: string }).script ?? '';
                         setState({ phase: 'completed', script });
                     } else if (job.status === 'failed') {
                         clearPolling();

@@ -16,7 +16,7 @@ Canonical baseline that Copilot and other tools also follow: [frontend/AGENTS.md
 
 ## Feature-driven architecture
 
-Target tree (migration in progress — see `docs/frontend-migration-plan.md`):
+Tree:
 
 ```
 src/
@@ -186,7 +186,7 @@ Before you call a frontend change done:
 
 ## Never do
 
-- ❌ Add files to `src/pages/`, `src/components/` (outside `ui/`/`layout/`), `src/hooks/`, `src/services/`, `src/contexts/`, `src/types/`, or `src/utils/`. Those folders are migration-target empty; new code lands under `features/`.
+- ❌ Recreate the old technical-layer folders (`src/pages/`, `src/hooks/`, `src/services/`, `src/contexts/`, `src/types/`, `src/utils/`) or drop loose files into `src/components/` outside `ui/` or `layout/`. New code lands under `features/<name>/`.
 - ❌ Modify shadcn primitive sources in `@/components/ui/` for a single-use customization. Customize at the call site via `className` + `cn()`.
 - ❌ Import from another feature's internal paths (`@/features/auth/api/…`). Use the barrel.
 - ❌ Hardcoded API URLs in a service. Use `import.meta.env.VITE_API_URL`.

@@ -47,8 +47,6 @@ Feature-driven (Bulletproof React). Target tree:
     ├── lib/utils.ts          # cn() helper
     └── styles/
 
-Migration from the current technical-layer structure is phased in [docs/frontend-migration-plan.md](../docs/frontend-migration-plan.md). The rules below apply to all **new** code; pre-existing violations are tracked by the plan.
-
 ## Rules
 
 ### Feature isolation
