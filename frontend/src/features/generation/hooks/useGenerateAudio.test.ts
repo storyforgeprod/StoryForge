@@ -1,11 +1,11 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { renderHook, act } from '@testing-library/react';
-import { useGenerateImages } from './useGenerateImages';
-import * as generateApi from '@/services/generateApi';
+import { useGenerateAudio } from './useGenerateAudio';
+import * as generateApi from '../api/generateApi';
 
-vi.mock('@/services/generateApi');
+vi.mock('../api/generateApi');
 
-const mockPost = vi.mocked(generateApi.postGenerateImages);
+const mockPost = vi.mocked(generateApi.postGenerateAudio);
 const mockPoll = vi.mocked(generateApi.getJobStatus);
 
 beforeEach(() => {
@@ -17,9 +17,9 @@ afterEach(() => {
     vi.useRealTimers();
 });
 
-describe('useGenerateImages', () => {
+describe('useGenerateAudio', () => {
     it('starts in idle phase', () => {
-        const { result } = renderHook(() => useGenerateImages());
+        const { result } = renderHook(() => useGenerateAudio());
         expect(result.current.state.phase).toBe('idle');
     });
 
@@ -32,13 +32,18 @@ describe('useGenerateImages', () => {
         mockPoll.mockResolvedValue({
             jobId: 'job-1',
             status: 'completed',
-            result: { imageUrls: ['https://img.example.com/1.png'], prompt: 'test', generatedAt: '2026-01-01T00:00:00Z' },
+            result: {
+                audioUrl: 'https://audio.example.com/1.mp3',
+                audioLength: 45,
+                textUsed: 'First 100 chars...',
+                generatedAt: '2026-01-01T00:00:00Z',
+            },
         });
 
-        const { result } = renderHook(() => useGenerateImages());
+        const { result } = renderHook(() => useGenerateAudio());
 
         act(() => {
-            result.current.generate('script-1', 'anime');
+            result.current.generate('script-1');
         });
 
         expect(result.current.state.phase).toBe('submitting');
@@ -55,18 +60,34 @@ describe('useGenerateImages', () => {
 
         expect(result.current.state.phase).toBe('completed');
         if (result.current.state.phase === 'completed') {
-            expect(result.current.state.imageUrls).toEqual(['https://img.example.com/1.png']);
+            expect(result.current.state.audioUrl).toBe('https://audio.example.com/1.mp3');
+            expect(result.current.state.audioLength).toBe(45);
         }
     });
 
-    it('job failed → error with backend error field', async () => {
+    it('passes voiceId when provided', async () => {
         mockPost.mockResolvedValue({ jobId: 'job-2', status: 'pending', createdAt: '2026-01-01T00:00:00Z' });
-        mockPoll.mockResolvedValue({ jobId: 'job-2', status: 'failed', error: 'Replicate unavailable' });
+        mockPoll.mockResolvedValue({ jobId: 'job-2', status: 'processing' });
 
-        const { result } = renderHook(() => useGenerateImages());
+        const { result } = renderHook(() => useGenerateAudio());
+
+        act(() => { result.current.generate('script-2', 'EXAVITQu4vr4xnSDxMaL'); });
+
+        await act(async () => { await Promise.resolve(); });
+
+        expect(mockPost).toHaveBeenCalledWith(
+            { scriptId: 'script-2', voiceId: 'EXAVITQu4vr4xnSDxMaL' },
+        );
+    });
+
+    it('job failed → error with backend error field', async () => {
+        mockPost.mockResolvedValue({ jobId: 'job-3', status: 'pending', createdAt: '2026-01-01T00:00:00Z' });
+        mockPoll.mockResolvedValue({ jobId: 'job-3', status: 'failed', error: 'ElevenLabs unavailable' });
+
+        const { result } = renderHook(() => useGenerateAudio());
 
         await act(async () => {
-            result.current.generate('script-2', 'manga');
+            result.current.generate('script-3');
             await Promise.resolve();
         });
 
@@ -76,18 +97,18 @@ describe('useGenerateImages', () => {
 
         expect(result.current.state.phase).toBe('error');
         if (result.current.state.phase === 'error') {
-            expect(result.current.state.message).toBe('Replicate unavailable');
+            expect(result.current.state.message).toBe('ElevenLabs unavailable');
         }
     });
 
     it('polling error → transitions to error state', async () => {
-        mockPost.mockResolvedValue({ jobId: 'job-3', status: 'pending', createdAt: '2026-01-01T00:00:00Z' });
+        mockPost.mockResolvedValue({ jobId: 'job-4', status: 'pending', createdAt: '2026-01-01T00:00:00Z' });
         mockPoll.mockRejectedValue({ status: 500, message: 'Server error' });
 
-        const { result } = renderHook(() => useGenerateImages());
+        const { result } = renderHook(() => useGenerateAudio());
 
         await act(async () => {
-            result.current.generate('script-3', 'webtoon');
+            result.current.generate('script-4');
             await Promise.resolve();
         });
 
@@ -101,10 +122,10 @@ describe('useGenerateImages', () => {
     it('401 error → session expired message', async () => {
         mockPost.mockRejectedValue({ status: 401, message: 'Unauthorized' });
 
-        const { result } = renderHook(() => useGenerateImages());
+        const { result } = renderHook(() => useGenerateAudio());
 
         await act(async () => {
-            result.current.generate('script-4', 'anime');
+            result.current.generate('script-5');
             await Promise.resolve();
         });
 
@@ -117,10 +138,10 @@ describe('useGenerateImages', () => {
     it('429 error → rate limit message', async () => {
         mockPost.mockRejectedValue({ status: 429, message: 'Rate limit' });
 
-        const { result } = renderHook(() => useGenerateImages());
+        const { result } = renderHook(() => useGenerateAudio());
 
         await act(async () => {
-            result.current.generate('script-5', 'anime');
+            result.current.generate('script-6');
             await Promise.resolve();
         });
 
@@ -131,13 +152,13 @@ describe('useGenerateImages', () => {
     });
 
     it('timeout fires at 200 attempts (1000 s) → correct error message', async () => {
-        mockPost.mockResolvedValue({ jobId: 'job-6', status: 'pending', createdAt: '2026-01-01T00:00:00Z' });
-        mockPoll.mockResolvedValue({ jobId: 'job-6', status: 'processing' });
+        mockPost.mockResolvedValue({ jobId: 'job-7', status: 'pending', createdAt: '2026-01-01T00:00:00Z' });
+        mockPoll.mockResolvedValue({ jobId: 'job-7', status: 'processing' });
 
-        const { result } = renderHook(() => useGenerateImages());
+        const { result } = renderHook(() => useGenerateAudio());
 
         await act(async () => {
-            result.current.generate('script-6', 'novel');
+            result.current.generate('script-7');
             await Promise.resolve();
         });
 
@@ -150,25 +171,20 @@ describe('useGenerateImages', () => {
         expect(result.current.state.phase).toBe('error');
         if (result.current.state.phase === 'error') {
             expect(result.current.state.message).toBe(
-                'La generación de imágenes tardó demasiado. Intentá de nuevo.',
+                'La generación de audio tardó demasiado. Intentá de nuevo.',
             );
         }
     });
 
     it('duplicate generate() while in-flight is ignored', async () => {
-        mockPost.mockResolvedValue({ jobId: 'job-7', status: 'pending', createdAt: '2026-01-01T00:00:00Z' });
+        mockPost.mockResolvedValue({ jobId: 'job-8', status: 'pending', createdAt: '2026-01-01T00:00:00Z' });
 
-        const { result } = renderHook(() => useGenerateImages());
+        const { result } = renderHook(() => useGenerateAudio());
 
-        act(() => {
-            result.current.generate('script-7', 'anime');
-        });
-
+        act(() => { result.current.generate('script-8'); });
         expect(result.current.state.phase).toBe('submitting');
 
-        act(() => {
-            result.current.generate('script-8', 'manga');
-        });
+        act(() => { result.current.generate('script-9'); });
 
         await act(async () => { await Promise.resolve(); });
 
@@ -178,10 +194,10 @@ describe('useGenerateImages', () => {
     it('reset() returns to idle state', async () => {
         mockPost.mockRejectedValue({ status: 429, message: 'Rate limit' });
 
-        const { result } = renderHook(() => useGenerateImages());
+        const { result } = renderHook(() => useGenerateAudio());
 
         await act(async () => {
-            result.current.generate('script-9', 'anime');
+            result.current.generate('script-10');
             await Promise.resolve();
         });
 
@@ -193,17 +209,17 @@ describe('useGenerateImages', () => {
     });
 
     it('interval is cleared after reaching completed state', async () => {
-        mockPost.mockResolvedValue({ jobId: 'job-8', status: 'pending', createdAt: '2026-01-01T00:00:00Z' });
+        mockPost.mockResolvedValue({ jobId: 'job-9', status: 'pending', createdAt: '2026-01-01T00:00:00Z' });
         mockPoll.mockResolvedValue({
-            jobId: 'job-8',
+            jobId: 'job-9',
             status: 'completed',
-            result: { imageUrls: ['https://img.example.com/done.png'], prompt: 'p', generatedAt: '2026-01-01T00:00:00Z' },
+            result: { audioUrl: 'https://audio.example.com/done.mp3', audioLength: 30, textUsed: 'done', generatedAt: '2026-01-01T00:00:00Z' },
         });
 
-        const { result } = renderHook(() => useGenerateImages());
+        const { result } = renderHook(() => useGenerateAudio());
 
         await act(async () => {
-            result.current.generate('script-10', 'anime');
+            result.current.generate('script-11');
             await Promise.resolve();
         });
 

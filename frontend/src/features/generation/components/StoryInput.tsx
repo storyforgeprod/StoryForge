@@ -6,7 +6,7 @@ import {
   STORY_MAX_LENGTH,
   STORY_MIN_LENGTH,
   validateStory,
-} from '@/utils/validation';
+} from '../utils/validation';
 
 export type StoryInputProps = {
   value: string;

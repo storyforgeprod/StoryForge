@@ -1,4 +1,4 @@
-import type { StoryStyle, ImageGenerationResult, AudioGenerationResult } from '@/types/generate';
+import type { StoryStyle, ImageGenerationResult, AudioGenerationResult } from '../types';
 import { getAuthToken } from '@/features/auth';
 
 const API_BASE = import.meta.env.VITE_API_URL ?? 'http://localhost:3000';

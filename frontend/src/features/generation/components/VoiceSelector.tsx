@@ -1,5 +1,5 @@
 import { useRef, useState } from 'react';
-import type { VoiceOption } from '@/types/generate';
+import type { VoiceOption } from '../types';
 
 export type VoiceSelectorProps = {
     value: string | null;

@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import type { PipelineStage } from '@/types/pipeline';
+import type { PipelineStage } from '../types';
 
 const STAGES: { value: PipelineStage | 'wizard'; label: string }[] = [
   { value: 'wizard', label: 'Wizard Completo' },
@@ -13,7 +13,7 @@ const STAGES: { value: PipelineStage | 'wizard'; label: string }[] = [
   { value: 'video', label: 'Video' },
 ];
 
-export function DevMode() {
+export function DevModePage() {
   const navigate = useNavigate();
   const [selectedStage, setSelectedStage] = useState<PipelineStage | 'wizard'>('wizard');
   const [storyContent, setStoryContent] = useState('');

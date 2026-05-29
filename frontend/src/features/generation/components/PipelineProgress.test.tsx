@@ -1,9 +1,10 @@
 import { render, screen } from '@testing-library/react';
 import { describe, it, expect } from 'vitest';
-import { PipelineProgress, type PipelineStage } from './PipelineProgress';
+import { PipelineProgress } from './PipelineProgress';
+import type { PipelineStageView } from '../types';
 
 describe('PipelineProgress', () => {
-    const mockStages: PipelineStage[] = [
+    const mockStages: PipelineStageView[] = [
         { id: 'script', label: 'Guión', status: 'done' },
         { id: 'images', label: 'Imágenes', status: 'active' },
         { id: 'audio', label: 'Audio', status: 'pending' },

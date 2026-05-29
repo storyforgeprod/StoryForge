@@ -1,15 +1,8 @@
 import { Check, X, Loader2 } from 'lucide-react';
-
-export type StageStatus = 'pending' | 'active' | 'done' | 'error';
-
-export type PipelineStage = {
-    id: 'script' | 'images' | 'audio' | 'video';
-    label: string;
-    status: StageStatus;
-};
+import type { StageStatus, PipelineStageView } from '../types';
 
 export type PipelineProgressProps = {
-    stages: PipelineStage[];
+    stages: PipelineStageView[];
 };
 
 export const PipelineProgress = ({ stages }: PipelineProgressProps) => {

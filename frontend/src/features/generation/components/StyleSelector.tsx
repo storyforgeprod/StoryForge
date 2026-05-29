@@ -1,4 +1,4 @@
-import { StoryStyle } from '@/types/generate';
+import { StoryStyle } from '../types';
 
 export type StyleSelectorProps = {
     value: StoryStyle | null;

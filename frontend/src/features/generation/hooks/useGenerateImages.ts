@@ -1,22 +1,21 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { postGenerateVideo, getJobStatus } from '@/services/generateApi';
-import type { GenerateVideoState, VideoAssemblyResult } from '@/types/generate';
+import { postGenerateImages, getJobStatus } from '../api/generateApi';
+import type { StoryStyle, GenerateImagesState, ImageGenerationResult } from '../types';
 
-export type UseGenerateVideoReturn = {
-    state: GenerateVideoState;
-    generate: (imageJobId: string, audioJobId: string, opts?: { fps?: number; bitrate?: string }) => void;
+export type UseGenerateImagesReturn = {
+    state: GenerateImagesState;
+    generate: (scriptId: string, style: StoryStyle) => void;
     reset: () => void;
 };
 
 const ERROR_MAP: Record<number, string> = {
-    400: 'Las imágenes o el audio aún no están listos.',
     401: 'Tu sesión expiró. Volvé a iniciar sesión.',
     429: 'Límite alcanzado. Intentá en un minuto.',
 };
 
 const NETWORK_ERROR = 'Error de conexión. Revisá tu internet.';
-const TIMEOUT_ERROR = 'El ensamblado tardó demasiado. Intentá de nuevo.';
-// 200 attempts × 5s = 1000s ≈ 16.7 min (unified polling across jobs)
+const TIMEOUT_ERROR = 'La generación de imágenes tardó demasiado. Intentá de nuevo.';
+// 200 attempts × 5s = 1000s ≈ 16.7 min (multi-scene generation)
 const MAX_ATTEMPTS = 200;
 const POLL_INTERVAL_MS = 5000;
 
@@ -28,8 +27,8 @@ function mapApiError(err: unknown): string {
     return NETWORK_ERROR;
 }
 
-export function useGenerateVideo(): UseGenerateVideoReturn {
-    const [state, setState] = useState<GenerateVideoState>({ phase: 'idle' });
+export function useGenerateImages(): UseGenerateImagesReturn {
+    const [state, setState] = useState<GenerateImagesState>({ phase: 'idle' });
     const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
     const attemptsRef = useRef(0);
     const inFlightRef = useRef(false);
@@ -58,13 +57,8 @@ export function useGenerateVideo(): UseGenerateVideoReturn {
                     const job = await getJobStatus(jobId);
                     if (job.status === 'completed') {
                         clearPolling();
-                        const result = job.result as VideoAssemblyResult | undefined;
-                        setState({
-                            phase: 'completed',
-                            videoUrl: result?.videoUrl ?? '',
-                            duration: result?.duration ?? 0,
-                            fileSize: result?.fileSize ?? 0,
-                        });
+                        const result = job.result as ImageGenerationResult | undefined;
+                        setState({ phase: 'completed', imageUrls: result?.imageUrls ?? [] });
                     } else if (job.status === 'failed') {
                         clearPolling();
                         setState({
@@ -72,7 +66,7 @@ export function useGenerateVideo(): UseGenerateVideoReturn {
                             message:
                                 (typeof job.error === 'string' ? job.error : undefined) ??
                                 job.message ??
-                                'No se pudo ensamblar el video.',
+                                'No se pudo generar las imágenes.',
                         });
                     }
                 } catch (err) {
@@ -85,16 +79,12 @@ export function useGenerateVideo(): UseGenerateVideoReturn {
     );
 
     const generate = useCallback(
-        async (
-            imageJobId: string,
-            audioJobId: string,
-            opts?: { fps?: number; bitrate?: string },
-        ) => {
+        async (scriptId: string, style: StoryStyle) => {
             if (inFlightRef.current) return;
             inFlightRef.current = true;
             setState({ phase: 'submitting' });
             try {
-                const { jobId } = await postGenerateVideo({ imageJobId, audioJobId, ...opts });
+                const { jobId } = await postGenerateImages({ scriptId, style });
                 setState({ phase: 'polling', jobId });
                 startPolling(jobId);
             } catch (err) {

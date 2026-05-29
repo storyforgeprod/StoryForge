@@ -1,10 +1,10 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { postGenerateImages, getJobStatus } from '@/services/generateApi';
-import type { StoryStyle, GenerateImagesState, ImageGenerationResult } from '@/types/generate';
+import { postGenerateAudio, getJobStatus } from '../api/generateApi';
+import type { GenerateAudioState, AudioGenerationResult } from '../types';
 
-export type UseGenerateImagesReturn = {
-    state: GenerateImagesState;
-    generate: (scriptId: string, style: StoryStyle) => void;
+export type UseGenerateAudioReturn = {
+    state: GenerateAudioState;
+    generate: (scriptId: string, voiceId?: string) => void;
     reset: () => void;
 };
 
@@ -14,8 +14,8 @@ const ERROR_MAP: Record<number, string> = {
 };
 
 const NETWORK_ERROR = 'Error de conexión. Revisá tu internet.';
-const TIMEOUT_ERROR = 'La generación de imágenes tardó demasiado. Intentá de nuevo.';
-// 200 attempts × 5s = 1000s ≈ 16.7 min (multi-scene generation)
+const TIMEOUT_ERROR = 'La generación de audio tardó demasiado. Intentá de nuevo.';
+// 200 attempts × 5s = 1000s ≈ 16.7 min (unified polling across jobs)
 const MAX_ATTEMPTS = 200;
 const POLL_INTERVAL_MS = 5000;
 
@@ -27,8 +27,8 @@ function mapApiError(err: unknown): string {
     return NETWORK_ERROR;
 }
 
-export function useGenerateImages(): UseGenerateImagesReturn {
-    const [state, setState] = useState<GenerateImagesState>({ phase: 'idle' });
+export function useGenerateAudio(): UseGenerateAudioReturn {
+    const [state, setState] = useState<GenerateAudioState>({ phase: 'idle' });
     const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
     const attemptsRef = useRef(0);
     const inFlightRef = useRef(false);
@@ -57,8 +57,12 @@ export function useGenerateImages(): UseGenerateImagesReturn {
                     const job = await getJobStatus(jobId);
                     if (job.status === 'completed') {
                         clearPolling();
-                        const result = job.result as ImageGenerationResult | undefined;
-                        setState({ phase: 'completed', imageUrls: result?.imageUrls ?? [] });
+                        const result = job.result as AudioGenerationResult | undefined;
+                        setState({
+                            phase: 'completed',
+                            audioUrl: result?.audioUrl ?? '',
+                            audioLength: result?.audioLength ?? 0,
+                        });
                     } else if (job.status === 'failed') {
                         clearPolling();
                         setState({
@@ -66,7 +70,7 @@ export function useGenerateImages(): UseGenerateImagesReturn {
                             message:
                                 (typeof job.error === 'string' ? job.error : undefined) ??
                                 job.message ??
-                                'No se pudo generar las imágenes.',
+                                'No se pudo generar el audio.',
                         });
                     }
                 } catch (err) {
@@ -79,12 +83,12 @@ export function useGenerateImages(): UseGenerateImagesReturn {
     );
 
     const generate = useCallback(
-        async (scriptId: string, style: StoryStyle) => {
+        async (scriptId: string, voiceId?: string) => {
             if (inFlightRef.current) return;
             inFlightRef.current = true;
             setState({ phase: 'submitting' });
             try {
-                const { jobId } = await postGenerateImages({ scriptId, style });
+                const { jobId } = await postGenerateAudio({ scriptId, voiceId });
                 setState({ phase: 'polling', jobId });
                 startPolling(jobId);
             } catch (err) {

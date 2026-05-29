@@ -5,20 +5,20 @@ import { useAuth } from '@/features/auth';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { StoryInput } from '@/components/Input/StoryInput';
-import { StyleSelector } from '@/components/StyleSelector/StyleSelector';
-import { VoiceSelector } from '@/components/VoiceSelector/VoiceSelector';
-import { AudioPlayer } from '@/components/AudioPlayer/AudioPlayer';
-import { ImageGrid } from '@/components/ImageGrid/ImageGrid';
-import { DownloadCard } from '@/components/DownloadCard/DownloadCard';
-import { PipelineProgress, type PipelineStage } from '@/components/PipelineProgress/PipelineProgress';
-import { validateStory } from '@/utils/validation';
-import { StoryStyle } from '@/types/generate';
-import { useGenerateScript } from '@/hooks/useGenerateScript';
-import { useGenerateImages } from '@/hooks/useGenerateImages';
-import { useGenerateAudio } from '@/hooks/useGenerateAudio';
-import { useGenerateVideo } from '@/hooks/useGenerateVideo';
-import { postPreset } from '@/services/generateApi';
+import { StoryInput } from '../components/StoryInput';
+import { StyleSelector } from '../components/StyleSelector';
+import { VoiceSelector } from '../components/VoiceSelector';
+import { AudioPlayer } from '../components/AudioPlayer';
+import { ImageGrid } from '../components/ImageGrid';
+import { DownloadCard } from '../components/DownloadCard';
+import { PipelineProgress } from '../components/PipelineProgress';
+import { validateStory } from '../utils/validation';
+import { StoryStyle, type PipelineStageView } from '../types';
+import { useGenerateScript } from '../hooks/useGenerateScript';
+import { useGenerateImages } from '../hooks/useGenerateImages';
+import { useGenerateAudio } from '../hooks/useGenerateAudio';
+import { useGenerateVideo } from '../hooks/useGenerateVideo';
+import { postPreset } from '../api/generateApi';
 
 type WizardStep = 'story' | 'style' | 'voice';
 
@@ -29,7 +29,7 @@ function deriveStages(
     imagesPhase: string,
     audioPhase: string,
     videoPhase: string,
-): PipelineStage[] {
+): PipelineStageView[] {
     const scriptStatus =
         genPhase === 'completed' ? 'done' : genPhase === 'error' ? 'error' : 'pending';
     const imagesStatus =
@@ -65,7 +65,7 @@ function deriveStages(
     ];
 }
 
-export function Generate() {
+export function GeneratePage() {
     const navigate = useNavigate();
     const [story, setStory] = useState('');
     const [lastScriptStory, setLastScriptStory] = useState('');

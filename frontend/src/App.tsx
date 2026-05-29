@@ -6,10 +6,9 @@ import {
   LoginPage,
   RegisterPage,
 } from '@/features/auth';
+import { GeneratePage, DevModePage } from '@/features/generation';
 import { Landing } from '@/pages/Landing';
 import { Home } from '@/pages/Home';
-import { Generate } from '@/pages/Generate';
-import { DevMode } from '@/pages/DevMode';
 import { NotFound } from '@/pages/NotFound';
 import { Header } from '@/components/Header';
 
@@ -46,7 +45,7 @@ function AppRoutes() {
           path="/app"
           element={
             <ProtectedRoute>
-              <Generate />
+              <GeneratePage />
             </ProtectedRoute>
           }
         />
@@ -54,7 +53,7 @@ function AppRoutes() {
           path="/dev"
           element={
             <ProtectedRoute>
-              <DevMode />
+              <DevModePage />
             </ProtectedRoute>
           }
         />

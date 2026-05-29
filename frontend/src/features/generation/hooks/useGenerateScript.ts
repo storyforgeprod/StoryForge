@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { postGenerateScript, getJobStatus } from '@/services/generateApi';
-import type { StoryStyle } from '@/types/generate';
+import { postGenerateScript, getJobStatus } from '../api/generateApi';
+import type { StoryStyle } from '../types';
 
 type GenerateScriptState =
     | { phase: 'idle' }

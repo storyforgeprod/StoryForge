@@ -1,9 +1,9 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { renderHook, act } from '@testing-library/react';
 import { useGenerateScript } from './useGenerateScript';
-import * as generateApi from '@/services/generateApi';
+import * as generateApi from '../api/generateApi';
 
-vi.mock('@/services/generateApi');
+vi.mock('../api/generateApi');
 
 const mockPost = vi.mocked(generateApi.postGenerateScript);
 const mockPoll = vi.mocked(generateApi.getJobStatus);

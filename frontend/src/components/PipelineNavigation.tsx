@@ -1,6 +1,6 @@
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import type { PipelineStage } from '@/types/pipeline';
+import type { PipelineStage } from '@/features/generation/types';
 
 const STAGES_ORDER: PipelineStage[] = ['story', 'script', 'images', 'audio', 'video'];
 

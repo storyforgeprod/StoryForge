@@ -27,6 +27,14 @@ export type AudioGenerationResult = {
     generatedAt: string;
 };
 
+export type VideoAssemblyResult = {
+    videoUrl: string;
+    duration: number;
+    fileSize: number;
+    format: string;
+    generatedAt: string;
+};
+
 export type GenerateImagesState =
     | { phase: 'idle' }
     | { phase: 'submitting' }
@@ -41,17 +49,19 @@ export type GenerateAudioState =
     | { phase: 'completed'; audioUrl: string; audioLength: number }
     | { phase: 'error'; message: string };
 
-export type VideoAssemblyResult = {
-    videoUrl: string;
-    duration: number;
-    fileSize: number;
-    format: string;
-    generatedAt: string;
-};
-
 export type GenerateVideoState =
     | { phase: 'idle' }
     | { phase: 'submitting' }
     | { phase: 'polling'; jobId: string }
     | { phase: 'completed'; videoUrl: string; duration: number; fileSize: number }
     | { phase: 'error'; message: string };
+
+export type PipelineStage = 'story' | 'script' | 'images' | 'audio' | 'video';
+
+export type StageStatus = 'pending' | 'active' | 'done' | 'error';
+
+export type PipelineStageView = {
+    id: 'script' | 'images' | 'audio' | 'video';
+    label: string;
+    status: StageStatus;
+};
