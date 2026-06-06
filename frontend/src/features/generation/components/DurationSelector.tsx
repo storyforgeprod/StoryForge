@@ -1,7 +1,4 @@
-import { useMemo } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Slider } from '@/components/ui/slider';
-import { Badge } from '@/components/ui/badge';
 
 const MIN_DURATION = 30;
 const MAX_DURATION = 120;
