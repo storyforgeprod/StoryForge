@@ -38,7 +38,7 @@ export class GenerateService {
     }
 
     // Validate duration if provided
-    const targetDuration = dto.duration ?? 60;
+    const targetDuration = dto.targetDuration ?? 60;
     if (targetDuration < 30 || targetDuration > 120) {
       throw new BadRequestException('Duration must be between 30-120 seconds');
     }
@@ -309,7 +309,7 @@ export class GenerateService {
     const matches = script.match(/\((\d+)s?\)/g) || [];
     let total = 0;
     for (const match of matches) {
-      const num = parseInt(match.match(/\d+/)?.[0] || '0', 10);
+      const num = parseInt(match.replace(/\D/g, '') || '0', 10);
       if (!isNaN(num)) {
         total += num;
       }
@@ -318,22 +318,7 @@ export class GenerateService {
   }
 
   /**
-   * Extract total duration from script by parsing (Xs) durations in each scene
-   */
-  private _extractTotalDuration(script: string): number {
-    const matches = script.match(/\((\d+)s?\)/g) || [];
-    let total = 0;
-    for (const match of matches) {
-      const num = parseInt(match.match(/\d+/)?.[0] || '0', 10);
-      if (!isNaN(num)) {
-        total += num;
-      }
-    }
-    return total > 0 ? total : 60; // Default to 60s if parsing fails
-  }
-
-  /**
-   * Build scene prompt from a single scene
+   * Build visual prompt from a single scene
    */
   private _buildScenePrompt(scene: string, style?: string): string {
     const cleaned = scene
