@@ -5,8 +5,6 @@ import { Badge } from '@/components/ui/badge';
 
 const MIN_DURATION = 30;
 const MAX_DURATION = 120;
-const MAX_SCENES = 12;
-const AVG_SECONDS_PER_SCENE = 5; // Default scene duration
 
 export type DurationSelectorProps = {
   targetDuration: number;
