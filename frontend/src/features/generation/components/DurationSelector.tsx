@@ -45,44 +45,6 @@ export function DurationSelector({ targetDuration, onDurationChange }: DurationS
           <span>{MAX_DURATION}s</span>
         </div>
       </div>
-
-      <Card className={!isOptimal ? 'border-amber-500' : ''}>
-        <CardHeader className="pb-3">
-          <CardTitle className="text-sm flex items-center justify-between">
-            Estimación de escenas
-            <Badge variant={isOptimal ? 'default' : 'destructive'}>
-              {estimatedScenes}/{MAX_SCENES}
-            </Badge>
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-2">
-          <div className="text-sm text-muted-foreground">
-            A una duración promedio de <span className="font-semibold">{AVG_SECONDS_PER_SCENE}s por escena</span>,
-            se generarían aproximadamente <span className="font-semibold">{estimatedScenes}</span> escenas.
-          </div>
-          
-          {!isOptimal && (
-            <div className="text-sm text-amber-600 bg-amber-50 dark:bg-amber-950 p-2 rounded">
-              ⚠️ Reduci la duración para disminuir el número de escenas. El máximo es {MAX_SCENES} escenas.
-            </div>
-          )}
-
-          <div className="text-xs text-muted-foreground mt-3 pt-3 border-t space-y-1">
-            <div className="flex justify-between">
-              <span>Duración total del video:</span>
-              <span className="font-semibold">{targetDuration}s</span>
-            </div>
-            <div className="flex justify-between">
-              <span>Duración de audio:</span>
-              <span className="font-semibold">~{targetDuration}s (narración ajustada)</span>
-            </div>
-            <div className="flex justify-between">
-              <span>Duración escenas:</span>
-              <span className="font-semibold">~{estimatedScenes * AVG_SECONDS_PER_SCENE}s</span>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
     </div>
   );
 }
