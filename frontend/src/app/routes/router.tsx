@@ -6,7 +6,7 @@ import {
   useAuth,
 } from '@/features/auth';
 import { DevModePage, GeneratePage } from '@/features/generation';
-import { HomePage, LandingPage, NotFoundPage } from '@/features/home';
+import { HomePage, NotFoundPage } from '@/features/home';
 import { ProjectsPage } from '@/features/projects';
 
 export const AppRoutes = () => {
@@ -36,7 +36,7 @@ export const AppRoutes = () => {
         />
         <Route
           path="/"
-          element={!isAuthenticated ? <LandingPage /> : <Navigate to="/home" replace />}
+          element={<Navigate to={isAuthenticated ? '/home' : '/login'} replace />}
         />
         <Route
           path="/home"
