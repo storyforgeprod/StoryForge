@@ -1,8 +1,9 @@
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useEffect, useState } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
+import { toast } from 'sonner';
 import { AlertCircle, ArrowRight } from 'lucide-react';
 import { useAuth } from '../providers/AuthProvider';
 import { AuthLayout } from '../components/AuthLayout';
@@ -34,6 +35,15 @@ export const LoginPage = () => {
   const [error, setError] = useState('');
   const { login } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
+
+  useEffect(() => {
+    const state = location.state as { registered?: boolean } | null;
+    if (state?.registered) {
+      toast.success('Cuenta creada. Iniciá sesión para continuar.');
+      navigate(location.pathname, { replace: true, state: null });
+    }
+  }, [location, navigate]);
 
   const form = useForm<LoginFormValues>({
     resolver: zodResolver(loginSchema),
@@ -46,7 +56,7 @@ export const LoginPage = () => {
     setError('');
     try {
       await login(values.email, values.password);
-      navigate('/app');
+      navigate('/home');
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : 'Error al iniciar sesión';
       setError(message);

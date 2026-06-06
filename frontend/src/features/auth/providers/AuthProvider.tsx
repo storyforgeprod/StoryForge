@@ -1,6 +1,8 @@
 import { createContext, useContext, useState, useEffect, useCallback, type ReactNode } from 'react';
 import type { User, AuthContextType } from '../types';
-import { loginUser, registerUser, refreshToken as refreshTokenApi } from '../api/authApi';
+// DEV: loginUser deshabilitado por el bypass de login (ver login()).
+// import { loginUser } from '../api/authApi';
+import { registerUser, refreshToken as refreshTokenApi } from '../api/authApi';
 import {
   getAuthToken,
   setAuthToken,
@@ -11,6 +13,16 @@ import {
 } from '../api/tokenStore';
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
+
+// DEV: usuario hardcodeado para saltar el login sin backend.
+const MOCK_USER: User = {
+  id: 'dev-user',
+  email: 'dev@storyforge.local',
+  name: 'Dev User',
+  role: 'DEVELOPER',
+  provider: 'local',
+};
+const MOCK_TOKEN = 'dev-token';
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
@@ -23,13 +35,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setIsLoading(false);
   }, []);
 
-  const login = useCallback(async (email: string, password: string) => {
+  const login = useCallback(async (email: string, _password: string) => {
     setIsLoading(true);
     try {
-      const response = await loginUser(email, password);
-      setAuthToken(response.access_token);
-      setStoredUser(response.user);
-      setUser(response.user);
+      // DEV: bypass del backend, cualquier credencial entra como MOCK_USER.
+      const user: User = { ...MOCK_USER, email: email || MOCK_USER.email };
+      setAuthToken(MOCK_TOKEN);
+      setStoredUser(user);
+      setUser(user);
+
+      // Login real (deshabilitado por el bypass de arriba):
+      // const response = await loginUser(email, _password);
+      // setAuthToken(response.access_token);
+      // setStoredUser(response.user);
+      // setUser(response.user);
     } finally {
       setIsLoading(false);
     }
@@ -38,10 +57,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const register = useCallback(async (email: string, password: string, name: string) => {
     setIsLoading(true);
     try {
-      const response = await registerUser(email, password, name);
-      setAuthToken(response.access_token);
-      setStoredUser(response.user);
-      setUser(response.user);
+      // Intenta crear la cuenta en el backend; si no está disponible (DEV),
+      // se ignora el error para no bloquear el flujo. No inicia sesión:
+      // el usuario debe loguearse después.
+      await registerUser(email, password, name).catch(() => {});
     } finally {
       setIsLoading(false);
     }

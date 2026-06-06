@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { Sparkles } from 'lucide-react';
 import { useAuth } from '@/features/auth';
 import { AppShell } from '@/components/layout/AppShell';
 import { CreateStepsNav } from '../components/CreateStepsNav';
@@ -164,12 +165,26 @@ export function GeneratePage() {
 
             <div className="mx-auto max-w-3xl px-6 pb-16 pt-10 sm:px-8">
                 <header className="mb-8">
-                    <h1 className="font-head text-[32px] font-extrabold tracking-[-0.04em]">
-                        Crear video
-                    </h1>
-                    <p className="mt-1.5 text-[14px] text-muted-foreground">
-                        Convertí tu historia en un Short narrado, paso a paso.
-                    </p>
+                    {!isPresetMode && genState.phase === 'idle' ? (
+                        <>
+                            <div className="mb-2 flex items-center gap-2 font-mono text-[12px] font-semibold uppercase tracking-[0.08em] text-acc">
+                                <Sparkles className="h-3.5 w-3.5" />
+                                AI script studio
+                            </div>
+                            <h1 className="font-head text-[34px] font-extrabold leading-[1.05] tracking-[-0.04em]">
+                                Convertí cualquier historia en un Short viral
+                            </h1>
+                        </>
+                    ) : (
+                        <>
+                            <h1 className="font-head text-[32px] font-extrabold tracking-[-0.04em]">
+                                Crear video
+                            </h1>
+                            <p className="mt-1.5 text-[14px] text-muted-foreground">
+                                Convertí tu historia en un Short narrado, paso a paso.
+                            </p>
+                        </>
+                    )}
                 </header>
 
                 <div className="space-y-6">

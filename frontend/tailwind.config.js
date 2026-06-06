@@ -36,6 +36,10 @@ export default {
           DEFAULT: 'var(--card)',
           foreground: 'var(--card-foreground)',
         },
+        popover: {
+          DEFAULT: 'var(--popover)',
+          foreground: 'var(--popover-foreground)',
+        },
         // Editorial-only extras (no shadcn equivalent)
         elev: 'var(--elev)',
         elev2: 'var(--elev2)',

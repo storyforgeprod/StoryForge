@@ -47,7 +47,7 @@ export const RegisterPage = () => {
     setError('');
     try {
       await register(values.email, values.password, values.name);
-      navigate('/app');
+      navigate('/login', { state: { registered: true } });
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : 'Error al registrarse';
       setError(message);
