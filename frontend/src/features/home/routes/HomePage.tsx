@@ -1,82 +1,91 @@
 import { useNavigate } from 'react-router-dom';
+import { ArrowRight, FlaskConical } from 'lucide-react';
 import { useAuth } from '@/features/auth';
+import { AppShell } from '@/components/layout/AppShell';
+import { ProjectCard, type Project } from '@/features/projects';
 import { Button } from '@/components/ui/button';
+
+const STATS = [
+  { value: '4', label: 'Projects' },
+  { value: '3', label: 'Renders left' },
+  { value: '1', label: 'Exported' },
+];
+
+const RECENT_PROJECTS: Project[] = [
+  { id: '1', title: "The Office Plant's Revenge", style: 'anime', durationSec: 30, status: 'draft' },
+  { id: '2', title: 'Deep Sea Creatures', style: 'manga', durationSec: 45, status: 'ready' },
+  { id: '3', title: 'Coffee Shop Cat', style: 'webtoon', durationSec: 30, status: 'exported' },
+];
 
 export function HomePage() {
   const navigate = useNavigate();
-  const { user, logout } = useAuth();
-
-  const handleLogout = () => {
-    logout();
-    navigate('/login');
-  };
-
+  const { user } = useAuth();
   const isDeveloper = user?.role === 'DEVELOPER';
+  const displayName = user?.name || user?.email?.split('@')[0] || 'creator';
 
   return (
-    <div className="min-h-screen bg-brand-gradient-soft p-8">
-      <div className="max-w-6xl mx-auto">
-        {/* Header */}
-        <div className="flex items-center justify-between mb-12">
-          <div>
-            <h1 className="text-4xl font-bold bg-brand-gradient bg-clip-text text-transparent mb-2">
-              StoryForge
-            </h1>
-            <p className="text-muted-foreground">Transforma historias en videos</p>
-          </div>
-          <div className="flex items-center gap-4">
-            <div className="text-right">
-              <p className="font-semibold text-foreground">{user?.name || user?.email}</p>
-              <p className="text-xs text-muted-foreground">{isDeveloper ? 'Desarrollador' : 'Usuario'}</p>
+    <AppShell crumb="Home">
+      <div className="mx-auto max-w-[900px] px-6 pb-20 pt-11 sm:px-12">
+        <h1 className="font-head text-[38px] font-extrabold leading-[1.05] tracking-[-0.04em]">
+          Hola, <span className="text-primary">{displayName}</span>.
+        </h1>
+        <p className="mt-2.5 text-[15px] text-muted-foreground">Esto es lo que tenés en tu tablero.</p>
+
+        <div className="mt-7 flex flex-wrap gap-3.5">
+          {STATS.map((stat) => (
+            <div key={stat.label} className="rounded-lg border border-border bg-card px-5 py-3.5">
+              <div className="font-head text-[30px] font-extrabold tracking-[-0.04em]">{stat.value}</div>
+              <div className="mt-1 font-mono text-[10.5px] uppercase tracking-[0.07em] text-mut2">
+                {stat.label}
+              </div>
             </div>
-            <Button onClick={handleLogout} variant="outline" className="text-destructive">
-              Logout
-            </Button>
-          </div>
+          ))}
         </div>
 
-        {/* Main Content */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-          {/* Regular Pipeline */}
-          <div className="bg-background rounded-lg shadow-lg p-8">
-            <h2 className="text-2xl font-bold text-foreground mb-4">Crear Video</h2>
-            <p className="text-muted-foreground mb-6">
-              Convierte tu historia en un video narrado paso a paso. Desde el guión hasta el resultado final.
-            </p>
-            <Button
-              onClick={() => navigate('/app')}
-              className="w-full bg-brand-gradient hover:bg-brand-gradient-hover"
-            >
-              Comenzar Pipeline
-            </Button>
+        <section className="mt-11">
+          <div className="mb-4 flex items-center justify-between">
+            <h2 className="font-head text-[20px] font-extrabold tracking-[-0.025em]">Recientes</h2>
           </div>
+          <div className="grid grid-cols-1 gap-3.5 sm:grid-cols-2 lg:grid-cols-3">
+            {RECENT_PROJECTS.map((project) => (
+              <ProjectCard key={project.id} project={project} />
+            ))}
+          </div>
+        </section>
 
-          {/* Developer Mode */}
-          {isDeveloper && (
-            <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-lg shadow-lg p-8 border-2 border-indigo-200">
-              <h2 className="text-2xl font-bold text-indigo-900 mb-2">Modo Desarrollador</h2>
-              <p className="text-indigo-700 text-sm mb-4 font-semibold">Beta - Acceso exclusivo</p>
-              <p className="text-gray-700 mb-6">
-                Salta a cualquier etapa del pipeline. Carga contenido directamente sin esperar generaciones. Ideal para testing y desarrollo.
-              </p>
-              <Button
-                onClick={() => navigate('/dev')}
-                className="w-full bg-indigo-600 hover:bg-indigo-700"
-              >
-                Entrar a Modo Dev
-              </Button>
+        <div className="mt-7 flex flex-col gap-3 sm:flex-row">
+          <button
+            type="button"
+            onClick={() => navigate('/app')}
+            className="flex flex-1 items-center justify-between gap-5 rounded-xl border border-dashed border-bd2 px-6 py-5 text-left transition hover:border-primary"
+          >
+            <div>
+              <div className="font-head text-[17px] font-extrabold">Crear un nuevo video</div>
+              <div className="mt-1 text-[13px] text-muted-foreground">
+                Convertí tu historia en un Short narrado, paso a paso.
+              </div>
             </div>
+            <ArrowRight className="h-5 w-5 flex-none text-primary" />
+          </button>
+
+          {isDeveloper && (
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => navigate('/dev')}
+              className="h-auto justify-start gap-3 rounded-xl px-6 py-5"
+            >
+              <FlaskConical className="h-5 w-5 text-primary" />
+              <span className="text-left">
+                <span className="block font-bold">Modo Desarrollador</span>
+                <span className="block text-[13px] font-normal text-muted-foreground">
+                  Saltá a cualquier etapa del pipeline.
+                </span>
+              </span>
+            </Button>
           )}
         </div>
-
-        {/* Recent Projects (placeholder) */}
-        <div className="mt-12 bg-white rounded-lg shadow-lg p-8">
-          <h3 className="text-xl font-bold text-gray-900 mb-6">Proyectos Recientes</h3>
-          <div className="text-center py-8 text-gray-500">
-            <p>No hay proyectos recientes. ¡Comienza creando uno!</p>
-          </div>
-        </div>
       </div>
-    </div>
+    </AppShell>
   );
 }

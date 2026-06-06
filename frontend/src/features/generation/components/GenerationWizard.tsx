@@ -86,11 +86,13 @@ export const GenerationWizard = ({
             <CardHeader>
                 <div className="flex items-center justify-between">
                     <div>
-                        <CardTitle>{copy.title}</CardTitle>
+                        <CardTitle className="font-head text-2xl tracking-[-0.03em]">{copy.title}</CardTitle>
                         <CardDescription>{copy.description}</CardDescription>
                     </div>
-                    <div className="text-right text-xs text-muted-foreground">
-                        <div className="font-semibold">Paso {copy.number} de 3</div>
+                    <div className="text-right">
+                        <div className="font-mono text-[11px] uppercase tracking-[0.06em] text-mut2">
+                            Paso {copy.number} de 3
+                        </div>
                     </div>
                 </div>
             </CardHeader>

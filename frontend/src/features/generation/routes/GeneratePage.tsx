@@ -1,9 +1,7 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { ArrowLeft } from 'lucide-react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { useAuth } from '@/features/auth';
-import { Button } from '@/components/ui/button';
-import { PipelineProgress } from '../components/PipelineProgress';
+import { AppShell } from '@/components/layout/AppShell';
+import { CreateStepsNav } from '../components/CreateStepsNav';
 import { GenerationWizard } from '../components/GenerationWizard';
 import {
     PresetDialogs,
@@ -13,7 +11,7 @@ import { ScriptStage } from '../components/stages/ScriptStage';
 import { ImagesStage } from '../components/stages/ImagesStage';
 import { AudioStage } from '../components/stages/AudioStage';
 import { VideoStage } from '../components/stages/VideoStage';
-import { deriveStages } from '../utils/deriveStages';
+import { validateStory } from '../utils/validation';
 import { useGenerateScript } from '../hooks/useGenerateScript';
 import { useGenerateImages } from '../hooks/useGenerateImages';
 import { useGenerateAudio } from '../hooks/useGenerateAudio';
@@ -22,7 +20,6 @@ import { useDevPresetHandoff } from '../hooks/useDevPresetHandoff';
 import { StoryStyle } from '../types';
 
 export function GeneratePage() {
-    const navigate = useNavigate();
     const { user } = useAuth();
     const isDeveloper = user?.role === 'DEVELOPER';
 
@@ -78,11 +75,6 @@ export function GeneratePage() {
         if (audioState.phase === 'polling') setAudioJobId(audioState.jobId);
     }, [audioState]);
 
-    const stages = useMemo(
-        () => deriveStages(genState.phase, imagesState.phase, audioState.phase, videoState.phase),
-        [genState.phase, imagesState.phase, audioState.phase, videoState.phase],
-    );
-
     const scrollSoon = (ref: React.RefObject<HTMLDivElement>) => {
         setTimeout(() => ref.current?.scrollIntoView({ behavior: 'smooth' }), 100);
     };
@@ -129,11 +121,6 @@ export function GeneratePage() {
         setPresetDialog('closed');
     };
 
-    const handleBackToHome = () => {
-        resetAll();
-        navigate('/home');
-    };
-
     const handleScriptRetry = () => {
         resetGeneration();
         resetImages();
@@ -144,21 +131,29 @@ export function GeneratePage() {
         setAudioJobId(null);
     };
 
+    const downstreamStarted =
+        imagesState.phase !== 'idle' || audioState.phase !== 'idle' || videoState.phase !== 'idle';
+    const crumb = downstreamStarted
+        ? 'Create / Video'
+        : genState.phase !== 'idle'
+            ? 'Create / Script'
+            : 'Create / Story';
+
     return (
-        <div className="min-h-screen">
-            <header className="border-b border-border/60">
-                <div className="mx-auto flex max-w-3xl items-center justify-between gap-4 px-4 py-4">
-                    <div className="flex items-center gap-4">
-                        <Button variant="ghost" size="icon" onClick={handleBackToHome}>
-                            <ArrowLeft className="h-4 w-4" />
-                        </Button>
-                        <h1 className="text-lg font-semibold">Generar video</h1>
-                    </div>
-                </div>
-            </header>
-
-            <PipelineProgress stages={stages} />
-
+        <AppShell
+            crumb={crumb}
+            steps={
+                <CreateStepsNav
+                    storyValid={validateStory(story).valid}
+                    style={style}
+                    voiceId={voiceId}
+                    scriptPhase={genState.phase}
+                    imagesPhase={imagesState.phase}
+                    audioPhase={audioState.phase}
+                    videoPhase={videoState.phase}
+                />
+            }
+        >
             <PresetDialogs
                 open={presetDialog}
                 onClose={() => setPresetDialog('closed')}
@@ -167,62 +162,73 @@ export function GeneratePage() {
                 onAudioApplied={setAudioJobId}
             />
 
-            <main className="mx-auto max-w-3xl px-4 py-8">
-                <ScriptStage
-                    state={genState}
-                    isPresetMode={isPresetMode}
-                    isDeveloper={isDeveloper}
-                    imagesIdle={imagesState.phase === 'idle'}
-                    scriptJobId={scriptJobId}
-                    style={style}
-                    onGenerateImages={handleGenerateImages}
-                    onRetry={handleScriptRetry}
-                    onOpenImagesPreset={() => setPresetDialog('images')}
-                />
+            <div className="mx-auto max-w-3xl px-6 pb-16 pt-10 sm:px-8">
+                <header className="mb-8">
+                    <h1 className="font-head text-[32px] font-extrabold tracking-[-0.04em]">
+                        Crear video
+                    </h1>
+                    <p className="mt-1.5 text-[14px] text-muted-foreground">
+                        Convertí tu historia en un Short narrado, paso a paso.
+                    </p>
+                </header>
 
-                <ImagesStage
-                    ref={imagesRef}
-                    state={imagesState}
-                    audioIdle={audioState.phase === 'idle'}
-                    isDeveloper={isDeveloper}
-                    onGenerateAudio={handleGenerateAudio}
-                    onRetry={resetImages}
-                    onOpenAudioPreset={() => setPresetDialog('audio')}
-                />
-
-                <AudioStage
-                    ref={audioRef}
-                    state={audioState}
-                    videoState={videoState}
-                    isDeveloper={isDeveloper}
-                    imageJobId={imageJobId}
-                    audioJobId={audioJobId}
-                    onGenerateVideo={handleGenerateVideo}
-                    onRetry={resetAudio}
-                    onOpenVideoPreset={() => setPresetDialog('video')}
-                />
-
-                <VideoStage
-                    ref={videoRef}
-                    state={videoState}
-                    onReset={resetAll}
-                    onRetry={resetVideo}
-                />
-
-                {!isPresetMode && genState.phase === 'idle' && (
-                    <GenerationWizard
-                        story={story}
-                        onStoryChange={setStory}
-                        style={style}
-                        onStyleChange={setStyle}
-                        voiceId={voiceId}
-                        onVoiceChange={setVoiceId}
+                <div className="space-y-6">
+                    <ScriptStage
+                        state={genState}
+                        isPresetMode={isPresetMode}
                         isDeveloper={isDeveloper}
-                        onGenerateScript={handleGenerateScript}
-                        onOpenScriptPreset={() => setPresetDialog('script')}
+                        imagesIdle={imagesState.phase === 'idle'}
+                        scriptJobId={scriptJobId}
+                        style={style}
+                        onGenerateImages={handleGenerateImages}
+                        onRetry={handleScriptRetry}
+                        onOpenImagesPreset={() => setPresetDialog('images')}
                     />
-                )}
-            </main>
-        </div>
+
+                    <ImagesStage
+                        ref={imagesRef}
+                        state={imagesState}
+                        audioIdle={audioState.phase === 'idle'}
+                        isDeveloper={isDeveloper}
+                        onGenerateAudio={handleGenerateAudio}
+                        onRetry={resetImages}
+                        onOpenAudioPreset={() => setPresetDialog('audio')}
+                    />
+
+                    <AudioStage
+                        ref={audioRef}
+                        state={audioState}
+                        videoState={videoState}
+                        isDeveloper={isDeveloper}
+                        imageJobId={imageJobId}
+                        audioJobId={audioJobId}
+                        onGenerateVideo={handleGenerateVideo}
+                        onRetry={resetAudio}
+                        onOpenVideoPreset={() => setPresetDialog('video')}
+                    />
+
+                    <VideoStage
+                        ref={videoRef}
+                        state={videoState}
+                        onReset={resetAll}
+                        onRetry={resetVideo}
+                    />
+
+                    {!isPresetMode && genState.phase === 'idle' && (
+                        <GenerationWizard
+                            story={story}
+                            onStoryChange={setStory}
+                            style={style}
+                            onStyleChange={setStyle}
+                            voiceId={voiceId}
+                            onVoiceChange={setVoiceId}
+                            isDeveloper={isDeveloper}
+                            onGenerateScript={handleGenerateScript}
+                            onOpenScriptPreset={() => setPresetDialog('script')}
+                        />
+                    )}
+                </div>
+            </div>
+        </AppShell>
     );
 }

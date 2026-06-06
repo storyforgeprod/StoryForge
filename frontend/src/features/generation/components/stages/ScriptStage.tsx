@@ -64,13 +64,13 @@ export const ScriptStage = ({
         return (
             <Card>
                 <CardHeader>
-                    <CardTitle>Guión generado</CardTitle>
+                    <CardTitle className="font-head text-2xl tracking-[-0.03em]">Guión generado</CardTitle>
                     <CardDescription>
                         Revisá el guión y generá las imágenes para tu historia.
                     </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                    <pre className="max-h-64 overflow-y-auto rounded-lg bg-muted p-4 text-sm whitespace-pre-wrap">
+                    <pre className="max-h-64 overflow-y-auto whitespace-pre-wrap rounded-lg border border-border bg-elev p-4 text-sm leading-relaxed">
                         {state.script}
                     </pre>
                     <div className="flex justify-end gap-2">

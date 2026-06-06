@@ -7,7 +7,7 @@ import {
 } from '@/features/auth';
 import { DevModePage, GeneratePage } from '@/features/generation';
 import { HomePage, LandingPage, NotFoundPage } from '@/features/home';
-import { Header } from '@/components/layout/Header';
+import { ProjectsPage } from '@/features/projects';
 
 export const AppRoutes = () => {
   const { isAuthenticated, isLoading } = useAuth();
@@ -25,7 +25,6 @@ export const AppRoutes = () => {
 
   return (
     <>
-      {isAuthenticated && <Header />}
       <Routes>
         <Route
           path="/login"
@@ -44,6 +43,14 @@ export const AppRoutes = () => {
           element={
             <ProtectedRoute>
               <HomePage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/projects"
+          element={
+            <ProtectedRoute>
+              <ProjectsPage />
             </ProtectedRoute>
           }
         />

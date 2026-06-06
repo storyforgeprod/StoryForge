@@ -1,23 +1,23 @@
 import { Link } from 'react-router-dom';
-import { Sparkles } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Brand } from '@/components/layout/Brand';
 
 export function LandingPage() {
   return (
     <div className="min-h-screen">
-      <header className="border-b border-border/60">
+      <header className="border-b border-border">
         <div className="mx-auto flex max-w-5xl items-center justify-between px-4 py-4">
-          <div className="flex items-center gap-2 font-semibold">
-            <Sparkles className="h-5 w-5 text-primary" />
-            StoryForge
-          </div>
+          <Brand />
+          <Button asChild variant="outline" size="sm">
+            <Link to="/login">Iniciar sesión</Link>
+          </Button>
         </div>
       </header>
 
       <main className="mx-auto max-w-5xl px-4 py-16">
         <div className="mb-12 text-center">
-          <h1 className="mb-4 text-4xl font-bold tracking-tight sm:text-5xl">
+          <h1 className="mb-4 font-head text-4xl font-extrabold tracking-[-0.04em] sm:text-5xl">
             De historia larga a YouTube Short
           </h1>
           <p className="mx-auto max-w-2xl text-lg text-muted-foreground">

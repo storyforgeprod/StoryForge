@@ -79,6 +79,25 @@ Feature-driven (Bulletproof React). Target tree:
 - Vitest + `@testing-library/react`. No snapshots for behavior-driven components.
 - One file per public surface (`Component.test.tsx`, `useThing.test.ts`).
 
+## Prototype
+
+`frontend/prototipo/` is the visual source of truth for the UI. Read [frontend/prototipo/README.md](prototipo/README.md) for the full design system (color tokens, typography, border radii, Tailwind config, component reference, and screen map).
+
+**When applying the prototype:**
+- Adapt Tailwind classes, CSS variables, and visual structure only.
+- Never touch state logic, API calls, event handlers, routing, auth, or tests.
+- Token source: `prototipo/tokens/variables.css` → paste into `src/index.css`.
+- Visual reference per screen: `prototipo/screens/*.png`.
+
+## Theming (Editorial Bold)
+
+The prototype is applied. Conventions:
+
+- Tokens live in `src/index.css`: shadcn semantic vars (`--background`, `--primary`, …) hold **full color values** (hex / oklch), and `tailwind.config.js` reads them as `var(--x)` (no `hsl()` wrapper). Editorial-only extras: `elev`, `elev2`, `bd2`, `mut2`, `acc2`, `acc-soft`, `acc-bd`, `on-acc`.
+- Fonts: `font-head` (Bricolage Grotesque), `font-body` (Plus Jakarta Sans), `font-mono` (JetBrains Mono). Animations: `animate-eq`, `animate-dot-bounce`, `animate-dot-pulse`.
+- Dark is the default; `[data-theme="light"]` overrides. Toggle via `useTheme()` from `@/app/providers/ThemeProvider` (persists to localStorage).
+- Authenticated pages render inside `<AppShell>` (`@/components/layout`, sidebar + crumb); auth pages use `<AuthLayout>`. `StyleThumb` (`@/features/generation`) renders per-style SVG art.
+
 ## Skills
 
 - `storyforge-frontend` — activates on any `.tsx` or frontend task.

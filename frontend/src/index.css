@@ -2,28 +2,88 @@
 @tailwind components;
 @tailwind utilities;
 
+/*
+  StoryForge — Editorial Bold design tokens.
+  Source of truth: frontend/prototipo/tokens/variables.css + README.md.
+  Dark is the default (:root). Light overrides live under [data-theme="light"].
+  shadcn semantic tokens hold full color values (consumed as `var(--x)` in
+  tailwind.config.js); editorial-only extras sit alongside them.
+*/
 @layer base {
-  :root {
-    --background: 222.2 84% 4.9%;
-    --foreground: 210 40% 98%;
-    --card: 222.2 84% 4.9%;
-    --card-foreground: 210 40% 98%;
-    --popover: 222.2 84% 4.9%;
-    --popover-foreground: 210 40% 98%;
-    --primary: 263 70% 58%;
-    --primary-foreground: 210 40% 98%;
-    --secondary: 217.2 32.6% 17.5%;
-    --secondary-foreground: 210 40% 98%;
-    --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
-    --accent: 217.2 32.6% 17.5%;
-    --accent-foreground: 210 40% 98%;
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 40% 98%;
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
-    --ring: 263 70% 58%;
-    --radius: 0.5rem;
+  :root,
+  [data-theme='dark'] {
+    /* shadcn semantic tokens */
+    --background: #0c0a09;
+    --foreground: #faf7f2;
+    --card: #16110c;
+    --card-foreground: #faf7f2;
+    --popover: #16110c;
+    --popover-foreground: #faf7f2;
+    --primary: oklch(0.72 0.18 38);
+    --primary-foreground: #1a0f06;
+    --secondary: #1a1714;
+    --secondary-foreground: #faf7f2;
+    --muted: #1a1714;
+    --muted-foreground: #b8aea2;
+    --accent: #221d18;
+    --accent-foreground: #faf7f2;
+    --destructive: oklch(0.6 0.2 25);
+    --destructive-foreground: #faf7f2;
+    --border: #2a241f;
+    --input: #2a241f;
+    --ring: oklch(0.72 0.18 38);
+    --radius: 0.625rem;
+
+    /* editorial-only extras */
+    --elev: #1a1714;
+    --elev2: #221d18;
+    --bd2: #382f27;
+    --mut2: #847a6e;
+    --acc2: oklch(0.74 0.16 55);
+    --acc-soft: oklch(0.72 0.18 38 / 0.14);
+    --acc-bd: oklch(0.72 0.18 38 / 0.34);
+    --on-acc: #1a0f06;
+    --ph-a: #322a22;
+    --ph-b: #15100b;
+    --ph-tx: #7a6e60;
+
+    --font-head: 'Bricolage Grotesque', system-ui, sans-serif;
+    --font-body: 'Plus Jakarta Sans', system-ui, sans-serif;
+    --font-mono: 'JetBrains Mono', monospace;
+  }
+
+  [data-theme='light'] {
+    --background: #faf6f0;
+    --foreground: #1c140d;
+    --card: #ffffff;
+    --card-foreground: #1c140d;
+    --popover: #ffffff;
+    --popover-foreground: #1c140d;
+    --primary: oklch(0.58 0.19 38);
+    --primary-foreground: #ffffff;
+    --secondary: #f4ede3;
+    --secondary-foreground: #1c140d;
+    --muted: #f4ede3;
+    --muted-foreground: #6b5d4d;
+    --accent: #ece0d2;
+    --accent-foreground: #1c140d;
+    --destructive: oklch(0.55 0.2 25);
+    --destructive-foreground: #ffffff;
+    --border: #e9ddcd;
+    --input: #e9ddcd;
+    --ring: oklch(0.58 0.19 38);
+
+    --elev: #f4ede3;
+    --elev2: #ece0d2;
+    --bd2: #d9c9b4;
+    --mut2: #9c8c77;
+    --acc2: oklch(0.6 0.17 55);
+    --acc-soft: oklch(0.58 0.19 38 / 0.12);
+    --acc-bd: oklch(0.58 0.19 38 / 0.3);
+    --on-acc: #ffffff;
+    --ph-a: #e3d6c4;
+    --ph-b: #f3ebdf;
+    --ph-tx: #a8967e;
   }
 }
 
@@ -33,6 +93,6 @@
   }
   body {
     @apply bg-background text-foreground antialiased;
-    font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    font-family: var(--font-body);
   }
 }
