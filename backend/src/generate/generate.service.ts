@@ -89,12 +89,13 @@ export class GenerateService {
   /**
    * Generate script content (used by queue processor)
    * This is the actual async logic that calls Azure OpenAI
+   * Passes MAX_SCENES constraint so script generation respects memory limits from stage 1
    */
   async generateScriptContent(
     userId: string,
     data: { story: string },
   ): Promise<{ script: string }> {
-    const script = await this.azureOpenAIService.generateScript(userId, data.story);
+    const script = await this.azureOpenAIService.generateScript(userId, data.story, this.MAX_SCENES);
     return { script };
   }
 

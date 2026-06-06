@@ -28,12 +28,12 @@ export class AzureOpenAIService {
         }
     }
 
-    async generateScript(userId: string, story: string): Promise<string> {
+    async generateScript(userId: string, story: string, maxScenes: number = 12): Promise<string> {
         if (!story || story.trim().length === 0) {
             throw new Error('Story cannot be empty');
         }
 
-        const prompt = this.buildScriptPrompt(story);
+        const prompt = this.buildScriptPrompt(story, maxScenes);
         const start = Date.now();
 
         try {
@@ -137,17 +137,18 @@ export class AzureOpenAIService {
         }
     }
 
-    private buildScriptPrompt(story: string): string {
+    private buildScriptPrompt(story: string, maxScenes: number = 12): string {
         return `You are a professional screenwriter specializing in short-form video content for YouTube Shorts.
 
 Convert the following story into a script suitable for a video lasting approximately 60 seconds.
 
 IMPORTANT REQUIREMENTS:
-1. Keep scenes SHORT and PUNCHY (2-3 seconds each)
-2. Include vivid visual descriptions
-3. Add sound effects in [BRACKETS]
-4. Include suggested music tone
-5. Format: Scene number, description, and duration
+1. Generate EXACTLY ${maxScenes} scenes maximum (fewer if story is shorter)
+2. Keep scenes SHORT and PUNCHY (2-3 seconds each)
+3. Include vivid visual descriptions
+4. Add sound effects in [BRACKETS]
+5. Include suggested music tone
+6. Format: Scene number, description, and duration
 
 Story to adapt:
 """
