@@ -16,8 +16,9 @@ const ERROR_MAP: Record<number, string> = {
 
 const NETWORK_ERROR = 'Error de conexión. Revisá tu internet.';
 const TIMEOUT_ERROR = 'La generación tardó demasiado. Intentá de nuevo.';
-const MAX_ATTEMPTS = 200; // 200 × 5s = 1000s ≈ 16.7 min
+const MAX_ATTEMPTS = 400; // 400 × 5s = 2000s ≈ 33 min
 const POLL_INTERVAL_MS = 5000;
+const TEMP_ERROR_CODES = new Set([502, 503, 504]);
 
 function mapApiError(err: unknown): string {
     if (err && typeof err === 'object' && 'status' in err) {
@@ -68,8 +69,24 @@ export function useGenerateScript(): UseGenerateScriptReturn {
                         });
                     }
                 } catch (err) {
-                    clearPolling();
-                    setState({ phase: 'error', message: mapApiError(err) });
+                    // Retry on temporary server errors (502/503/504)
+                    // Fail immediately on auth/not-found errors
+                    if (err && typeof err === 'object' && 'status' in err) {
+                        const status = (err as { status: number }).status;
+                        if (TEMP_ERROR_CODES.has(status)) {
+                            // Server busy, will retry on next interval
+                            console.warn(`[Polling] Attempt ${attemptsRef.current}: Server busy (${status}), retrying...`);
+                            return;
+                        }
+                        // Permanent error: fail now
+                        if (status === 401 || status === 404) {
+                            clearPolling();
+                            setState({ phase: 'error', message: mapApiError(err) });
+                            return;
+                        }
+                    }
+                    // For unknown errors, retry (don't give up)
+                    console.warn(`[Polling] Attempt ${attemptsRef.current}: ${err}, will retry...`);
                 }
             }, POLL_INTERVAL_MS);
         },
