@@ -676,10 +676,12 @@ export class GenerateService {
     }
 
     // 4. Call VideoService to assemble video
+    // Pass actual audio duration so video isn't cut off
     const videoUrl = await this.videoService.assembleVideo(imageUrls, audioUrl, {
       fps: data.fps,
       bitrate: data.bitrate,
       jobId: data.jobId,
+      audioDuration: audioResult.audioLength || 60,
     });
 
     const duration = audioResult.audioLength || 60;

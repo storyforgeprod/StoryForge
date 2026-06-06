@@ -62,7 +62,7 @@ export class VideoService implements OnModuleInit {
   async assembleVideo(
     images: string[],
     audioPath: string,
-    metadata: { fps?: number; bitrate?: string; jobId?: string },
+    metadata: { fps?: number; bitrate?: string; jobId?: string; audioDuration?: number },
   ): Promise<string> {
     const strategy = process.env.VIDEO_ASSEMBLY_STRATEGY ?? 'local';
     this.logger.log(`[VideoService] using strategy: ${strategy}`);
@@ -75,7 +75,7 @@ export class VideoService implements OnModuleInit {
   private async _assembleLocal(
     images: string[],
     audioPath: string,
-    metadata: { fps?: number; bitrate?: string; jobId?: string },
+    metadata: { fps?: number; bitrate?: string; jobId?: string; audioDuration?: number },
   ): Promise<string> {
     if (!images || images.length === 0) throw new Error('At least one image URL is required');
     if (images.length > 12) throw new Error('Maximum 12 images allowed (Render 512MB memory limit)');
@@ -112,7 +112,10 @@ export class VideoService implements OnModuleInit {
       // Run FFmpeg
       const ffmpegStart = Date.now();
       await this._runFfmpeg(
-        this._buildFfmpegArgs(tmpDir, images.length, secPerImage, outputPath, metadata),
+        this._buildFfmpegArgs(tmpDir, images.length, secPerImage, outputPath, {
+          ...metadata,
+          actualAudioDuration: audioDuration,
+        }),
       );
       this.logger.log(`[VideoAssembly] 🎥 FFmpeg done: ${Date.now() - ffmpegStart}ms`);
 
@@ -156,7 +159,7 @@ export class VideoService implements OnModuleInit {
   private async _assembleServerless(
     images: string[],
     audioPath: string,
-    metadata: { fps?: number; bitrate?: string; jobId?: string },
+    metadata: { fps?: number; bitrate?: string; jobId?: string; audioDuration?: number },
   ): Promise<string> {
     const url = process.env.MODAL_FUNCTION_URL;
     if (!url) throw new Error('MODAL_FUNCTION_URL is not set. Cannot use serverless strategy.');
@@ -170,6 +173,7 @@ export class VideoService implements OnModuleInit {
         jobId: metadata?.jobId,
         fps: metadata?.fps ?? 30,
         bitrate: metadata?.bitrate ?? '2000k',
+        audioDuration: metadata?.audioDuration ?? 60,
       }),
       signal: AbortSignal.timeout(240_000),
     });
@@ -225,7 +229,7 @@ export class VideoService implements OnModuleInit {
       });
       proc.on('close', () => {
         const d = parseFloat(output.trim());
-        const duration = isNaN(d) ? 60 : Math.min(d, 60);
+        const duration = isNaN(d) ? 60 : d; // Use actual audio duration, no limit
         this.logger.debug(`[VideoAssembly] ffprobe: ${duration.toFixed(2)}s`);
         resolve(duration);
       });
@@ -237,11 +241,13 @@ export class VideoService implements OnModuleInit {
     numImages: number,
     secPerImage: number,
     outputPath: string,
-    options: { fps?: number; bitrate?: string },
+    options: { fps?: number; bitrate?: string; audioDuration?: number; actualAudioDuration?: number },
   ): string[] {
     const fps = options?.fps ?? 30;
     const bitrate = options?.bitrate ?? '1200k';
-    this.logger.log(`[VideoAssembly] 🎞️  FFmpeg config: ${fps}fps, ${bitrate} bitrate, ${secPerImage.toFixed(2)}s/img`);
+    // Use actual audio duration if provided; otherwise calculate from images
+    const actualAudioDuration = options?.actualAudioDuration ?? (secPerImage * numImages);
+    this.logger.log(`[VideoAssembly] 🎞️  FFmpeg config: ${fps}fps, ${bitrate} bitrate, ${secPerImage.toFixed(2)}s/img, audio=${actualAudioDuration.toFixed(2)}s`);
     const args: string[] = [];
 
     for (let i = 0; i < numImages; i++) {
@@ -264,7 +270,7 @@ export class VideoService implements OnModuleInit {
       '-map', `${numImages}:a`,
       '-c:v', 'libx264', '-preset', 'ultrafast', '-crf', '23', '-b:v', bitrate, '-threads', '1',
       '-c:a', 'aac', '-b:a', '128k',
-      '-t', '60',
+      '-t', actualAudioDuration.toFixed(2),
       '-r', String(fps),
       '-movflags', '+faststart',
       '-y',
