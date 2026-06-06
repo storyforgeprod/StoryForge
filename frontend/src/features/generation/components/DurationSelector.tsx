@@ -14,12 +14,7 @@ export type DurationSelectorProps = {
 };
 
 export function DurationSelector({ targetDuration, onDurationChange }: DurationSelectorProps) {
-  const estimatedScenes = useMemo(() => {
-    return Math.ceil(targetDuration / AVG_SECONDS_PER_SCENE);
-  }, [targetDuration]);
-
-  const isOptimal = estimatedScenes <= MAX_SCENES;
-
+  
   return (
     <div className="space-y-4">
       <div>
