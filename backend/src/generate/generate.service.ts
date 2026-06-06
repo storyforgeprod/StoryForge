@@ -43,6 +43,9 @@ export class GenerateService {
       throw new BadRequestException('Duration must be between 30-120 seconds');
     }
 
+    // 0. Ensure user exists (auto-sync for first-time users from JWT)
+    await this._ensureUserExists(userId);
+
     // 1. Create Job record with 'pending' status
     let job;
     try {
@@ -154,6 +157,9 @@ export class GenerateService {
     userId: string,
     dto: GenerateImagesDto,
   ): Promise<GenerateImagesResponseDto> {
+    // Ensure user exists (auto-sync for first-time users from JWT)
+    await this._ensureUserExists(userId);
+
     // 1. Validate input
     if (!dto.scriptId || dto.scriptId.trim().length === 0) {
       throw new BadRequestException('scriptId is required');
@@ -282,6 +288,34 @@ export class GenerateService {
   }
 
   /**
+   * Ensure user exists in database
+   * Auto-creates a basic user record if not found
+   * Prevents foreign key constraint violations for authenticated users
+   */
+  private async _ensureUserExists(userId: string): Promise<void> {
+    try {
+      const existingUser = await this.prisma.user.findUnique({
+        where: { id: userId },
+      });
+
+      if (!existingUser) {
+        // Auto-create user from JWT claim
+        await this.prisma.user.create({
+          data: {
+            id: userId,
+            email: `user-${userId}@storyforge.local`,
+            name: `User ${userId.substring(0, 8)}`,
+            role: 'USER',
+            provider: 'jwt',
+          },
+        });
+      }
+    } catch (error) {
+      // Silently continue - duplicate user creation is harmless
+    }
+  }
+
+  /**
    * Extract scene blocks from script (Scene 1, Scene 2, etc.)
    */
   private _extractScenes(script: string): string[] {
@@ -338,6 +372,9 @@ export class GenerateService {
     userId: string,
     dto: GenerateAudioDto,
   ): Promise<GenerateAudioResponseDto> {
+    // Ensure user exists (auto-sync for first-time users from JWT)
+    await this._ensureUserExists(userId);
+
     // 1. Validate input
     if (!dto.scriptId || dto.scriptId.trim().length === 0) {
       throw new BadRequestException('scriptId is required');
@@ -495,6 +532,9 @@ export class GenerateService {
     userId: string,
     dto: GenerateVideoDto,
   ): Promise<GenerateVideoResponseDto> {
+    // Ensure user exists (auto-sync for first-time users from JWT)
+    await this._ensureUserExists(userId);
+
     // 1. Validate inputs
     if (!dto.imageJobId || dto.imageJobId.trim().length === 0) {
       throw new BadRequestException('imageJobId is required');
