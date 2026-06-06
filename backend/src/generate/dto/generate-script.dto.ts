@@ -1,4 +1,4 @@
-import { IsString, IsNotEmpty, MaxLength, MinLength, IsEnum } from 'class-validator';
+import { IsString, IsNotEmpty, MaxLength, MinLength, IsEnum, IsNumber, IsOptional } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
 export enum StoryStyle {
@@ -31,15 +31,34 @@ export class GenerateScriptDto {
   style!: StoryStyle;
 
   @ApiProperty({
-    description: 'Target video duration in seconds (for pacing)',
+    description: 'Target video duration in seconds (for pacing and audio)',
     example: 60,
     minimum: 30,
-    maximum: 300,
+    maximum: 120,
   })
+  @IsNumber()
   duration?: number;
 }
 
 export class GenerateScriptResponseDto {
+  @ApiProperty({
+    description: 'Job ID for tracking generation status',
+    example: 'job_abc123',
+  })
+  jobId!: string;
+
+  @ApiProperty({
+    description: 'Current job status',
+    example: 'pending',
+  })
+  status!: string;
+
+  @ApiProperty({
+    description: 'Target duration passed through pipeline',
+    example: 60,
+  })
+  targetDuration?: number;
+
   @ApiProperty({
     description: 'Generated script (null if still processing)',
     example: 'Scene 1: Establishing shot...',

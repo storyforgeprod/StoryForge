@@ -37,6 +37,12 @@ export class GenerateService {
       throw new BadRequestException('Story cannot be empty');
     }
 
+    // Validate duration if provided
+    const targetDuration = dto.duration ?? 60;
+    if (targetDuration < 30 || targetDuration > 120) {
+      throw new BadRequestException('Duration must be between 30-120 seconds');
+    }
+
     // 1. Create Job record with 'pending' status
     let job;
     try {
@@ -47,6 +53,11 @@ export class GenerateService {
           type: 'script',
           status: 'pending',
           progress: 0,
+          // Store story + duration in metadata for later stages (audio generation)
+          metadata: JSON.stringify({
+            story: dto.story,
+            targetDuration,
+          }),
         },
       });
     } catch (error) {
@@ -62,6 +73,7 @@ export class GenerateService {
         projectId: null,
         type: 'script',
         story: dto.story,
+        targetDuration,
         _startTime: Date.now(),
       });
     } catch (error) {
@@ -89,13 +101,19 @@ export class GenerateService {
   /**
    * Generate script content (used by queue processor)
    * This is the actual async logic that calls Azure OpenAI
-   * Passes MAX_SCENES constraint so script generation respects memory limits from stage 1
+   * Passes MAX_SCENES + targetDuration constraints to script generator
    */
   async generateScriptContent(
     userId: string,
-    data: { story: string },
+    data: { story: string; targetDuration?: number },
   ): Promise<{ script: string }> {
-    const script = await this.azureOpenAIService.generateScript(userId, data.story, this.MAX_SCENES);
+    const targetDuration = data.targetDuration ?? 60;
+    const script = await this.azureOpenAIService.generateScript(
+      userId,
+      data.story,
+      this.MAX_SCENES,
+      targetDuration,
+    );
     return { script };
   }
 
@@ -277,7 +295,45 @@ export class GenerateService {
   }
 
   /**
-   * Build visual prompt from a single scene
+   * Count number of scenes in script
+   */
+  private _countScenes(script: string): number {
+    const matches = script.match(/^Scene\s+\d+/gim) || [];
+    return matches.length > 0 ? matches.length : 1;
+  }
+
+  /**
+   * Extract total duration from script by parsing (Xs) durations in each scene
+   */
+  private _extractTotalDuration(script: string): number {
+    const matches = script.match(/\((\d+)s?\)/g) || [];
+    let total = 0;
+    for (const match of matches) {
+      const num = parseInt(match.match(/\d+/)?.[0] || '0', 10);
+      if (!isNaN(num)) {
+        total += num;
+      }
+    }
+    return total > 0 ? total : 60; // Default to 60s if parsing fails
+  }
+
+  /**
+   * Extract total duration from script by parsing (Xs) durations in each scene
+   */
+  private _extractTotalDuration(script: string): number {
+    const matches = script.match(/\((\d+)s?\)/g) || [];
+    let total = 0;
+    for (const match of matches) {
+      const num = parseInt(match.match(/\d+/)?.[0] || '0', 10);
+      if (!isNaN(num)) {
+        total += num;
+      }
+    }
+    return total > 0 ? total : 60; // Default to 60s if parsing fails
+  }
+
+  /**
+   * Build scene prompt from a single scene
    */
   private _buildScenePrompt(scene: string, style?: string): string {
     const cleaned = scene
@@ -378,7 +434,7 @@ export class GenerateService {
     userId: string,
     data: { jobId: string; scriptId: string; voiceId?: string },
   ): Promise<AudioGenerationResult> {
-    // 1. Fetch the script job result
+    // 1. Fetch the script job result + metadata
     const scriptJob = await this.prisma.job.findUnique({
       where: { id: data.scriptId },
     });
@@ -396,9 +452,40 @@ export class GenerateService {
       scriptText = scriptJob.result;
     }
 
-    // 3. Generate audio with fallback (ElevenLabs → Azure Speech)
+    // 3. Extract story + targetDuration from script job metadata
+    let story = '';
+    let targetDuration = 60;
+    try {
+      if (scriptJob.metadata) {
+        const metadata = JSON.parse(scriptJob.metadata);
+        story = metadata.story || '';
+        targetDuration = metadata.targetDuration || 60;
+      }
+    } catch (e) {
+      // Metadata parse error, use defaults
+    }
+
+    // 4. Count scenes in script to provide context
+    const sceneCount = this._extractScenes(scriptText).length;
+
+    // 5. Generate narration from original story (not literal script reading)
+    let narration: string;
+    if (story) {
+      // Use Azure OpenAI to generate professional narration
+      narration = await this.azureOpenAIService.generateAudioNarration(
+        userId,
+        story,
+        targetDuration,
+        sceneCount,
+      );
+    } else {
+      // Fallback: use script if story not available
+      narration = scriptText;
+    }
+
+    // 6. Generate audio with fallback (ElevenLabs → Azure Speech)
     const audioUrl = await this.audioGenerationService.generateTextToSpeech(
-      scriptText,
+      narration,
       data.voiceId,
     );
 
