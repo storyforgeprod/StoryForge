@@ -12,6 +12,9 @@ import { VideoService } from '../integrations/video.service';
 
 @Injectable()
 export class GenerateService {
+  // Maximum number of scenes per video to avoid OOM on Render 512MB
+  private readonly MAX_SCENES = 12;
+
   constructor(
     private prisma: PrismaService,
     private queue: QueueService,
@@ -231,6 +234,13 @@ export class GenerateService {
 
     if (!scenes.length) {
       throw new BadRequestException('No scenes found in script');
+    }
+
+    // 3.5 Validate scene count (prevent OOM on Render 512MB)
+    if (scenes.length > this.MAX_SCENES) {
+      throw new BadRequestException(
+        `Maximum ${this.MAX_SCENES} scenes allowed to prevent memory saturation. Your script has ${scenes.length} scenes.`
+      );
     }
 
     // 4. Generate one image per scene (sequential to avoid rate limits)

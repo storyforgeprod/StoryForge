@@ -78,6 +78,7 @@ export class VideoService implements OnModuleInit {
     metadata: { fps?: number; bitrate?: string; jobId?: string },
   ): Promise<string> {
     if (!images || images.length === 0) throw new Error('At least one image URL is required');
+    if (images.length > 12) throw new Error('Maximum 12 images allowed (Render 512MB memory limit)');
     if (!audioPath?.trim()) throw new Error('Audio URL is required');
 
     const jobId = metadata?.jobId || uuidv4();
