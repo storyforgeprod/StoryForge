@@ -11,16 +11,19 @@ import {
 import { StoryInput } from './StoryInput';
 import { StyleSelector } from './StyleSelector';
 import { VoiceSelector } from './VoiceSelector';
+import { DurationSelector } from './DurationSelector';
 import { validateStory } from '../utils/validation';
 import type { StoryStyle } from '../types';
 
-type WizardStep = 'story' | 'style' | 'voice';
+type WizardStep = 'story' | 'style' | 'duration' | 'voice';
 
 export type GenerationWizardProps = {
     story: string;
     onStoryChange: (story: string) => void;
     style: StoryStyle | null;
     onStyleChange: (style: StoryStyle) => void;
+    targetDuration: number;
+    onDurationChange: (duration: number) => void;
     voiceId: string | null;
     onVoiceChange: (voiceId: string) => void;
     isDeveloper: boolean;
@@ -32,7 +35,7 @@ const STEP_COPY: Record<WizardStep, { title: string; description: string; number
     story: {
         title: 'Tu historia',
         description:
-            'Pegá el texto que querés convertir en un Short. En los siguientes pasos elegís estilo y voz.',
+            'Pegá el texto que querés convertir en un Short. En los siguientes pasos elegís estilo, duración y voz.',
         number: 1,
     },
     style: {
@@ -40,10 +43,15 @@ const STEP_COPY: Record<WizardStep, { title: string; description: string; number
         description: 'Elegí el estilo visual que mejor refleja tu historia.',
         number: 2,
     },
+    duration: {
+        title: 'Duración y escenas',
+        description: 'Definí la duración del video. El sistema ajustará las escenas automáticamente.',
+        number: 3,
+    },
     voice: {
         title: 'Voz y narrador',
         description: 'Elegí la voz que narrará tu historia.',
-        number: 3,
+        number: 4,
     },
 };
 
@@ -52,6 +60,8 @@ export const GenerationWizard = ({
     onStoryChange,
     style,
     onStyleChange,
+    targetDuration,
+    onDurationChange,
     voiceId,
     onVoiceChange,
     isDeveloper,
@@ -72,13 +82,18 @@ export const GenerationWizard = ({
         }
         if (step === 'style') {
             if (!style) return;
+            setStep('duration');
+            return;
+        }
+        if (step === 'duration') {
             setStep('voice');
         }
     };
 
     const handleBack = () => {
         if (step === 'style') setStep('story');
-        if (step === 'voice') setStep('style');
+        if (step === 'duration') setStep('style');
+        if (step === 'voice') setStep('duration');
     };
 
     return (
@@ -90,7 +105,7 @@ export const GenerationWizard = ({
                         <CardDescription>{copy.description}</CardDescription>
                     </div>
                     <div className="text-right text-xs text-muted-foreground">
-                        <div className="font-semibold">Paso {copy.number} de 3</div>
+                        <div className="font-semibold">Paso {copy.number} de 4</div>
                     </div>
                 </div>
             </CardHeader>
@@ -128,6 +143,24 @@ export const GenerationWizard = ({
                                 Atrás
                             </Button>
                             <Button type="button" disabled={!style} onClick={handleContinue}>
+                                Continuar
+                            </Button>
+                        </div>
+                    </>
+                )}
+
+                {step === 'duration' && (
+                    <>
+                        <DurationSelector
+                            targetDuration={targetDuration}
+                            onDurationChange={onDurationChange}
+                        />
+                        <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                            <Button type="button" variant="outline" onClick={handleBack}>
+                                <ChevronLeft className="mr-2 h-4 w-4" />
+                                Atrás
+                            </Button>
+                            <Button type="button" onClick={handleContinue}>
                                 Continuar
                             </Button>
                         </div>

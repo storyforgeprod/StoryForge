@@ -29,6 +29,7 @@ export function GeneratePage() {
     const [story, setStory] = useState('');
     const [lastScriptStory, setLastScriptStory] = useState('');
     const [style, setStyle] = useState<StoryStyle | null>(null);
+    const [targetDuration, setTargetDuration] = useState(60);
     const [voiceId, setVoiceId] = useState<string | null>(null);
     const [scriptJobId, setScriptJobId] = useState<string | null>(null);
     const [imageJobId, setImageJobId] = useState<string | null>(null);
@@ -91,7 +92,7 @@ export function GeneratePage() {
         if (!style || !voiceId) return;
         if (genState.phase === 'completed' && story === lastScriptStory) return;
         setLastScriptStory(story);
-        generate(story, style);
+        generate(story, style, targetDuration);
     };
 
     const handleGenerateImages = () => {
@@ -215,6 +216,8 @@ export function GeneratePage() {
                         onStoryChange={setStory}
                         style={style}
                         onStyleChange={setStyle}
+                        targetDuration={targetDuration}
+                        onDurationChange={setTargetDuration}
                         voiceId={voiceId}
                         onVoiceChange={setVoiceId}
                         isDeveloper={isDeveloper}
