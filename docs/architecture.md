@@ -148,6 +148,61 @@ NestJS 10, TypeScript 5, Prisma, `@azure/openai`, `@supabase/supabase-js`, Bull 
 
 Not installed despite env vars in .env.example: `anthropic`, `replicate`
 
+## Frontend Architecture (ADR)
+
+The frontend uses **feature-driven architecture** (Bulletproof React style). Each business capability is a self-contained slice; cross-feature coupling goes through a single per-feature public API.
+
+### Tree
+
+    frontend/src/
+    ├── app/                          # composition root
+    │   ├── App.tsx                   # router shell
+    │   ├── main.tsx
+    │   ├── providers/AppProviders.tsx
+    │   └── routes/router.tsx         # route table
+    ├── features/
+    │   ├── auth/                     # login, register, JWT, ProtectedRoute
+    │   ├── generation/               # script/images/audio/video pipeline
+    │   └── home/                     # landing, dashboard, 404
+    │       ├── api/                  # fetch wrappers, token store
+    │       ├── components/           # internal UI (not exported)
+    │       ├── hooks/                # internal hooks (not exported)
+    │       ├── providers/            # React context providers
+    │       ├── routes/               # page-level components
+    │       ├── types/                # feature-owned types
+    │       ├── utils/                # pure helpers
+    │       └── index.ts              # PUBLIC API — only what crosses the boundary
+    ├── components/
+    │   ├── ui/                       # shadcn primitives (global, import from anywhere)
+    │   └── layout/                   # cross-feature layout (Header)
+    ├── lib/utils.ts                  # cn() helper
+    └── styles/
+
+### Public-API rule
+
+Outside a feature, only `@/features/<name>` (the root `index.ts` barrel) may be imported. Deep paths like `@/features/auth/components/LoginForm` are forbidden.
+
+Enforced by the `import/no-restricted-paths` lint rule.
+
+### Cross-feature coupling
+
+Features cannot import each other except via the barrel. Shared concerns belong in:
+
+- `components/ui/` — design-system primitives.
+- `components/layout/` — chrome that spans features (Header, etc.).
+- `lib/` — framework-agnostic utilities.
+- `app/` — composition (providers, router).
+
+Anything else lifts the dependency out of the feature, not across features.
+
+### Why
+
+- Feature folders read as one unit per business capability — an AI agent or new contributor opens *one* directory to understand "image generation," not five technical-layer folders.
+- The barrel makes refactors local: internal renames don't ripple across the codebase, only the public surface is a contract.
+- The lint rule turns the architectural intent into a build-time guarantee.
+
+Frontend-specific rules: see [frontend/AGENTS.md](../frontend/AGENTS.md).
+
 ## Deploy
 
 No Docker, CI/CD, or Render config files exist. Deployment is manual via Render dashboard.
