@@ -31,14 +31,14 @@ export class AzureOpenAIService {
     async generateScript(
         userId: string,
         story: string,
-        maxScenes: number = 12,
+        targetScenes: number = 12,
         targetDuration: number = 60,
     ): Promise<string> {
         if (!story || story.trim().length === 0) {
             throw new Error('Story cannot be empty');
         }
 
-        const prompt = this.buildScriptPrompt(story, maxScenes, targetDuration);
+        const prompt = this.buildScriptPrompt(story, targetScenes, targetDuration);
         const start = Date.now();
 
         try {
@@ -142,14 +142,14 @@ export class AzureOpenAIService {
         }
     }
 
-    private buildScriptPrompt(story: string, maxScenes: number = 12, targetDuration: number = 60): string {
-        const secondsPerScene = Math.round(targetDuration / maxScenes);
+    private buildScriptPrompt(story: string, targetScenes: number = 12, targetDuration: number = 60): string {
+        const secondsPerScene = Math.round(targetDuration / targetScenes);
         return `You are a professional screenwriter specializing in short-form video content for YouTube Shorts.
 
-Convert the following story into a script suitable for a video lasting approximately ${targetDuration} seconds.
+Convert the following story into a script suitable for a video lasting approximately ${targetDuration} seconds with exactly ${targetScenes} scenes.
 
 IMPORTANT REQUIREMENTS:
-1. Generate EXACTLY ${maxScenes} scenes maximum (fewer if story is shorter)
+1. Generate EXACTLY ${targetScenes} scenes (this is a MUST)
 2. Each scene should be approximately ${secondsPerScene} seconds
 3. Total duration across all scenes should be ~${targetDuration} seconds
 4. Keep scenes SHORT and PUNCHY with vivid visual descriptions
@@ -169,6 +169,7 @@ Music: [Music tone]
 
 CRITICAL: Each scene MUST include duration in parentheses like (2s), (3s), etc.
 The sum of all scene durations should equal approximately ${targetDuration} seconds.
+You MUST generate exactly ${targetScenes} scenes.
 
 Story to adapt:
 """

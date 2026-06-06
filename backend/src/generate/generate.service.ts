@@ -43,6 +43,12 @@ export class GenerateService {
       throw new BadRequestException('Duration must be between 30-120 seconds');
     }
 
+    // Validate scenes if provided
+    const targetScenes = dto.targetScenes ?? 12;
+    if (targetScenes < 1 || targetScenes > 12) {
+      throw new BadRequestException('Scenes must be between 1-12');
+    }
+
     // 0. Ensure user exists (auto-sync for first-time users from JWT)
     await this._ensureUserExists(userId);
 
@@ -56,10 +62,11 @@ export class GenerateService {
           type: 'script',
           status: 'pending',
           progress: 0,
-          // Store story + duration in metadata for later stages (audio generation)
+          // Store story + duration + scenes in metadata for later stages (audio generation)
           metadata: JSON.stringify({
             story: dto.story,
             targetDuration,
+            targetScenes,
           }),
         },
       });
@@ -77,6 +84,7 @@ export class GenerateService {
         type: 'script',
         story: dto.story,
         targetDuration,
+        targetScenes,
         _startTime: Date.now(),
       });
     } catch (error) {
@@ -104,17 +112,18 @@ export class GenerateService {
   /**
    * Generate script content (used by queue processor)
    * This is the actual async logic that calls Azure OpenAI
-   * Passes MAX_SCENES + targetDuration constraints to script generator
+   * Passes targetScenes + targetDuration constraints to script generator
    */
   async generateScriptContent(
     userId: string,
-    data: { story: string; targetDuration?: number },
+    data: { story: string; targetDuration?: number; targetScenes?: number },
   ): Promise<{ script: string }> {
     const targetDuration = data.targetDuration ?? 60;
+    const targetScenes = data.targetScenes ?? 12;
     const script = await this.azureOpenAIService.generateScript(
       userId,
       data.story,
-      this.MAX_SCENES,
+      targetScenes,
       targetDuration,
     );
     return { script };
