@@ -6,9 +6,12 @@ import {
   HttpStatus,
   Get,
   Param,
+  UseGuards,
 } from "@nestjs/common";
-import { Throttle } from "@nestjs/throttler";
-import { ApiTags, ApiOperation, ApiResponse } from "@nestjs/swagger";
+import { AuthGuard } from "@nestjs/passport";
+import { Throttle, SkipThrottle } from "@nestjs/throttler";
+import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from "@nestjs/swagger";
+import { CurrentUser } from "@/common/auth/current-user.decorator";
 import { GenerateService } from "./generate.service";
 import {
   GenerateScriptDto,
@@ -27,10 +30,11 @@ import {
   GenerateVideoResponseDto,
 } from "./dto/generate-video.dto";
 
-const ANONYMOUS_USER_ID = "dev-user";
 
 @ApiTags("Generate")
 @Controller("generate")
+@UseGuards(AuthGuard("jwt"))
+@ApiBearerAuth()
 export class GenerateController {
   constructor(private readonly generateService: GenerateService) { }
 
@@ -50,13 +54,19 @@ export class GenerateController {
     status: 400,
     description: "Invalid input",
   })
+  @ApiResponse({
+    status: 401,
+    description: "Unauthorized - JWT token required",
+  })
   async generateScript(
+    @CurrentUser() user: any,
     @Body() dto: GenerateScriptDto,
   ): Promise<GenerateScriptResponseDto> {
-    return this.generateService.generateScript(ANONYMOUS_USER_ID, dto);
+    return this.generateService.generateScript(user.sub, dto);
   }
 
   @Get("job/:jobId")
+  @SkipThrottle()
   @ApiOperation({
     summary: "Get job status",
     description: "Retrieve the status and result of a generation job",
@@ -65,8 +75,15 @@ export class GenerateController {
     status: 200,
     description: "Job status retrieved",
   })
-  async getJobStatus(@Param("jobId") jobId: string) {
-    return this.generateService.getJobStatus(jobId, ANONYMOUS_USER_ID);
+  @ApiResponse({
+    status: 401,
+    description: "Unauthorized - JWT token required",
+  })
+  async getJobStatus(
+    @CurrentUser() user: any,
+    @Param("jobId") jobId: string,
+  ) {
+    return this.generateService.getJobStatus(jobId, user.sub);
   }
 
   @Post("images")
@@ -81,10 +98,15 @@ export class GenerateController {
     status: 202,
     description: "Image generation job queued",
   })
+  @ApiResponse({
+    status: 401,
+    description: "Unauthorized - JWT token required",
+  })
   async generateImages(
+    @CurrentUser() user: any,
     @Body() dto: GenerateImagesDto,
   ): Promise<GenerateImagesResponseDto> {
-    return this.generateService.generateImages(ANONYMOUS_USER_ID, dto);
+    return this.generateService.generateImages(user.sub, dto);
   }
 
   @Post("audio")
@@ -98,10 +120,15 @@ export class GenerateController {
     status: 202,
     description: "Audio generation job queued",
   })
+  @ApiResponse({
+    status: 401,
+    description: "Unauthorized - JWT token required",
+  })
   async generateAudio(
+    @CurrentUser() user: any,
     @Body() dto: GenerateAudioDto,
   ): Promise<GenerateAudioResponseDto> {
-    return this.generateService.generateAudio(ANONYMOUS_USER_ID, dto);
+    return this.generateService.generateAudio(user.sub, dto);
   }
 
   @Post("video")
@@ -116,10 +143,38 @@ export class GenerateController {
     description: "Video assembly job created",
   })
   @ApiResponse({ status: 400, description: "Invalid request" })
-  @ApiResponse({ status: 403, description: "Unauthorized" })
+  @ApiResponse({ status: 401, description: "Unauthorized - JWT token required" })
   async generateVideo(
+    @CurrentUser() user: any,
     @Body() dto: GenerateVideoDto,
   ): Promise<GenerateVideoResponseDto> {
-    return this.generateService.generateVideo(ANONYMOUS_USER_ID, dto);
+    return this.generateService.generateVideo(user.sub, dto);
+  }
+
+  @Post("preset/:type")
+  @Throttle({ default: { limit: 10, ttl: 60000 } })
+  @HttpCode(HttpStatus.CREATED)
+  @ApiOperation({
+    summary: "Save preset content as a job",
+    description: "Saves preset script, images, or audio content directly as a job in the system",
+  })
+  @ApiResponse({
+    status: 201,
+    description: "Preset job created successfully",
+  })
+  @ApiResponse({
+    status: 400,
+    description: "Invalid preset type or content",
+  })
+  @ApiResponse({
+    status: 401,
+    description: "Unauthorized - JWT token required",
+  })
+  async savePreset(
+    @CurrentUser() user: any,
+    @Param("type") type: string,
+    @Body() body: { content?: string; jobId?: string },
+  ): Promise<{ jobId: string; type: string }> {
+    return this.generateService.savePreset(user.sub, type, body);
   }
 }

@@ -15,9 +15,9 @@ const ERROR_MAP: Record<number, string> = {
 
 const NETWORK_ERROR = 'Error de conexión. Revisá tu internet.';
 const TIMEOUT_ERROR = 'La generación de imágenes tardó demasiado. Intentá de nuevo.';
-// 30 attempts × 3 s = 90 s timeout (Replicate can be slow)
-const MAX_ATTEMPTS = 30;
-const POLL_INTERVAL_MS = 3000;
+// 200 attempts × 5s = 1000s ≈ 16.7 min (multi-scene generation)
+const MAX_ATTEMPTS = 200;
+const POLL_INTERVAL_MS = 5000;
 
 function mapApiError(err: unknown): string {
     if (err && typeof err === 'object' && 'status' in err) {

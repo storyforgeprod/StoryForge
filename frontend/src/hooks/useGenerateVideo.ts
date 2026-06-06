@@ -16,9 +16,9 @@ const ERROR_MAP: Record<number, string> = {
 
 const NETWORK_ERROR = 'Error de conexión. Revisá tu internet.';
 const TIMEOUT_ERROR = 'El ensamblado tardó demasiado. Intentá de nuevo.';
-// 80 attempts × 3 s = 240 s (4-minute timeout, matches backend SLA + buffer)
-const MAX_ATTEMPTS = 80;
-const POLL_INTERVAL_MS = 3000;
+// 200 attempts × 5s = 1000s ≈ 16.7 min (unified polling across jobs)
+const MAX_ATTEMPTS = 200;
+const POLL_INTERVAL_MS = 5000;
 
 function mapApiError(err: unknown): string {
     if (err && typeof err === 'object' && 'status' in err) {

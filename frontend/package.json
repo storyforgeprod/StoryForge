@@ -11,8 +11,8 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@radix-ui/react-dialog": "^1.1.15",
     "@radix-ui/react-slot": "^1.1.0",
-    "@rolldown/binding-win32-x64-msvc": "^1.0.2",
     "@supabase/supabase-js": "^2.45.0",
     "axios": "^1.7.7",
     "class-variance-authority": "^0.7.0",

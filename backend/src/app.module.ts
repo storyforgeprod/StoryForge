@@ -13,7 +13,7 @@ import { AuthModule } from './common/auth/auth.module';
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
-      envFilePath: '.env.local',
+      envFilePath: '.env',
     }),
     // Configure Bull (Redis) connection using REDIS_URL so producers and
     // consumers share the same Redis instance.

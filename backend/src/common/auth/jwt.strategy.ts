@@ -15,17 +15,17 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     private readonly supabaseService: SupabaseService,
     private readonly usersService: UsersService,
   ) {
-    const secret = process.env.SUPABASE_JWT_SECRET;
+    const secret = process.env.JWT_SECRET || process.env.SUPABASE_JWT_SECRET;
     if (!secret) {
       console.warn(
-        'SUPABASE_JWT_SECRET is not set. Add JWT Secret from Supabase Dashboard → Settings → API',
+        'JWT_SECRET is not set. Set JWT_SECRET in .env to sign and validate tokens',
       );
     }
 
     super({
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
       ignoreExpiration: false,
-      secretOrKey: secret || process.env.JWT_SECRET || 'dev-only-insecure',
+      secretOrKey: secret || 'dev-only-insecure',
       algorithms: ['HS256'],
     });
   }

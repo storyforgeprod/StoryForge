@@ -6,8 +6,8 @@ import { GenerateVideoDto, GenerateVideoResponseDto, VideoAssemblyResult } from 
 import { PrismaService } from '../common/prisma/prisma.service';
 import { QueueService } from '../common/queue/queue.service';
 import { AzureOpenAIService } from '../integrations/azure-openai.service';
-import { AzureFoundryImageService } from '../integrations/azure-foundry-image.service';
-import { ElevenLabsService } from '../integrations/elevenlabs.service';
+import { ImageService } from '../integrations/image.service';
+import { AudioGenerationService } from '../integrations/audio-generation.service';
 import { VideoService } from '../integrations/video.service';
 
 @Injectable()
@@ -16,8 +16,8 @@ export class GenerateService {
     private prisma: PrismaService,
     private queue: QueueService,
     private azureOpenAIService: AzureOpenAIService,
-    private azureFoundryImageService: AzureFoundryImageService,
-    private elevenLabsService: ElevenLabsService,
+    private imageService: ImageService,
+    private audioGenerationService: AudioGenerationService,
     private videoService: VideoService,
   ) { }
 
@@ -202,22 +202,22 @@ export class GenerateService {
 
   /**
    * Generate image content (used by queue processor)
-   * This is the actual async logic that calls Azure Foundry
+   * Extracts scenes from script and generates one image per scene
    */
   async generateImageContent(
     userId: string,
     data: { jobId: string; scriptId: string; style?: string; imageDescription?: string },
   ): Promise<ImageGenerationResult> {
-    // 1. Fetch original script Job to get the generated script
+    // 1. Fetch script result
     const scriptJob = await this.prisma.job.findUnique({
       where: { id: data.scriptId },
     });
 
-    if (!scriptJob || !scriptJob.result) {
+    if (!scriptJob?.result) {
       throw new BadRequestException('Script job not found or incomplete');
     }
 
-    // 2. Parse script result to extract visual description
+    // 2. Parse script text
     let scriptContent: string;
     try {
       const parsed = JSON.parse(scriptJob.result);
@@ -226,27 +226,55 @@ export class GenerateService {
       scriptContent = scriptJob.result;
     }
 
-    const imagePrompt = this._buildImagePrompt(scriptContent, data.style, data.imageDescription);
+    // 3. Extract scenes
+    const scenes = this._extractScenes(scriptContent);
 
-    const imageUrls = await this.azureFoundryImageService.generateImages(userId, imagePrompt, 1);
+    if (!scenes.length) {
+      throw new BadRequestException('No scenes found in script');
+    }
+
+    // 4. Generate one image per scene (sequential to avoid rate limits)
+    const imageUrls: string[] = [];
+    const prompts: string[] = [];
+
+    for (const scene of scenes) {
+      const prompt = this._buildScenePrompt(scene, data.style);
+      prompts.push(prompt);
+
+      const imageUrl = await this.imageService.generateImage(userId, prompt);
+      imageUrls.push(imageUrl);
+    }
 
     return {
       imageUrls,
-      prompt: imagePrompt,
+      prompt: prompts.join('\n---\n'),
       generatedAt: new Date(),
     };
   }
 
-  private _buildImagePrompt(
-    scriptContent: string,
-    style?: string,
-    imageDescription?: string,
-  ): string {
-    const description = imageDescription
-      ? imageDescription
-      : `Create a vivid cover image description for this script: ${scriptContent}`;
+  /**
+   * Extract scene blocks from script (Scene 1, Scene 2, etc.)
+   */
+  private _extractScenes(script: string): string[] {
+    const matches = script.match(/(?:Scene\s+\d+[:\-]?.*?)(?=Scene\s+\d+|$)/gis);
 
-    return style ? `${style} style, ${description}` : description;
+    if (!matches?.length) {
+      return [script];
+    }
+
+    return matches.map(scene => scene.trim());
+  }
+
+  /**
+   * Build visual prompt from a single scene
+   */
+  private _buildScenePrompt(scene: string, style?: string): string {
+    const cleaned = scene
+      .replace(/[*_#\[\]()]/g, '')
+      .replace(/\s+/g, ' ')
+      .substring(0, 400);
+
+    return `Cinematic ${style || 'novel'} style, ${cleaned}, dramatic lighting, high detail, 4k composition, cinematic framing, YouTube Shorts visual`;
   }
 
   /**
@@ -333,7 +361,7 @@ export class GenerateService {
 
   /**
    * Generate audio content (used by queue processor)
-   * This is the actual async logic that calls ElevenLabs API
+   * This is the actual async logic that calls TTS with fallback (ElevenLabs → Azure Speech)
    */
   async generateAudioContent(
     userId: string,
@@ -357,10 +385,11 @@ export class GenerateService {
       scriptText = scriptJob.result;
     }
 
-    // 3. Generate audio via ElevenLabs
-    const audioUrl = await this.elevenLabsService.generateAudio(scriptText, {
-      voiceId: data.voiceId,
-    });
+    // 3. Generate audio with fallback (ElevenLabs → Azure Speech)
+    const audioUrl = await this.audioGenerationService.generateTextToSpeech(
+      scriptText,
+      data.voiceId,
+    );
 
     // 4. Calculate audio length (rough estimate: 150 words per minute)
     const wordCount = scriptText.split(' ').length;
@@ -531,5 +560,48 @@ export class GenerateService {
       format: 'mp4',
       generatedAt: new Date(),
     };
+  }
+
+  /**
+   * Save preset content (script, images, audio) as a completed job
+   * Allows developers to skip generation steps for testing/preset flows
+   */
+  async savePreset(
+    userId: string,
+    type: string,
+    body: { content?: string; jobId?: string },
+  ): Promise<{ jobId: string; type: string }> {
+    const validTypes = ['script', 'images', 'audio'];
+    if (!validTypes.includes(type)) {
+      throw new BadRequestException(`Invalid preset type. Must be one of: ${validTypes.join(', ')}`);
+    }
+
+    if (!body.content && !body.jobId) {
+      throw new BadRequestException('Either "content" or "jobId" must be provided');
+    }
+
+    try {
+      // Create a completed job for the preset
+      const job = await this.prisma.job.create({
+        data: {
+          userId,
+          projectId: null,
+          type,
+          status: 'completed',
+          progress: 100,
+          result: body.content || body.jobId || '',
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        },
+      });
+
+      return {
+        jobId: job.id,
+        type,
+      };
+    } catch (error) {
+      console.error('Failed to save preset:', error);
+      throw new BadRequestException('Failed to save preset job');
+    }
   }
 }
