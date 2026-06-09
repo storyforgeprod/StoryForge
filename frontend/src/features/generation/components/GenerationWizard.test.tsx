@@ -15,7 +15,10 @@ function makeProps(overrides: Partial<React.ComponentProps<typeof GenerationWiza
         voiceId: null,
         onVoiceChange: vi.fn(),
         isDeveloper: false,
+        genState: { phase: 'idle' as const },
         onGenerateScript: vi.fn(),
+        onRetryScript: vi.fn(),
+        onStartPipeline: vi.fn(),
         onOpenScriptPreset: vi.fn(),
         ...overrides,
     };
@@ -27,94 +30,190 @@ describe('GenerationWizard', () => {
         expect(screen.getByText('Tu historia')).toBeInTheDocument();
     });
 
-    it('disables continue when the story is invalid', () => {
+    it('shows Duración and Escenas selects on the story step', () => {
+        render(<GenerationWizard {...makeProps()} />);
+        expect(screen.getByText('Duración')).toBeInTheDocument();
+        expect(screen.getByText('Escenas')).toBeInTheDocument();
+    });
+
+    it('disables "Generar guión" when the story is invalid', () => {
         render(<GenerationWizard {...makeProps({ story: 'too short' })} />);
-        expect(screen.getByRole('button', { name: /continuar/i })).toBeDisabled();
-    });
-
-    it('advances story → style → voice when each step is valid', async () => {
-        const user = userEvent.setup();
-        render(<GenerationWizard {...makeProps({ story: validStory, style: StoryStyle.ANIME })} />);
-
-        await user.click(screen.getByRole('button', { name: /continuar/i }));
-        expect(screen.getByText('Estilo visual')).toBeInTheDocument();
-
-        await user.click(screen.getByRole('button', { name: /continuar/i }));
-        expect(screen.getByText('Voz y narrador')).toBeInTheDocument();
-    });
-
-    it('disables the style-step continue when no style is selected', async () => {
-        const user = userEvent.setup();
-        render(<GenerationWizard {...makeProps({ story: validStory })} />);
-
-        await user.click(screen.getByRole('button', { name: /continuar/i }));
-        expect(screen.getByRole('button', { name: /continuar/i })).toBeDisabled();
-    });
-
-    it('disables the generate button when no voice is selected', async () => {
-        const user = userEvent.setup();
-        render(<GenerationWizard {...makeProps({ story: validStory, style: StoryStyle.ANIME })} />);
-
-        await user.click(screen.getByRole('button', { name: /continuar/i }));
-        await user.click(screen.getByRole('button', { name: /continuar/i }));
-
         expect(screen.getByRole('button', { name: /generar guión/i })).toBeDisabled();
     });
 
-    it('fires onGenerateScript when the voice step submits', async () => {
+    it('fires onGenerateScript with duration and scenes, then shows script step', async () => {
         const user = userEvent.setup();
         const onGenerateScript = vi.fn();
+        render(<GenerationWizard {...makeProps({ story: validStory, onGenerateScript })} />);
+
+        await user.click(screen.getByRole('button', { name: /generar guión/i }));
+
+        expect(onGenerateScript).toHaveBeenCalledTimes(1);
+        expect(onGenerateScript).toHaveBeenCalledWith(expect.any(Number), expect.any(Number));
+        expect(screen.getByText('Tu guión')).toBeInTheDocument();
+    });
+
+    it('disables continue on script step while genState is not completed', async () => {
+        const user = userEvent.setup();
+        render(
+            <GenerationWizard
+                {...makeProps({
+                    story: validStory,
+                    genState: { phase: 'polling', jobId: 'job1', attempts: 1 },
+                })}
+            />,
+        );
+
+        await user.click(screen.getByRole('button', { name: /generar guión/i }));
+
+        expect(screen.getByRole('button', { name: /continuar/i })).toBeDisabled();
+    });
+
+    it('enables continue on script step when genState is completed', async () => {
+        const user = userEvent.setup();
+        render(
+            <GenerationWizard
+                {...makeProps({
+                    story: validStory,
+                    genState: {
+                        phase: 'completed',
+                        script: 'Scene 1: Intro (5s)\n[Sound: Hello]',
+                    },
+                })}
+            />,
+        );
+
+        await user.click(screen.getByRole('button', { name: /generar guión/i }));
+
+        expect(screen.getByRole('button', { name: /continuar/i })).not.toBeDisabled();
+    });
+
+    it('advances script → style → voice when each step is valid', async () => {
+        const user = userEvent.setup();
         render(
             <GenerationWizard
                 {...makeProps({
                     story: validStory,
                     style: StoryStyle.ANIME,
-                    voiceId: 'EXAVITQu4vr4xnSDxMaL',
-                    onGenerateScript,
+                    voiceId: 'voice1',
+                    genState: {
+                        phase: 'completed',
+                        script: 'Scene 1: Intro (5s)\n[Sound: Hello]',
+                    },
                 })}
             />,
         );
 
-        await user.click(screen.getByRole('button', { name: /continuar/i }));
-        await user.click(screen.getByRole('button', { name: /continuar/i }));
         await user.click(screen.getByRole('button', { name: /generar guión/i }));
+        expect(screen.getByText('Tu guión')).toBeInTheDocument();
 
-        expect(onGenerateScript).toHaveBeenCalledTimes(1);
+        await user.click(screen.getByRole('button', { name: /continuar/i }));
+        expect(screen.getByText('Estilo visual')).toBeInTheDocument();
+
+        await user.click(screen.getByRole('button', { name: /continuar/i }));
+        expect(screen.getByText('Voz y narrador')).toBeInTheDocument();
     });
 
-    it('shows the preset button on the voice step only when developer', async () => {
+    it('disables style-step continue when no style is selected', async () => {
         const user = userEvent.setup();
-        const { rerender } = render(
+        render(
             <GenerationWizard
                 {...makeProps({
                     story: validStory,
-                    style: StoryStyle.ANIME,
-                    voiceId: 'EXAVITQu4vr4xnSDxMaL',
+                    style: null,
+                    genState: {
+                        phase: 'completed',
+                        script: 'Scene 1: Intro (5s)\n[Sound: Hello]',
+                    },
                 })}
             />,
         );
 
+        await user.click(screen.getByRole('button', { name: /generar guión/i }));
         await user.click(screen.getByRole('button', { name: /continuar/i }));
-        await user.click(screen.getByRole('button', { name: /continuar/i }));
-        expect(screen.queryByRole('button', { name: /usar preset/i })).not.toBeInTheDocument();
 
-        rerender(
+        expect(screen.getByRole('button', { name: /continuar/i })).toBeDisabled();
+    });
+
+    it('fires onStartPipeline when "Generar video" is clicked with voice selected', async () => {
+        const user = userEvent.setup();
+        const onStartPipeline = vi.fn();
+        render(
             <GenerationWizard
                 {...makeProps({
                     story: validStory,
                     style: StoryStyle.ANIME,
-                    voiceId: 'EXAVITQu4vr4xnSDxMaL',
-                    isDeveloper: true,
+                    voiceId: 'voice1',
+                    genState: {
+                        phase: 'completed',
+                        script: 'Scene 1: Intro (5s)\n[Sound: Hello]',
+                    },
+                    onStartPipeline,
                 })}
             />,
         );
-        expect(screen.getByRole('button', { name: /usar preset/i })).toBeInTheDocument();
+
+        await user.click(screen.getByRole('button', { name: /generar guión/i }));
+        await user.click(screen.getByRole('button', { name: /continuar/i }));
+        await user.click(screen.getByRole('button', { name: /continuar/i }));
+        await user.click(screen.getByRole('button', { name: /generar video/i }));
+
+        expect(onStartPipeline).toHaveBeenCalledTimes(1);
     });
 
-    it('walks back through the steps', async () => {
+    it('disables "Generar video" when no voice is selected', async () => {
         const user = userEvent.setup();
-        render(<GenerationWizard {...makeProps({ story: validStory, style: StoryStyle.ANIME })} />);
+        render(
+            <GenerationWizard
+                {...makeProps({
+                    story: validStory,
+                    style: StoryStyle.ANIME,
+                    voiceId: null,
+                    genState: {
+                        phase: 'completed',
+                        script: 'Scene 1: Intro (5s)\n[Sound: Hello]',
+                    },
+                })}
+            />,
+        );
 
+        await user.click(screen.getByRole('button', { name: /generar guión/i }));
+        await user.click(screen.getByRole('button', { name: /continuar/i }));
+        await user.click(screen.getByRole('button', { name: /continuar/i }));
+
+        expect(screen.getByRole('button', { name: /generar video/i })).toBeDisabled();
+    });
+
+    it('calls onRetryScript and returns to story step when back is pressed on script step', async () => {
+        const user = userEvent.setup();
+        const onRetryScript = vi.fn();
+        render(<GenerationWizard {...makeProps({ story: validStory, onRetryScript })} />);
+
+        await user.click(screen.getByRole('button', { name: /generar guión/i }));
+        expect(screen.getByText('Tu guión')).toBeInTheDocument();
+
+        await user.click(screen.getByRole('button', { name: /atrás/i }));
+
+        expect(onRetryScript).toHaveBeenCalledTimes(1);
+        expect(screen.getByText('Tu historia')).toBeInTheDocument();
+    });
+
+    it('walks back through all steps', async () => {
+        const user = userEvent.setup();
+        render(
+            <GenerationWizard
+                {...makeProps({
+                    story: validStory,
+                    style: StoryStyle.ANIME,
+                    genState: {
+                        phase: 'completed',
+                        script: 'Scene 1: Intro (5s)\n[Sound: Hello]',
+                    },
+                })}
+            />,
+        );
+
+        await user.click(screen.getByRole('button', { name: /generar guión/i }));
         await user.click(screen.getByRole('button', { name: /continuar/i }));
         await user.click(screen.getByRole('button', { name: /continuar/i }));
         expect(screen.getByText('Voz y narrador')).toBeInTheDocument();
@@ -123,6 +222,19 @@ describe('GenerationWizard', () => {
         expect(screen.getByText('Estilo visual')).toBeInTheDocument();
 
         await user.click(screen.getByRole('button', { name: /atrás/i }));
-        expect(screen.getByText('Tu historia')).toBeInTheDocument();
+        expect(screen.getByText('Tu guión')).toBeInTheDocument();
+    });
+
+    it('shows preset button on script step only when developer', async () => {
+        const user = userEvent.setup();
+        const { rerender } = render(
+            <GenerationWizard {...makeProps({ story: validStory, isDeveloper: false })} />,
+        );
+
+        await user.click(screen.getByRole('button', { name: /generar guión/i }));
+        expect(screen.queryByRole('button', { name: /usar preset/i })).not.toBeInTheDocument();
+
+        rerender(<GenerationWizard {...makeProps({ story: validStory, isDeveloper: true })} />);
+        expect(screen.getByRole('button', { name: /usar preset/i })).toBeInTheDocument();
     });
 });

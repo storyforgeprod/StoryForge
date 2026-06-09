@@ -11,30 +11,25 @@ import {
 import { StoryInput } from './StoryInput';
 import { StyleSelector } from './StyleSelector';
 import { VoiceSelector } from './VoiceSelector';
-import { DurationSelector } from './DurationSelector';
-import { ScenesSelector } from './ScenesSelector';
+import { DurationSelect } from './DurationSelect';
+import { ScenesSelect } from './ScenesSelect';
 import { ScriptReviewStep } from './ScriptReviewStep';
 import { validateStory } from '../utils/validation';
 import type { GenerateScriptState, StoryStyle } from '../types';
 
-type WizardStep = 'story' | 'style' | 'duration' | 'scenes' | 'script' | 'voice';
+type WizardStep = 'story' | 'script' | 'style' | 'voice';
 
 export type GenerationWizardProps = {
     story: string;
     onStoryChange: (story: string) => void;
     style: StoryStyle | null;
     onStyleChange: (style: StoryStyle) => void;
-    targetDuration: number;
-    onDurationChange: (duration: number) => void;
-    targetScenes: number;
-    onScenesChange: (scenes: number) => void;
     voiceId: string | null;
     onVoiceChange: (voiceId: string) => void;
     isDeveloper: boolean;
     genState: GenerateScriptState;
-    onGenerateScript: () => void;
+    onGenerateScript: (duration: number, scenes: number) => void;
     onRetryScript: () => void;
-    onRegenerateScript: () => void;
     onStartPipeline: () => void;
     onOpenScriptPreset: () => void;
 };
@@ -42,34 +37,23 @@ export type GenerationWizardProps = {
 const STEP_COPY: Record<WizardStep, { title: string; description: string; number: number }> = {
     story: {
         title: 'Tu historia',
-        description:
-            'Pegá el texto que querés convertir en un Short. En los siguientes pasos elegís estilo, duración y escenas.',
+        description: 'Pegá el texto que querés convertir en un Short y configurá la duración y escenas.',
         number: 1,
-    },
-    style: {
-        title: 'Estilo visual',
-        description: 'Elegí el estilo visual que mejor refleja tu historia.',
-        number: 2,
-    },
-    duration: {
-        title: 'Duración del video',
-        description: 'Definí la duración total del video (30-120 segundos).',
-        number: 3,
-    },
-    scenes: {
-        title: 'Cantidad de escenas',
-        description: 'Elegí cuántas escenas deseas. La duración por escena se calculará automáticamente.',
-        number: 4,
     },
     script: {
         title: 'Tu guión',
         description: 'Revisá las escenas generadas. Podés regenerar si algo no quedó bien.',
-        number: 5,
+        number: 2,
+    },
+    style: {
+        title: 'Estilo visual',
+        description: 'Elegí el estilo visual que mejor refleja tu historia.',
+        number: 3,
     },
     voice: {
         title: 'Voz y narrador',
         description: 'Elegí la voz que narrará tu historia.',
-        number: 6,
+        number: 4,
     },
 };
 
@@ -78,62 +62,42 @@ export const GenerationWizard = ({
     onStoryChange,
     style,
     onStyleChange,
-    targetDuration,
-    onDurationChange,
-    targetScenes,
-    onScenesChange,
     voiceId,
     onVoiceChange,
     isDeveloper,
     genState,
     onGenerateScript,
     onRetryScript,
-    onRegenerateScript,
     onStartPipeline,
     onOpenScriptPreset,
 }: GenerationWizardProps) => {
     const [step, setStep] = useState<WizardStep>('story');
     const [submitAttempted, setSubmitAttempted] = useState(false);
+    const [targetDuration, setTargetDuration] = useState(60);
+    const [targetScenes, setTargetScenes] = useState(12);
     const validation = useMemo(() => validateStory(story), [story]);
     const copy = STEP_COPY[step];
     const isScriptGenerating = genState.phase === 'submitting' || genState.phase === 'polling';
 
-    const handleContinue = () => {
-        if (step === 'story') {
-            setSubmitAttempted(true);
-            if (!validation.valid) return;
-            setStep('style');
-            return;
-        }
-        if (step === 'style') {
-            if (!style) return;
-            setStep('duration');
-            return;
-        }
-        if (step === 'duration') {
-            setStep('scenes');
-            return;
-        }
-        if (step === 'scenes') {
-            onGenerateScript();
-            setStep('script');
-            return;
-        }
-        if (step === 'script') {
-            if (genState.phase !== 'completed') return;
-            setStep('voice');
-        }
+    const handleGenerateScript = () => {
+        setSubmitAttempted(true);
+        if (!validation.valid) return;
+        onGenerateScript(targetDuration, targetScenes);
+        setStep('script');
+    };
+
+    const handleRegenerate = () => {
+        onRetryScript();
+        onGenerateScript(targetDuration, targetScenes);
     };
 
     const handleBack = () => {
-        if (step === 'style') setStep('story');
-        if (step === 'duration') setStep('style');
-        if (step === 'scenes') setStep('duration');
         if (step === 'script') {
             onRetryScript();
-            setStep('scenes');
+            setStep('story');
         }
-        if (step === 'voice') setStep('script');
+        if (step === 'style') setStep('script');
+        if (step === 'voice') setStep('style');
     };
 
     return (
@@ -145,7 +109,7 @@ export const GenerationWizard = ({
                         <CardDescription>{copy.description}</CardDescription>
                     </div>
                     <div className="text-right text-xs text-muted-foreground">
-                        <div className="font-semibold">Paso {copy.number} de 6</div>
+                        <div className="font-semibold">Paso {copy.number} de 4</div>
                     </div>
                 </div>
             </CardHeader>
@@ -157,6 +121,10 @@ export const GenerationWizard = ({
                             onChange={onStoryChange}
                             showErrors={submitAttempted}
                         />
+                        <div className="grid grid-cols-2 gap-4">
+                            <DurationSelect value={targetDuration} onChange={setTargetDuration} />
+                            <ScenesSelect value={targetScenes} onChange={setTargetScenes} />
+                        </div>
                         <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
                             <p className="text-xs text-muted-foreground">
                                 {validation.valid
@@ -166,60 +134,8 @@ export const GenerationWizard = ({
                             <Button
                                 type="button"
                                 disabled={!validation.valid}
-                                onClick={handleContinue}
+                                onClick={handleGenerateScript}
                             >
-                                Continuar
-                            </Button>
-                        </div>
-                    </>
-                )}
-
-                {step === 'style' && (
-                    <>
-                        <StyleSelector value={style} onChange={onStyleChange} />
-                        <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-                            <Button type="button" variant="outline" onClick={handleBack}>
-                                <ChevronLeft className="mr-2 h-4 w-4" />
-                                Atrás
-                            </Button>
-                            <Button type="button" disabled={!style} onClick={handleContinue}>
-                                Continuar
-                            </Button>
-                        </div>
-                    </>
-                )}
-
-                {step === 'duration' && (
-                    <>
-                        <DurationSelector
-                            targetDuration={targetDuration}
-                            onDurationChange={onDurationChange}
-                        />
-                        <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-                            <Button type="button" variant="outline" onClick={handleBack}>
-                                <ChevronLeft className="mr-2 h-4 w-4" />
-                                Atrás
-                            </Button>
-                            <Button type="button" onClick={handleContinue}>
-                                Continuar
-                            </Button>
-                        </div>
-                    </>
-                )}
-
-                {step === 'scenes' && (
-                    <>
-                        <ScenesSelector
-                            targetScenes={targetScenes}
-                            onScenesChange={onScenesChange}
-                            targetDuration={targetDuration}
-                        />
-                        <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-                            <Button type="button" variant="outline" onClick={handleBack}>
-                                <ChevronLeft className="mr-2 h-4 w-4" />
-                                Atrás
-                            </Button>
-                            <Button type="button" onClick={handleContinue}>
                                 Generar guión
                             </Button>
                         </div>
@@ -230,7 +146,7 @@ export const GenerationWizard = ({
                     <>
                         <ScriptReviewStep
                             state={genState}
-                            onRegenerate={onRegenerateScript}
+                            onRegenerate={handleRegenerate}
                         />
                         <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
                             <Button
@@ -255,11 +171,30 @@ export const GenerationWizard = ({
                                 <Button
                                     type="button"
                                     disabled={genState.phase !== 'completed'}
-                                    onClick={handleContinue}
+                                    onClick={() => setStep('style')}
                                 >
                                     Continuar
                                 </Button>
                             </div>
+                        </div>
+                    </>
+                )}
+
+                {step === 'style' && (
+                    <>
+                        <StyleSelector value={style} onChange={onStyleChange} />
+                        <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                            <Button type="button" variant="outline" onClick={handleBack}>
+                                <ChevronLeft className="mr-2 h-4 w-4" />
+                                Atrás
+                            </Button>
+                            <Button
+                                type="button"
+                                disabled={!style}
+                                onClick={() => setStep('voice')}
+                            >
+                                Continuar
+                            </Button>
                         </div>
                     </>
                 )}
