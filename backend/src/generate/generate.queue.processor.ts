@@ -10,6 +10,8 @@ interface GenerationJobData {
   projectId: string | null;
   type: 'script' | 'images' | 'audio' | 'video';
   story?: string;
+  targetDuration?: number;
+  targetScenes?: number;
   scriptId?: string;
   style?: string;
   imageDescription?: string;
@@ -60,6 +62,8 @@ export class GenerateQueueProcessor {
         this.logger.log(`[SCRIPT] 📝 Generating script from story (${story?.length || 0} chars)`);
         result = await this.generateService.generateScriptContent(userId, {
           story: story || '',
+          targetDuration: job.data.targetDuration,
+          targetScenes: job.data.targetScenes,
         });
         this.logger.log(`[SCRIPT] ✓ Generated script`);
       } else if (type === 'images') {

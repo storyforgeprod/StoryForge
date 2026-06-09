@@ -41,18 +41,6 @@ export class GenerateScriptDto {
   @Min(30)
   @Max(120)
   targetDuration?: number;
-
-  @ApiProperty({
-    description: 'Target number of scenes (1-12, default 12)',
-    example: 12,
-    minimum: 1,
-    maximum: 12,
-  })
-  @IsOptional()
-  @IsNumber()
-  @Min(1)
-  @Max(12)
-  targetScenes?: number;
 }
 
 export class GenerateScriptResponseDto {

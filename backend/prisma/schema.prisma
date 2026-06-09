@@ -102,6 +102,7 @@ model Job {
   // Results
   result            String?    @db.Text // JSON with generated content
   error             String?    // Error message if failed
+  metadata          String?    @db.Text // JSON with additional context (story, duration, etc)
   
   // Metadata
   startedAt         DateTime?

@@ -17,7 +17,7 @@ import { useGenerateScript } from '../hooks/useGenerateScript';
 import { useGenerateImages } from '../hooks/useGenerateImages';
 import { useGenerateAudio } from '../hooks/useGenerateAudio';
 import { useGenerateVideo } from '../hooks/useGenerateVideo';
-import { StoryStyle } from '../types';
+import type { StoryStyle } from '../types';
 
 export function GeneratePage() {
     const { user } = useAuth();
@@ -26,6 +26,8 @@ export function GeneratePage() {
     const [story, setStory] = useState('');
     const [lastScriptStory, setLastScriptStory] = useState('');
     const [style, setStyle] = useState<StoryStyle | null>(null);
+    const [targetDuration, setTargetDuration] = useState(60);
+    const [targetScenes, setTargetScenes] = useState(12);
     const [voiceId, setVoiceId] = useState<string | null>(null);
     const [scriptJobId, setScriptJobId] = useState<string | null>(null);
     const [imageJobId, setImageJobId] = useState<string | null>(null);
@@ -61,7 +63,7 @@ export function GeneratePage() {
         if (!style || !voiceId) return;
         if (genState.phase === 'completed' && story === lastScriptStory) return;
         setLastScriptStory(story);
-        generate(story, style);
+        generate(story, style, targetDuration, targetScenes);
     };
 
     const handleGenerateImages = () => {
@@ -208,6 +210,10 @@ export function GeneratePage() {
                             onStoryChange={setStory}
                             style={style}
                             onStyleChange={setStyle}
+                            targetDuration={targetDuration}
+                            onDurationChange={setTargetDuration}
+                            targetScenes={targetScenes}
+                            onScenesChange={setTargetScenes}
                             voiceId={voiceId}
                             onVoiceChange={setVoiceId}
                             isDeveloper={isDeveloper}

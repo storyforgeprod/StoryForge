@@ -28,12 +28,17 @@ export class AzureOpenAIService {
         }
     }
 
-    async generateScript(userId: string, story: string): Promise<string> {
+    async generateScript(
+        userId: string,
+        story: string,
+        targetScenes: number = 12,
+        targetDuration: number = 60,
+    ): Promise<string> {
         if (!story || story.trim().length === 0) {
             throw new Error('Story cannot be empty');
         }
 
-        const prompt = this.buildScriptPrompt(story);
+        const prompt = this.buildScriptPrompt(story, targetScenes, targetDuration);
         const start = Date.now();
 
         try {
@@ -137,23 +142,115 @@ export class AzureOpenAIService {
         }
     }
 
-    private buildScriptPrompt(story: string): string {
+    private buildScriptPrompt(story: string, targetScenes: number = 12, targetDuration: number = 60): string {
+        const secondsPerScene = Math.round(targetDuration / targetScenes);
         return `You are a professional screenwriter specializing in short-form video content for YouTube Shorts.
 
-Convert the following story into a script suitable for a video lasting approximately 60 seconds.
+Convert the following story into a script suitable for a video lasting approximately ${targetDuration} seconds with exactly ${targetScenes} scenes.
 
 IMPORTANT REQUIREMENTS:
-1. Keep scenes SHORT and PUNCHY (2-3 seconds each)
-2. Include vivid visual descriptions
-3. Add sound effects in [BRACKETS]
-4. Include suggested music tone
-5. Format: Scene number, description, and duration
+1. Generate EXACTLY ${targetScenes} scenes (this is a MUST)
+2. Each scene should be approximately ${secondsPerScene} seconds
+3. Total duration across all scenes should be ~${targetDuration} seconds
+4. Keep scenes SHORT and PUNCHY with vivid visual descriptions
+5. Add sound effects in [BRACKETS]
+6. Include suggested music tone
+
+MANDATORY FORMAT (do NOT deviate):
+Scene 1: [Visual description] (Xs)
+[Sound: Sound effect description]
+Music: [Music tone]
+
+Scene 2: [Visual description] (Ys)
+[Sound: Sound effect description]
+Music: [Music tone]
+
+...and so on.
+
+CRITICAL: Each scene MUST include duration in parentheses like (2s), (3s), etc.
+The sum of all scene durations should equal approximately ${targetDuration} seconds.
+You MUST generate exactly ${targetScenes} scenes.
 
 Story to adapt:
 """
 ${story}
 """
 
-Provide only the script, no additional commentary.`;
+Provide only the script in the exact format above, no additional commentary.`;
+    }
+
+    /**
+     * Generate audio narration from original story
+     * Creates a concise narration that summarizes the story (not a literal reading of script)
+     * Timed to fit the video duration
+     */
+    async generateAudioNarration(
+        userId: string,
+        story: string,
+        targetDuration: number = 60,
+        sceneCount: number = 1,
+    ): Promise<string> {
+        if (!story || story.trim().length === 0) {
+            throw new Error('Story cannot be empty');
+        }
+
+        const prompt = this.buildAudioNarrationPrompt(story, targetDuration, sceneCount);
+        const start = Date.now();
+
+        try {
+            const response = await this.client.getChatCompletions(this.deployment, [
+                {
+                    role: 'user',
+                    content: prompt,
+                },
+            ]);
+
+            const narration = response.choices?.[0]?.message?.content || '';
+            if (!narration) {
+                throw new Error('No narration generated');
+            }
+
+            const latency = Date.now() - start;
+            this.logger.log(
+                `AzureOpenAI generateAudioNarration completed for user=${userId} deployment=${this.deployment} latency=${latency}ms`,
+            );
+
+            return narration;
+        } catch (error) {
+            const message = error instanceof Error ? error.message : String(error);
+            this.logger.error(`AzureOpenAI generateAudioNarration failed: ${message}`);
+            throw error;
+        }
+    }
+
+    private buildAudioNarrationPrompt(story: string, targetDuration: number = 60, sceneCount: number = 1): string {
+        const wordsPerSecond = 2.5; // Average speaking rate
+        const targetWords = Math.round(targetDuration * wordsPerSecond);
+        
+        return `You are a professional voice-over artist specializing in YouTube Shorts narration.
+
+Create a compelling ${targetDuration}-second narration for a short-form video.
+
+STORY (original narrative to base your narration on):
+"""
+${story}
+"""
+
+VIDEO STRUCTURE:
+- Total duration: ${targetDuration} seconds
+- Number of scenes: ${sceneCount}
+- Average time per scene: ${Math.round(targetDuration / sceneCount)} seconds
+
+YOUR TASK:
+1. Summarize the KEY PLOT POINTS from the original story
+2. Create a cohesive narrative that flows naturally
+3. Target approximately ${targetWords} words (fits ${targetDuration}s at normal speaking pace)
+4. Maintain emotional arc and tension from the original
+5. Use vivid, descriptive language suitable for YouTube Shorts
+6. DO NOT read the scene descriptions or technical directions
+7. Write for a professional voice-over (clear, engaging, natural)
+
+Provide ONLY the narration text. No stage directions, no timestamps, no scene numbers.
+The narration should be engaging and storytelling-focused, not technical.`;
     }
 }

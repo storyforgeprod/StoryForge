@@ -12,6 +12,9 @@ import { VideoService } from '../integrations/video.service';
 
 @Injectable()
 export class GenerateService {
+  // Maximum number of scenes per video to avoid OOM on Render 512MB
+  private readonly MAX_SCENES = 12;
+
   constructor(
     private prisma: PrismaService,
     private queue: QueueService,
@@ -34,6 +37,21 @@ export class GenerateService {
       throw new BadRequestException('Story cannot be empty');
     }
 
+    // Validate duration if provided
+    const targetDuration = dto.targetDuration ?? 60;
+    if (targetDuration < 30 || targetDuration > 120) {
+      throw new BadRequestException('Duration must be between 30-120 seconds');
+    }
+
+    // Validate scenes if provided
+    const targetScenes = dto.targetScenes ?? 12;
+    if (targetScenes < 1 || targetScenes > 12) {
+      throw new BadRequestException('Scenes must be between 1-12');
+    }
+
+    // 0. Ensure user exists (auto-sync for first-time users from JWT)
+    await this._ensureUserExists(userId);
+
     // 1. Create Job record with 'pending' status
     let job;
     try {
@@ -44,6 +62,12 @@ export class GenerateService {
           type: 'script',
           status: 'pending',
           progress: 0,
+          // Store story + duration + scenes in metadata for later stages (audio generation)
+          metadata: JSON.stringify({
+            story: dto.story,
+            targetDuration,
+            targetScenes,
+          }),
         },
       });
     } catch (error) {
@@ -59,6 +83,8 @@ export class GenerateService {
         projectId: null,
         type: 'script',
         story: dto.story,
+        targetDuration,
+        targetScenes,
         _startTime: Date.now(),
       });
     } catch (error) {
@@ -86,12 +112,20 @@ export class GenerateService {
   /**
    * Generate script content (used by queue processor)
    * This is the actual async logic that calls Azure OpenAI
+   * Passes targetScenes + targetDuration constraints to script generator
    */
   async generateScriptContent(
     userId: string,
-    data: { story: string },
+    data: { story: string; targetDuration?: number; targetScenes?: number },
   ): Promise<{ script: string }> {
-    const script = await this.azureOpenAIService.generateScript(userId, data.story);
+    const targetDuration = data.targetDuration ?? 60;
+    const targetScenes = data.targetScenes ?? 12;
+    const script = await this.azureOpenAIService.generateScript(
+      userId,
+      data.story,
+      targetScenes,
+      targetDuration,
+    );
     return { script };
   }
 
@@ -132,6 +166,9 @@ export class GenerateService {
     userId: string,
     dto: GenerateImagesDto,
   ): Promise<GenerateImagesResponseDto> {
+    // Ensure user exists (auto-sync for first-time users from JWT)
+    await this._ensureUserExists(userId);
+
     // 1. Validate input
     if (!dto.scriptId || dto.scriptId.trim().length === 0) {
       throw new BadRequestException('scriptId is required');
@@ -233,6 +270,13 @@ export class GenerateService {
       throw new BadRequestException('No scenes found in script');
     }
 
+    // 3.5 Validate scene count (prevent OOM on Render 512MB)
+    if (scenes.length > this.MAX_SCENES) {
+      throw new BadRequestException(
+        `Maximum ${this.MAX_SCENES} scenes allowed to prevent memory saturation. Your script has ${scenes.length} scenes.`
+      );
+    }
+
     // 4. Generate one image per scene (sequential to avoid rate limits)
     const imageUrls: string[] = [];
     const prompts: string[] = [];
@@ -253,6 +297,34 @@ export class GenerateService {
   }
 
   /**
+   * Ensure user exists in database
+   * Auto-creates a basic user record if not found
+   * Prevents foreign key constraint violations for authenticated users
+   */
+  private async _ensureUserExists(userId: string): Promise<void> {
+    try {
+      const existingUser = await this.prisma.user.findUnique({
+        where: { id: userId },
+      });
+
+      if (!existingUser) {
+        // Auto-create user from JWT claim
+        await this.prisma.user.create({
+          data: {
+            id: userId,
+            email: `user-${userId}@storyforge.local`,
+            name: `User ${userId.substring(0, 8)}`,
+            role: 'USER',
+            provider: 'jwt',
+          },
+        });
+      }
+    } catch (error) {
+      // Silently continue - duplicate user creation is harmless
+    }
+  }
+
+  /**
    * Extract scene blocks from script (Scene 1, Scene 2, etc.)
    */
   private _extractScenes(script: string): string[] {
@@ -263,6 +335,29 @@ export class GenerateService {
     }
 
     return matches.map(scene => scene.trim());
+  }
+
+  /**
+   * Count number of scenes in script
+   */
+  private _countScenes(script: string): number {
+    const matches = script.match(/^Scene\s+\d+/gim) || [];
+    return matches.length > 0 ? matches.length : 1;
+  }
+
+  /**
+   * Extract total duration from script by parsing (Xs) durations in each scene
+   */
+  private _extractTotalDuration(script: string): number {
+    const matches = script.match(/\((\d+)s?\)/g) || [];
+    let total = 0;
+    for (const match of matches) {
+      const num = parseInt(match.replace(/\D/g, '') || '0', 10);
+      if (!isNaN(num)) {
+        total += num;
+      }
+    }
+    return total > 0 ? total : 60; // Default to 60s if parsing fails
   }
 
   /**
@@ -286,6 +381,9 @@ export class GenerateService {
     userId: string,
     dto: GenerateAudioDto,
   ): Promise<GenerateAudioResponseDto> {
+    // Ensure user exists (auto-sync for first-time users from JWT)
+    await this._ensureUserExists(userId);
+
     // 1. Validate input
     if (!dto.scriptId || dto.scriptId.trim().length === 0) {
       throw new BadRequestException('scriptId is required');
@@ -367,7 +465,7 @@ export class GenerateService {
     userId: string,
     data: { jobId: string; scriptId: string; voiceId?: string },
   ): Promise<AudioGenerationResult> {
-    // 1. Fetch the script job result
+    // 1. Fetch the script job result + metadata
     const scriptJob = await this.prisma.job.findUnique({
       where: { id: data.scriptId },
     });
@@ -385,9 +483,40 @@ export class GenerateService {
       scriptText = scriptJob.result;
     }
 
-    // 3. Generate audio with fallback (ElevenLabs → Azure Speech)
+    // 3. Extract story + targetDuration from script job metadata
+    let story = '';
+    let targetDuration = 60;
+    try {
+      if (scriptJob.metadata) {
+        const metadata = JSON.parse(scriptJob.metadata);
+        story = metadata.story || '';
+        targetDuration = metadata.targetDuration || 60;
+      }
+    } catch (e) {
+      // Metadata parse error, use defaults
+    }
+
+    // 4. Count scenes in script to provide context
+    const sceneCount = this._extractScenes(scriptText).length;
+
+    // 5. Generate narration from original story (not literal script reading)
+    let narration: string;
+    if (story) {
+      // Use Azure OpenAI to generate professional narration
+      narration = await this.azureOpenAIService.generateAudioNarration(
+        userId,
+        story,
+        targetDuration,
+        sceneCount,
+      );
+    } else {
+      // Fallback: use script if story not available
+      narration = scriptText;
+    }
+
+    // 6. Generate audio with fallback (ElevenLabs → Azure Speech)
     const audioUrl = await this.audioGenerationService.generateTextToSpeech(
-      scriptText,
+      narration,
       data.voiceId,
     );
 
@@ -412,6 +541,9 @@ export class GenerateService {
     userId: string,
     dto: GenerateVideoDto,
   ): Promise<GenerateVideoResponseDto> {
+    // Ensure user exists (auto-sync for first-time users from JWT)
+    await this._ensureUserExists(userId);
+
     // 1. Validate inputs
     if (!dto.imageJobId || dto.imageJobId.trim().length === 0) {
       throw new BadRequestException('imageJobId is required');
@@ -544,10 +676,12 @@ export class GenerateService {
     }
 
     // 4. Call VideoService to assemble video
+    // Pass actual audio duration so video isn't cut off
     const videoUrl = await this.videoService.assembleVideo(imageUrls, audioUrl, {
       fps: data.fps,
       bitrate: data.bitrate,
       jobId: data.jobId,
+      audioDuration: audioResult.audioLength || 60,
     });
 
     const duration = audioResult.audioLength || 60;
