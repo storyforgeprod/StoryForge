@@ -1,9 +1,8 @@
 import { useNavigate } from 'react-router-dom';
-import { ArrowRight, FlaskConical } from 'lucide-react';
+import { ArrowRight } from 'lucide-react';
 import { useAuth } from '@/features/auth';
 import { AppShell } from '@/components/layout/AppShell';
 import { ProjectCard, type Project } from '@/features/projects';
-import { Button } from '@/components/ui/button';
 
 const STATS = [
   { value: '4', label: 'Projects' },
@@ -20,7 +19,6 @@ const RECENT_PROJECTS: Project[] = [
 export function HomePage() {
   const navigate = useNavigate();
   const { user } = useAuth();
-  const isDeveloper = user?.role === 'DEVELOPER';
   const displayName = user?.name || user?.email?.split('@')[0] || 'creator';
 
   return (
@@ -53,11 +51,11 @@ export function HomePage() {
           </div>
         </section>
 
-        <div className="mt-7 flex flex-col gap-3 sm:flex-row">
+        <div className="mt-7">
           <button
             type="button"
             onClick={() => navigate('/app')}
-            className="flex flex-1 items-center justify-between gap-5 rounded-xl border border-dashed border-bd2 px-6 py-5 text-left transition hover:border-primary"
+            className="flex w-full items-center justify-between gap-5 rounded-xl border border-dashed border-bd2 px-6 py-5 text-left transition hover:border-primary"
           >
             <div>
               <div className="font-head text-[17px] font-extrabold">Crear un nuevo video</div>
@@ -67,23 +65,6 @@ export function HomePage() {
             </div>
             <ArrowRight className="h-5 w-5 flex-none text-primary" />
           </button>
-
-          {isDeveloper && (
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => navigate('/dev')}
-              className="h-auto justify-start gap-3 rounded-xl px-6 py-5"
-            >
-              <FlaskConical className="h-5 w-5 text-primary" />
-              <span className="text-left">
-                <span className="block font-bold">Modo Desarrollador</span>
-                <span className="block text-[13px] font-normal text-muted-foreground">
-                  Saltá a cualquier etapa del pipeline.
-                </span>
-              </span>
-            </Button>
-          )}
         </div>
       </div>
     </AppShell>

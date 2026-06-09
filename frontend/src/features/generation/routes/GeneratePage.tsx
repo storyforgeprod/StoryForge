@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Sparkles } from 'lucide-react';
 import { useAuth } from '@/features/auth';
 import { AppShell } from '@/components/layout/AppShell';
@@ -17,7 +17,6 @@ import { useGenerateScript } from '../hooks/useGenerateScript';
 import { useGenerateImages } from '../hooks/useGenerateImages';
 import { useGenerateAudio } from '../hooks/useGenerateAudio';
 import { useGenerateVideo } from '../hooks/useGenerateVideo';
-import { useDevPresetHandoff } from '../hooks/useDevPresetHandoff';
 import { StoryStyle } from '../types';
 
 export function GeneratePage() {
@@ -31,7 +30,6 @@ export function GeneratePage() {
     const [scriptJobId, setScriptJobId] = useState<string | null>(null);
     const [imageJobId, setImageJobId] = useState<string | null>(null);
     const [audioJobId, setAudioJobId] = useState<string | null>(null);
-    const [isPresetMode, setIsPresetMode] = useState(false);
     const [presetDialog, setPresetDialog] = useState<PresetDialogState>('closed');
 
     const imagesRef = useRef<HTMLDivElement>(null);
@@ -42,27 +40,6 @@ export function GeneratePage() {
     const { state: imagesState, generate: generateImages, reset: resetImages } = useGenerateImages();
     const { state: audioState, generate: generateAudio, reset: resetAudio } = useGenerateAudio();
     const { state: videoState, generate: generateVideo, reset: resetVideo } = useGenerateVideo();
-
-    useDevPresetHandoff(
-        useCallback(
-            (applied) => {
-                setStory(applied.story);
-                if (applied.scriptJobId) setScriptJobId(applied.scriptJobId);
-                if (applied.imageJobId) setImageJobId(applied.imageJobId);
-                if (applied.audioJobId) setAudioJobId(applied.audioJobId);
-                setIsPresetMode(applied.isPresetMode);
-                if (applied.isPresetMode) {
-                    setStyle((prev) => prev ?? applied.style);
-                    setVoiceId((prev) => prev ?? applied.voiceId);
-                    resetGeneration();
-                    resetImages();
-                    resetAudio();
-                    resetVideo();
-                }
-            },
-            [resetGeneration, resetImages, resetAudio, resetVideo],
-        ),
-    );
 
     useEffect(() => {
         if (genState.phase === 'polling') setScriptJobId(genState.jobId);
@@ -88,10 +65,8 @@ export function GeneratePage() {
     };
 
     const handleGenerateImages = () => {
-        if (!scriptJobId) return;
-        const styleToUse = style ?? (isPresetMode ? StoryStyle.ANIME : null);
-        if (!styleToUse) return;
-        generateImages(scriptJobId, styleToUse);
+        if (!scriptJobId || !style) return;
+        generateImages(scriptJobId, style);
         scrollSoon(imagesRef);
     };
 
@@ -118,7 +93,6 @@ export function GeneratePage() {
         setStory('');
         setStyle(null);
         setVoiceId(null);
-        setIsPresetMode(false);
         setPresetDialog('closed');
     };
 
@@ -165,7 +139,7 @@ export function GeneratePage() {
 
             <div className="mx-auto max-w-3xl px-6 pb-16 pt-10 sm:px-8">
                 <header className="mb-8">
-                    {!isPresetMode && genState.phase === 'idle' ? (
+                    {genState.phase === 'idle' ? (
                         <>
                             <div className="mb-2 flex items-center gap-2 font-mono text-[12px] font-semibold uppercase tracking-[0.08em] text-acc">
                                 <Sparkles className="h-3.5 w-3.5" />
@@ -190,7 +164,6 @@ export function GeneratePage() {
                 <div className="space-y-6">
                     <ScriptStage
                         state={genState}
-                        isPresetMode={isPresetMode}
                         isDeveloper={isDeveloper}
                         imagesIdle={imagesState.phase === 'idle'}
                         scriptJobId={scriptJobId}
@@ -229,7 +202,7 @@ export function GeneratePage() {
                         onRetry={resetVideo}
                     />
 
-                    {!isPresetMode && genState.phase === 'idle' && (
+                    {genState.phase === 'idle' && (
                         <GenerationWizard
                             story={story}
                             onStoryChange={setStory}

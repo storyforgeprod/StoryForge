@@ -11,7 +11,6 @@ import type { GenerateScriptState, StoryStyle } from '../../types';
 
 export type ScriptStageProps = {
     state: GenerateScriptState;
-    isPresetMode: boolean;
     isDeveloper: boolean;
     imagesIdle: boolean;
     scriptJobId: string | null;
@@ -23,7 +22,6 @@ export type ScriptStageProps = {
 
 export const ScriptStage = ({
     state,
-    isPresetMode,
     isDeveloper,
     imagesIdle,
     scriptJobId,
@@ -32,8 +30,6 @@ export const ScriptStage = ({
     onRetry,
     onOpenImagesPreset,
 }: ScriptStageProps) => {
-    if (isPresetMode) return null;
-
     const isGenerating = state.phase === 'submitting' || state.phase === 'polling';
 
     if (isGenerating) {

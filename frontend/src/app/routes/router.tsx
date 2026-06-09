@@ -1,18 +1,20 @@
-import { Navigate, Route, Routes } from 'react-router-dom';
+import { Navigate, Route, Routes } from "react-router-dom";
 import {
   ProtectedRoute,
   LoginPage,
   RegisterPage,
   useAuth,
-} from '@/features/auth';
-import { DevModePage, GeneratePage } from '@/features/generation';
-import { HomePage, NotFoundPage } from '@/features/home';
-import { ProjectsPage } from '@/features/projects';
+} from "@/features/auth";
+import { GeneratePage } from "@/features/generation";
+import { HomePage, NotFoundPage } from "@/features/home";
+import { ProjectsPage } from "@/features/projects";
+
+const BYPASS_AUTH = import.meta.env.VITE_BYPASS_AUTH === "true";
 
 export const AppRoutes = () => {
   const { isAuthenticated, isLoading } = useAuth();
 
-  if (isLoading) {
+  if (!BYPASS_AUTH && isLoading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="text-center">
@@ -28,15 +30,28 @@ export const AppRoutes = () => {
       <Routes>
         <Route
           path="/login"
-          element={!isAuthenticated ? <LoginPage /> : <Navigate to="/home" replace />}
+          element={
+            !isAuthenticated ? <LoginPage /> : <Navigate to="/home" replace />
+          }
         />
         <Route
           path="/register"
-          element={!isAuthenticated ? <RegisterPage /> : <Navigate to="/home" replace />}
+          element={
+            !isAuthenticated ? (
+              <RegisterPage />
+            ) : (
+              <Navigate to="/home" replace />
+            )
+          }
         />
         <Route
           path="/"
-          element={<Navigate to={isAuthenticated ? '/home' : '/login'} replace />}
+          element={
+            <Navigate
+              to={BYPASS_AUTH || isAuthenticated ? "/home" : "/login"}
+              replace
+            />
+          }
         />
         <Route
           path="/home"
@@ -59,14 +74,6 @@ export const AppRoutes = () => {
           element={
             <ProtectedRoute>
               <GeneratePage />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/dev"
-          element={
-            <ProtectedRoute>
-              <DevModePage />
             </ProtectedRoute>
           }
         />

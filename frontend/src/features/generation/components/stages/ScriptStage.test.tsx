@@ -5,7 +5,6 @@ import { ScriptStage } from './ScriptStage';
 import { StoryStyle } from '../../types';
 
 const baseProps = {
-    isPresetMode: false,
     isDeveloper: false,
     imagesIdle: true,
     scriptJobId: 'job_1',
@@ -16,13 +15,6 @@ const baseProps = {
 };
 
 describe('ScriptStage', () => {
-    it('renders nothing in preset mode', () => {
-        const { container } = render(
-            <ScriptStage {...baseProps} isPresetMode={true} state={{ phase: 'idle' }} />,
-        );
-        expect(container).toBeEmptyDOMElement();
-    });
-
     it('renders nothing while idle', () => {
         const { container } = render(<ScriptStage {...baseProps} state={{ phase: 'idle' }} />);
         expect(container).toBeEmptyDOMElement();
