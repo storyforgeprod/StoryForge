@@ -6,7 +6,13 @@ import {
   Length,
 } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
-import { StoryStyle } from './generate-script.dto';
+
+export enum StoryStyle {
+  ANIME = 'anime',
+  MANGA = 'manga',
+  WEBTOON = 'webtoon',
+  NOVEL = 'novel',
+}
 
 export class GenerateImagesDto {
   @ApiProperty({
