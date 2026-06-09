@@ -25,8 +25,6 @@ export function GeneratePage() {
     const [story, setStory] = useState('');
     const [lastScriptStory, setLastScriptStory] = useState('');
     const [style, setStyle] = useState<StoryStyle | null>(null);
-    const [targetDuration, setTargetDuration] = useState(60);
-    const [targetScenes, setTargetScenes] = useState(12);
     const [voiceId, setVoiceId] = useState<string | null>(null);
     const [scriptJobId, setScriptJobId] = useState<string | null>(null);
     const [imageJobId, setImageJobId] = useState<string | null>(null);
@@ -58,24 +56,15 @@ export function GeneratePage() {
         setTimeout(() => ref.current?.scrollIntoView({ behavior: 'smooth' }), 100);
     };
 
-    const handleGenerateScript = () => {
-        if (!style) return;
+    const handleGenerateScript = (duration: number, scenes: number) => {
         if (genState.phase === 'completed' && story === lastScriptStory) return;
         setLastScriptStory(story);
-        generate(story, targetDuration, targetScenes);
+        generate(story, duration, scenes);
     };
 
     const handleRetryScript = () => {
         resetGeneration();
         setScriptJobId(null);
-    };
-
-    const handleRegenerateScript = () => {
-        if (!style) return;
-        resetGeneration();
-        setScriptJobId(null);
-        setLastScriptStory(story);
-        generate(story, targetDuration, targetScenes);
     };
 
     const handleGenerateImages = () => {
@@ -176,17 +165,12 @@ export function GeneratePage() {
                             onStoryChange={setStory}
                             style={style}
                             onStyleChange={setStyle}
-                            targetDuration={targetDuration}
-                            onDurationChange={setTargetDuration}
-                            targetScenes={targetScenes}
-                            onScenesChange={setTargetScenes}
                             voiceId={voiceId}
                             onVoiceChange={setVoiceId}
                             isDeveloper={isDeveloper}
                             genState={genState}
                             onGenerateScript={handleGenerateScript}
                             onRetryScript={handleRetryScript}
-                            onRegenerateScript={handleRegenerateScript}
                             onStartPipeline={handleGenerateImages}
                             onOpenScriptPreset={() => setPresetDialog('script')}
                         />
