@@ -62,7 +62,7 @@ export function GeneratePage() {
         if (!style) return;
         if (genState.phase === 'completed' && story === lastScriptStory) return;
         setLastScriptStory(story);
-        generate(story, style, targetDuration, targetScenes);
+        generate(story, targetDuration, targetScenes);
     };
 
     const handleRetryScript = () => {
@@ -75,7 +75,7 @@ export function GeneratePage() {
         resetGeneration();
         setScriptJobId(null);
         setLastScriptStory(story);
-        generate(story, style, targetDuration, targetScenes);
+        generate(story, targetDuration, targetScenes);
     };
 
     const handleGenerateImages = () => {

@@ -38,7 +38,7 @@ describe('useGenerateScript', () => {
         const { result } = renderHook(() => useGenerateScript());
 
         act(() => {
-            result.current.generate('My story', 'anime');
+            result.current.generate('My story');
         });
 
         expect(result.current.state.phase).toBe('submitting');
@@ -67,7 +67,7 @@ describe('useGenerateScript', () => {
         const { result } = renderHook(() => useGenerateScript());
 
         await act(async () => {
-            result.current.generate('My story', 'anime');
+            result.current.generate('My story');
             await Promise.resolve();
         });
 
@@ -85,7 +85,7 @@ describe('useGenerateScript', () => {
         const { result } = renderHook(() => useGenerateScript());
 
         await act(async () => {
-            result.current.generate('My story', 'anime');
+            result.current.generate('My story');
             await Promise.resolve();
         });
 
@@ -108,7 +108,7 @@ describe('useGenerateScript', () => {
         const { result } = renderHook(() => useGenerateScript());
 
         await act(async () => {
-            result.current.generate('My story', 'anime');
+            result.current.generate('My story');
             await Promise.resolve();
         });
 
@@ -134,7 +134,7 @@ describe('useGenerateScript', () => {
         const { result } = renderHook(() => useGenerateScript());
 
         await act(async () => {
-            result.current.generate('My story', 'anime');
+            result.current.generate('My story');
             await Promise.resolve();
         });
 
@@ -159,7 +159,7 @@ describe('useGenerateScript', () => {
         const { result } = renderHook(() => useGenerateScript());
 
         await act(async () => {
-            result.current.generate('My story', 'anime');
+            result.current.generate('My story');
             await Promise.resolve();
         });
 
@@ -186,7 +186,7 @@ describe('useGenerateScript', () => {
         const { result } = renderHook(() => useGenerateScript());
 
         await act(async () => {
-            result.current.generate('My story', 'anime');
+            result.current.generate('My story');
             await Promise.resolve();
         });
 
@@ -214,7 +214,7 @@ describe('useGenerateScript', () => {
         const { result } = renderHook(() => useGenerateScript());
 
         await act(async () => {
-            result.current.generate('My story', 'anime');
+            result.current.generate('My story');
             await Promise.resolve();
         });
 
