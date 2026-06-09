@@ -38,11 +38,6 @@ export const CreateStepsNav = ({
     : storyValid && collecting
       ? 'active'
       : 'pending';
-  const voiceStatus: StepStatus = voiceId
-    ? 'done'
-    : style && collecting
-      ? 'active'
-      : 'pending';
   const scriptStatus: StepStatus =
     scriptPhase === 'completed'
       ? 'done'
@@ -51,18 +46,23 @@ export const CreateStepsNav = ({
         : scriptPhase === 'error'
           ? 'error'
           : 'pending';
+  const voiceStatus: StepStatus = voiceId
+    ? 'done'
+    : scriptPhase === 'completed' && imagesPhase === 'idle'
+      ? 'active'
+      : 'pending';
   const videoStatus: StepStatus =
     videoPhase === 'completed'
       ? 'done'
-      : downstreamActive || scriptPhase === 'completed'
+      : downstreamActive
         ? 'active'
         : 'pending';
 
   const steps: { num: string; label: string; status: StepStatus }[] = [
     { num: '01', label: 'Story', status: storyStatus },
     { num: '02', label: 'Style', status: styleStatus },
-    { num: '03', label: 'Voice', status: voiceStatus },
-    { num: '04', label: 'Script', status: scriptStatus },
+    { num: '03', label: 'Script', status: scriptStatus },
+    { num: '04', label: 'Voice', status: voiceStatus },
     { num: '05', label: 'Video', status: videoStatus },
   ];
 

@@ -8,7 +8,6 @@ import {
     PresetDialogs,
     type PresetDialogState,
 } from '../components/PresetDialogs';
-import { ScriptStage } from '../components/stages/ScriptStage';
 import { ImagesStage } from '../components/stages/ImagesStage';
 import { AudioStage } from '../components/stages/AudioStage';
 import { VideoStage } from '../components/stages/VideoStage';
@@ -60,8 +59,21 @@ export function GeneratePage() {
     };
 
     const handleGenerateScript = () => {
-        if (!style || !voiceId) return;
+        if (!style) return;
         if (genState.phase === 'completed' && story === lastScriptStory) return;
+        setLastScriptStory(story);
+        generate(story, style, targetDuration, targetScenes);
+    };
+
+    const handleRetryScript = () => {
+        resetGeneration();
+        setScriptJobId(null);
+    };
+
+    const handleRegenerateScript = () => {
+        if (!style) return;
+        resetGeneration();
+        setScriptJobId(null);
         setLastScriptStory(story);
         generate(story, style, targetDuration, targetScenes);
     };
@@ -95,26 +107,20 @@ export function GeneratePage() {
         setStory('');
         setStyle(null);
         setVoiceId(null);
+        setLastScriptStory('');
         setPresetDialog('closed');
-    };
-
-    const handleScriptRetry = () => {
-        resetGeneration();
-        resetImages();
-        resetAudio();
-        resetVideo();
-        setScriptJobId(null);
-        setImageJobId(null);
-        setAudioJobId(null);
     };
 
     const downstreamStarted =
         imagesState.phase !== 'idle' || audioState.phase !== 'idle' || videoState.phase !== 'idle';
+
     const crumb = downstreamStarted
         ? 'Create / Video'
         : genState.phase !== 'idle'
             ? 'Create / Script'
             : 'Create / Story';
+
+    const wizardVisible = imagesState.phase === 'idle';
 
     return (
         <AppShell
@@ -141,7 +147,7 @@ export function GeneratePage() {
 
             <div className="mx-auto max-w-3xl px-6 pb-16 pt-10 sm:px-8">
                 <header className="mb-8">
-                    {genState.phase === 'idle' ? (
+                    {wizardVisible ? (
                         <>
                             <div className="mb-2 flex items-center gap-2 font-mono text-[12px] font-semibold uppercase tracking-[0.08em] text-acc">
                                 <Sparkles className="h-3.5 w-3.5" />
@@ -164,16 +170,27 @@ export function GeneratePage() {
                 </header>
 
                 <div className="space-y-6">
-                    <ScriptStage
-                        state={genState}
-                        isDeveloper={isDeveloper}
-                        imagesIdle={imagesState.phase === 'idle'}
-                        scriptJobId={scriptJobId}
-                        style={style}
-                        onGenerateImages={handleGenerateImages}
-                        onRetry={handleScriptRetry}
-                        onOpenImagesPreset={() => setPresetDialog('images')}
-                    />
+                    {wizardVisible && (
+                        <GenerationWizard
+                            story={story}
+                            onStoryChange={setStory}
+                            style={style}
+                            onStyleChange={setStyle}
+                            targetDuration={targetDuration}
+                            onDurationChange={setTargetDuration}
+                            targetScenes={targetScenes}
+                            onScenesChange={setTargetScenes}
+                            voiceId={voiceId}
+                            onVoiceChange={setVoiceId}
+                            isDeveloper={isDeveloper}
+                            genState={genState}
+                            onGenerateScript={handleGenerateScript}
+                            onRetryScript={handleRetryScript}
+                            onRegenerateScript={handleRegenerateScript}
+                            onStartPipeline={handleGenerateImages}
+                            onOpenScriptPreset={() => setPresetDialog('script')}
+                        />
+                    )}
 
                     <ImagesStage
                         ref={imagesRef}
@@ -203,24 +220,6 @@ export function GeneratePage() {
                         onReset={resetAll}
                         onRetry={resetVideo}
                     />
-
-                    {genState.phase === 'idle' && (
-                        <GenerationWizard
-                            story={story}
-                            onStoryChange={setStory}
-                            style={style}
-                            onStyleChange={setStyle}
-                            targetDuration={targetDuration}
-                            onDurationChange={setTargetDuration}
-                            targetScenes={targetScenes}
-                            onScenesChange={setTargetScenes}
-                            voiceId={voiceId}
-                            onVoiceChange={setVoiceId}
-                            isDeveloper={isDeveloper}
-                            onGenerateScript={handleGenerateScript}
-                            onOpenScriptPreset={() => setPresetDialog('script')}
-                        />
-                    )}
                 </div>
             </div>
         </AppShell>
