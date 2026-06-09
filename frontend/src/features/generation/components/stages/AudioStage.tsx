@@ -59,7 +59,7 @@ export const AudioStage = forwardRef<HTMLDivElement, AudioStageProps>(
             return (
                 <Card ref={ref}>
                     <CardHeader>
-                        <CardTitle>Narración generada</CardTitle>
+                        <CardTitle className="font-head text-2xl tracking-[-0.03em]">Narración generada</CardTitle>
                         <CardDescription>
                             Escuchá la narración y generá el video final.
                         </CardDescription>

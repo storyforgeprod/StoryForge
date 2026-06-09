@@ -25,7 +25,6 @@ describe('GenerationWizard', () => {
     it('starts on the story step', () => {
         render(<GenerationWizard {...makeProps()} />);
         expect(screen.getByText('Tu historia')).toBeInTheDocument();
-        expect(screen.getByText('Paso 1 de 3')).toBeInTheDocument();
     });
 
     it('disables continue when the story is invalid', () => {
@@ -39,11 +38,9 @@ describe('GenerationWizard', () => {
 
         await user.click(screen.getByRole('button', { name: /continuar/i }));
         expect(screen.getByText('Estilo visual')).toBeInTheDocument();
-        expect(screen.getByText('Paso 2 de 3')).toBeInTheDocument();
 
         await user.click(screen.getByRole('button', { name: /continuar/i }));
         expect(screen.getByText('Voz y narrador')).toBeInTheDocument();
-        expect(screen.getByText('Paso 3 de 3')).toBeInTheDocument();
     });
 
     it('disables the style-step continue when no style is selected', async () => {

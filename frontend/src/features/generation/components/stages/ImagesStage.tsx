@@ -39,7 +39,7 @@ export const ImagesStage = forwardRef<HTMLDivElement, ImagesStageProps>(
             return (
                 <Card ref={ref}>
                     <CardHeader>
-                        <CardTitle>Imágenes generadas</CardTitle>
+                        <CardTitle className="font-head text-2xl tracking-[-0.03em]">Imágenes generadas</CardTitle>
                         <CardDescription>
                             Revisá las imágenes antes de continuar al audio.
                         </CardDescription>

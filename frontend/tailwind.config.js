@@ -2,53 +2,83 @@ import tailwindcssAnimate from 'tailwindcss-animate';
 
 /** @type {import('tailwindcss').Config} */
 export default {
-  darkMode: ['class'],
+  darkMode: ['class', '[data-theme="dark"]'],
   content: ['./index.html', './src/**/*.{js,ts,jsx,tsx}'],
   theme: {
     extend: {
       colors: {
-        border: 'hsl(var(--border))',
-        input: 'hsl(var(--input))',
-        ring: 'hsl(var(--ring))',
-        background: 'hsl(var(--background))',
-        foreground: 'hsl(var(--foreground))',
+        border: 'var(--border)',
+        input: 'var(--input)',
+        ring: 'var(--ring)',
+        background: 'var(--background)',
+        foreground: 'var(--foreground)',
         primary: {
-          DEFAULT: 'hsl(var(--primary))',
-          foreground: 'hsl(var(--primary-foreground))',
+          DEFAULT: 'var(--primary)',
+          foreground: 'var(--primary-foreground)',
         },
         secondary: {
-          DEFAULT: 'hsl(var(--secondary))',
-          foreground: 'hsl(var(--secondary-foreground))',
+          DEFAULT: 'var(--secondary)',
+          foreground: 'var(--secondary-foreground)',
         },
         destructive: {
-          DEFAULT: 'hsl(var(--destructive))',
-          foreground: 'hsl(var(--destructive-foreground))',
+          DEFAULT: 'var(--destructive)',
+          foreground: 'var(--destructive-foreground)',
         },
         muted: {
-          DEFAULT: 'hsl(var(--muted))',
-          foreground: 'hsl(var(--muted-foreground))',
+          DEFAULT: 'var(--muted)',
+          foreground: 'var(--muted-foreground)',
         },
         accent: {
-          DEFAULT: 'hsl(var(--accent))',
-          foreground: 'hsl(var(--accent-foreground))',
+          DEFAULT: 'var(--accent)',
+          foreground: 'var(--accent-foreground)',
         },
         card: {
-          DEFAULT: 'hsl(var(--card))',
-          foreground: 'hsl(var(--card-foreground))',
+          DEFAULT: 'var(--card)',
+          foreground: 'var(--card-foreground)',
         },
+        popover: {
+          DEFAULT: 'var(--popover)',
+          foreground: 'var(--popover-foreground)',
+        },
+        // Editorial-only extras (no shadcn equivalent)
+        elev: 'var(--elev)',
+        elev2: 'var(--elev2)',
+        bd2: 'var(--bd2)',
+        mut2: 'var(--mut2)',
+        acc2: 'var(--acc2)',
+        'acc-soft': 'var(--acc-soft)',
+        'acc-bd': 'var(--acc-bd)',
+        'on-acc': 'var(--on-acc)',
+      },
+      fontFamily: {
+        head: ['var(--font-head)'],
+        body: ['var(--font-body)'],
+        mono: ['var(--font-mono)'],
       },
       borderRadius: {
+        xl: '16px',
         lg: 'var(--radius)',
         md: 'calc(var(--radius) - 2px)',
         sm: 'calc(var(--radius) - 4px)',
       },
-      backgroundImage: {
-        // Brand gradient tokens — replace hardcoded `from-purple-600 to-pink-600`
-        // across pages with `bg-brand-gradient` (+ `hover:bg-brand-gradient-hover`).
-        'brand-gradient': 'linear-gradient(to right, #9333ea, #db2777)',
-        'brand-gradient-hover': 'linear-gradient(to right, #7e22ce, #be185d)',
-        // Light-shade variant for page backgrounds (`from-purple-50 to-pink-50`).
-        'brand-gradient-soft': 'linear-gradient(to bottom right, #faf5ff, #fdf2f8)',
+      keyframes: {
+        eq: {
+          '0%, 100%': { height: '25%' },
+          '50%': { height: '95%' },
+        },
+        'dot-bounce': {
+          '0%, 100%': { transform: 'translateY(0)', opacity: '0.4' },
+          '50%': { transform: 'translateY(-5px)', opacity: '1' },
+        },
+        'dot-pulse': {
+          '0%, 100%': { opacity: '0.4' },
+          '50%': { opacity: '1' },
+        },
+      },
+      animation: {
+        eq: 'eq 0.8s ease-in-out infinite',
+        'dot-bounce': 'dot-bounce 1s infinite',
+        'dot-pulse': 'dot-pulse 1s infinite',
       },
     },
   },

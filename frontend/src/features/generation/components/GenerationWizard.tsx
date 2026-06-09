@@ -13,10 +13,11 @@ import { StyleSelector } from './StyleSelector';
 import { VoiceSelector } from './VoiceSelector';
 import { DurationSelector } from './DurationSelector';
 import { ScenesSelector } from './ScenesSelector';
+import { ScriptReviewStep } from './ScriptReviewStep';
 import { validateStory } from '../utils/validation';
-import type { StoryStyle } from '../types';
+import type { GenerateScriptState, StoryStyle } from '../types';
 
-type WizardStep = 'story' | 'style' | 'duration' | 'scenes' | 'voice';
+type WizardStep = 'story' | 'style' | 'duration' | 'scenes' | 'script' | 'voice';
 
 export type GenerationWizardProps = {
     story: string;
@@ -30,7 +31,11 @@ export type GenerationWizardProps = {
     voiceId: string | null;
     onVoiceChange: (voiceId: string) => void;
     isDeveloper: boolean;
+    genState: GenerateScriptState;
     onGenerateScript: () => void;
+    onRetryScript: () => void;
+    onRegenerateScript: () => void;
+    onStartPipeline: () => void;
     onOpenScriptPreset: () => void;
 };
 
@@ -38,7 +43,7 @@ const STEP_COPY: Record<WizardStep, { title: string; description: string; number
     story: {
         title: 'Tu historia',
         description:
-            'Pegá el texto que querés convertir en un Short. En los siguientes pasos elegís estilo, duración, escenas y voz.',
+            'Pegá el texto que querés convertir en un Short. En los siguientes pasos elegís estilo, duración y escenas.',
         number: 1,
     },
     style: {
@@ -56,10 +61,15 @@ const STEP_COPY: Record<WizardStep, { title: string; description: string; number
         description: 'Elegí cuántas escenas deseas. La duración por escena se calculará automáticamente.',
         number: 4,
     },
+    script: {
+        title: 'Tu guión',
+        description: 'Revisá las escenas generadas. Podés regenerar si algo no quedó bien.',
+        number: 5,
+    },
     voice: {
         title: 'Voz y narrador',
         description: 'Elegí la voz que narrará tu historia.',
-        number: 5,
+        number: 6,
     },
 };
 
@@ -75,13 +85,18 @@ export const GenerationWizard = ({
     voiceId,
     onVoiceChange,
     isDeveloper,
+    genState,
     onGenerateScript,
+    onRetryScript,
+    onRegenerateScript,
+    onStartPipeline,
     onOpenScriptPreset,
 }: GenerationWizardProps) => {
     const [step, setStep] = useState<WizardStep>('story');
     const [submitAttempted, setSubmitAttempted] = useState(false);
     const validation = useMemo(() => validateStory(story), [story]);
     const copy = STEP_COPY[step];
+    const isScriptGenerating = genState.phase === 'submitting' || genState.phase === 'polling';
 
     const handleContinue = () => {
         if (step === 'story') {
@@ -100,6 +115,12 @@ export const GenerationWizard = ({
             return;
         }
         if (step === 'scenes') {
+            onGenerateScript();
+            setStep('script');
+            return;
+        }
+        if (step === 'script') {
+            if (genState.phase !== 'completed') return;
             setStep('voice');
         }
     };
@@ -108,7 +129,11 @@ export const GenerationWizard = ({
         if (step === 'style') setStep('story');
         if (step === 'duration') setStep('style');
         if (step === 'scenes') setStep('duration');
-        if (step === 'voice') setStep('scenes');
+        if (step === 'script') {
+            onRetryScript();
+            setStep('scenes');
+        }
+        if (step === 'voice') setStep('script');
     };
 
     return (
@@ -120,7 +145,7 @@ export const GenerationWizard = ({
                         <CardDescription>{copy.description}</CardDescription>
                     </div>
                     <div className="text-right text-xs text-muted-foreground">
-                        <div className="font-semibold">Paso {copy.number} de 5</div>
+                        <div className="font-semibold">Paso {copy.number} de 6</div>
                     </div>
                 </div>
             </CardHeader>
@@ -195,8 +220,46 @@ export const GenerationWizard = ({
                                 Atrás
                             </Button>
                             <Button type="button" onClick={handleContinue}>
-                                Continuar
+                                Generar guión
                             </Button>
+                        </div>
+                    </>
+                )}
+
+                {step === 'script' && (
+                    <>
+                        <ScriptReviewStep
+                            state={genState}
+                            onRegenerate={onRegenerateScript}
+                        />
+                        <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                            <Button
+                                type="button"
+                                variant="outline"
+                                disabled={isScriptGenerating}
+                                onClick={handleBack}
+                            >
+                                <ChevronLeft className="mr-2 h-4 w-4" />
+                                Atrás
+                            </Button>
+                            <div className="flex gap-2">
+                                {isDeveloper && genState.phase !== 'completed' && (
+                                    <Button
+                                        type="button"
+                                        variant="outline"
+                                        onClick={onOpenScriptPreset}
+                                    >
+                                        Usar preset
+                                    </Button>
+                                )}
+                                <Button
+                                    type="button"
+                                    disabled={genState.phase !== 'completed'}
+                                    onClick={handleContinue}
+                                >
+                                    Continuar
+                                </Button>
+                            </div>
                         </div>
                     </>
                 )}
@@ -209,24 +272,13 @@ export const GenerationWizard = ({
                                 <ChevronLeft className="mr-2 h-4 w-4" />
                                 Atrás
                             </Button>
-                            <div className="flex gap-2">
-                                {isDeveloper && (
-                                    <Button
-                                        type="button"
-                                        variant="outline"
-                                        onClick={onOpenScriptPreset}
-                                    >
-                                        Usar preset
-                                    </Button>
-                                )}
-                                <Button
-                                    type="button"
-                                    disabled={!voiceId}
-                                    onClick={onGenerateScript}
-                                >
-                                    Generar guión
-                                </Button>
-                            </div>
+                            <Button
+                                type="button"
+                                disabled={!voiceId}
+                                onClick={onStartPipeline}
+                            >
+                                Generar video
+                            </Button>
                         </div>
                     </>
                 )}

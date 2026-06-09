@@ -1,18 +1,20 @@
-import { Navigate, Route, Routes } from 'react-router-dom';
+import { Navigate, Route, Routes } from "react-router-dom";
 import {
   ProtectedRoute,
   LoginPage,
   RegisterPage,
   useAuth,
-} from '@/features/auth';
-import { DevModePage, GeneratePage } from '@/features/generation';
-import { HomePage, LandingPage, NotFoundPage } from '@/features/home';
-import { Header } from '@/components/layout/Header';
+} from "@/features/auth";
+import { GeneratePage } from "@/features/generation";
+import { HomePage, NotFoundPage } from "@/features/home";
+import { ProjectsPage } from "@/features/projects";
+
+const BYPASS_AUTH = import.meta.env.VITE_BYPASS_AUTH === "true";
 
 export const AppRoutes = () => {
   const { isAuthenticated, isLoading } = useAuth();
 
-  if (isLoading) {
+  if (!BYPASS_AUTH && isLoading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="text-center">
@@ -25,19 +27,31 @@ export const AppRoutes = () => {
 
   return (
     <>
-      {isAuthenticated && <Header />}
       <Routes>
         <Route
           path="/login"
-          element={!isAuthenticated ? <LoginPage /> : <Navigate to="/home" replace />}
+          element={
+            !isAuthenticated ? <LoginPage /> : <Navigate to="/home" replace />
+          }
         />
         <Route
           path="/register"
-          element={!isAuthenticated ? <RegisterPage /> : <Navigate to="/home" replace />}
+          element={
+            !isAuthenticated ? (
+              <RegisterPage />
+            ) : (
+              <Navigate to="/home" replace />
+            )
+          }
         />
         <Route
           path="/"
-          element={!isAuthenticated ? <LandingPage /> : <Navigate to="/home" replace />}
+          element={
+            <Navigate
+              to={BYPASS_AUTH || isAuthenticated ? "/home" : "/login"}
+              replace
+            />
+          }
         />
         <Route
           path="/home"
@@ -48,18 +62,18 @@ export const AppRoutes = () => {
           }
         />
         <Route
-          path="/app"
+          path="/projects"
           element={
             <ProtectedRoute>
-              <GeneratePage />
+              <ProjectsPage />
             </ProtectedRoute>
           }
         />
         <Route
-          path="/dev"
+          path="/app"
           element={
             <ProtectedRoute>
-              <DevModePage />
+              <GeneratePage />
             </ProtectedRoute>
           }
         />
