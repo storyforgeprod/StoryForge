@@ -8,10 +8,12 @@ import {
 import { ApiProperty } from '@nestjs/swagger';
 
 export enum StoryStyle {
-  ANIME = 'anime',
-  MANGA = 'manga',
-  WEBTOON = 'webtoon',
-  NOVEL = 'novel',
+  BOLD_COMIC   = 'bold-comic',
+  SOFT_CARTOON = 'soft-cartoon',
+  RETRO_POP    = 'retro-pop',
+  MANGA_INK    = 'manga-ink',
+  STORYBOOK    = 'storybook',
+  TOON_3D      = '3d-toon',
 }
 
 export class GenerateImagesDto {
@@ -26,7 +28,7 @@ export class GenerateImagesDto {
   @ApiProperty({
     description: 'Visual style for image generation',
     enum: StoryStyle,
-    example: StoryStyle.ANIME,
+    example: StoryStyle.BOLD_COMIC,
   })
   @IsEnum(StoryStyle)
   @IsNotEmpty()
