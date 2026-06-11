@@ -27,3 +27,10 @@ it('shows ScenePreviewRow when a style is selected', () => {
   render(<StyleStep value="bold-comic" onChange={vi.fn()} imagesState={idleImages} sceneCount={3} onContinue={vi.fn()} />);
   expect(screen.getAllByTestId('scene-skeleton')).toHaveLength(3);
 });
+
+it('disables Continue and shows loading text while images are generating', () => {
+  const pollingState: GenerateImagesState = { phase: 'polling', jobId: 'job_1' };
+  render(<StyleStep value="bold-comic" onChange={vi.fn()} imagesState={pollingState} sceneCount={5} onContinue={vi.fn()} />);
+  const btn = screen.getByRole('button', { name: /generating images/i });
+  expect(btn).toBeDisabled();
+});

@@ -29,6 +29,7 @@ export type StyleStepProps = {
 export const StyleStep = ({ value, onChange, imagesState, sceneCount, onContinue }: StyleStepProps) => {
   const imageUrls = imagesState.phase === 'completed' ? imagesState.imageUrls : [];
   const hasError = imagesState.phase === 'error';
+  const isGeneratingImages = imagesState.phase === 'submitting' || imagesState.phase === 'polling';
 
   return (
     <div className="space-y-6">
@@ -94,7 +95,9 @@ export const StyleStep = ({ value, onChange, imagesState, sceneCount, onContinue
       )}
 
       <div className="flex justify-end">
-        <Button disabled={!value} onClick={onContinue}>Continue</Button>
+        <Button disabled={!value || isGeneratingImages} onClick={onContinue}>
+          {isGeneratingImages ? 'Generating images…' : 'Continue'}
+        </Button>
       </div>
     </div>
   );
