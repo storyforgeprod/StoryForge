@@ -1,11 +1,15 @@
 export const StoryStyle = {
-    ANIME: 'anime',
-    MANGA: 'manga',
-    WEBTOON: 'webtoon',
-    NOVEL: 'novel',
+  BOLD_COMIC:   'bold-comic',
+  SOFT_CARTOON: 'soft-cartoon',
+  RETRO_POP:    'retro-pop',
+  MANGA_INK:    'manga-ink',
+  STORYBOOK:    'storybook',
+  TOON_3D:      '3d-toon',
 } as const;
 
 export type StoryStyle = typeof StoryStyle[keyof typeof StoryStyle];
+
+export type WizardStep = 'story' | 'script' | 'style' | 'voice' | 'video';
 
 export type VoiceOption = {
     id: string;

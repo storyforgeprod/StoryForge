@@ -4,7 +4,7 @@ import type { GenerateScriptState } from '../types';
 
 export type UseGenerateScriptReturn = {
     state: GenerateScriptState;
-    generate: (story: string, targetDuration?: number, targetScenes?: number) => void;
+    generate: (story: string, targetDuration?: number, targetScenes?: number, tone?: string) => void;
     reset: () => void;
 };
 
@@ -94,10 +94,10 @@ export function useGenerateScript(): UseGenerateScriptReturn {
     );
 
     const generate = useCallback(
-        async (story: string, targetDuration?: number, targetScenes?: number) => {
+        async (story: string, targetDuration?: number, targetScenes?: number, tone?: string) => {
             setState({ phase: 'submitting' });
             try {
-                const { jobId } = await postGenerateScript({ story, targetDuration, targetScenes });
+                const { jobId } = await postGenerateScript({ story, targetDuration, targetScenes, tone });
                 setState({ phase: 'polling', jobId, attempts: 0 });
                 startPolling(jobId);
             } catch (err) {
