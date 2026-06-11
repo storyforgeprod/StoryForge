@@ -1,7 +1,5 @@
 import { createContext, useContext, useState, useEffect, useCallback, type ReactNode } from 'react';
 import type { User, AuthContextType } from '../types';
-// DEV: loginUser deshabilitado por el bypass de login (ver login()).
-// import { loginUser } from '../api/authApi';
 import { registerUser, refreshToken as refreshTokenApi } from '../api/authApi';
 import {
   getAuthToken,
@@ -14,7 +12,6 @@ import {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-// DEV: usuario hardcodeado para saltar el login sin backend.
 const MOCK_USER: User = {
   id: 'dev-user',
   email: 'dev@storyforge.local',
@@ -38,17 +35,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const login = useCallback(async (email: string, _password: string) => {
     setIsLoading(true);
     try {
-      // DEV: bypass del backend, cualquier credencial entra como MOCK_USER.
       const user: User = { ...MOCK_USER, email: email || MOCK_USER.email };
       setAuthToken(MOCK_TOKEN);
       setStoredUser(user);
       setUser(user);
-
-      // Login real (deshabilitado por el bypass de arriba):
-      // const response = await loginUser(email, _password);
-      // setAuthToken(response.access_token);
-      // setStoredUser(response.user);
-      // setUser(response.user);
     } finally {
       setIsLoading(false);
     }

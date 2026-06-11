@@ -8,7 +8,7 @@ import {
   Param,
   UseGuards,
 } from "@nestjs/common";
-import { AuthGuard } from "@nestjs/passport";
+import { JwtAuthGuard } from "@/common/auth/jwt.guard";
 import { Throttle, SkipThrottle } from "@nestjs/throttler";
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from "@nestjs/swagger";
 import { CurrentUser } from "@/common/auth/current-user.decorator";
@@ -33,7 +33,7 @@ import {
 
 @ApiTags("Generate")
 @Controller("generate")
-@UseGuards(AuthGuard("jwt"))
+@UseGuards(JwtAuthGuard)
 @ApiBearerAuth()
 export class GenerateController {
   constructor(private readonly generateService: GenerateService) { }

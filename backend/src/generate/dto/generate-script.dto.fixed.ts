@@ -2,10 +2,12 @@ import { IsString, IsNotEmpty, MaxLength, MinLength, IsEnum, IsOptional, IsNumbe
 import { ApiProperty } from '@nestjs/swagger';
 
 export enum StoryStyle {
-  ANIME = 'anime',
-  MANGA = 'manga',
-  WEBTOON = 'webtoon',
-  NOVEL = 'novel',
+  BOLD_COMIC   = 'bold-comic',
+  SOFT_CARTOON = 'soft-cartoon',
+  RETRO_POP    = 'retro-pop',
+  MANGA_INK    = 'manga-ink',
+  STORYBOOK    = 'storybook',
+  TOON_3D      = '3d-toon',
 }
 
 export class GenerateScriptDto {
@@ -24,7 +26,7 @@ export class GenerateScriptDto {
   @ApiProperty({
     description: 'Visual style for the generated content',
     enum: StoryStyle,
-    example: StoryStyle.ANIME,
+    example: StoryStyle.BOLD_COMIC,
   })
   @IsEnum(StoryStyle)
   @IsNotEmpty()
