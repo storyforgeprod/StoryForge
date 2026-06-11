@@ -78,6 +78,20 @@ describe('postGenerateScript', () => {
             postGenerateScript({ story: 'x', style: 'manga' }),
         ).rejects.toMatchObject({ status: 500 });
     });
+
+    it('sends tone in request body when provided', async () => {
+        const mockFetch = makeFetchMock(true, 200, {
+            jobId: 'job-1',
+            status: 'pending',
+            createdAt: '2026-01-01T00:00:00Z',
+        });
+        vi.stubGlobal('fetch', mockFetch);
+        localStorage.setItem('storyforge_token', 'test-token');
+
+        await postGenerateScript({ story: 'test story', tone: 'dramatic' });
+        const body = JSON.parse(mockFetch.mock.calls[0][1].body);
+        expect(body.tone).toBe('dramatic');
+    });
 });
 
 describe('getJobStatus', () => {

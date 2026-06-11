@@ -1,15 +1,15 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { postGenerateScript, getJobStatus } from '../api/generateApi';
-import type { StoryStyle, GenerateScriptState } from '../types';
+import type { GenerateScriptState } from '../types';
 
 export type UseGenerateScriptReturn = {
     state: GenerateScriptState;
-    generate: (story: string, style: StoryStyle, targetDuration?: number, targetScenes?: number) => void;
+    generate: (story: string, targetDuration?: number, targetScenes?: number, tone?: string) => void;
     reset: () => void;
 };
 
 const ERROR_MAP: Record<number, string> = {
-    400: 'Revisá el texto o el estilo seleccionado.',
+    400: 'Revisá el texto ingresado.',
     401: 'Tu sesión expiró. Volvé a iniciar sesión.',
     429: 'Límite alcanzado. Intentá en un minuto.',
 };
@@ -78,15 +78,13 @@ export function useGenerateScript(): UseGenerateScriptReturn {
                             console.warn(`[Polling] Attempt ${attemptsRef.current}: Server busy (${status}), retrying...`);
                             return;
                         }
-                        // Permanent error: fail now
-                        if (status === 401 || status === 404) {
-                            clearPolling();
-                            setState({ phase: 'error', message: mapApiError(err) });
-                            return;
-                        }
+                        // Any other HTTP error is permanent — fail immediately
+                        clearPolling();
+                        setState({ phase: 'error', message: mapApiError(err) });
+                        return;
                     }
-                    // For unknown errors, retry (don't give up)
-                    console.warn(`[Polling] Attempt ${attemptsRef.current}: ${err}, will retry...`);
+                    // True network failure (no status): retry
+                    console.warn(`[Polling] Attempt ${attemptsRef.current}: network error, retrying...`);
                 }
             }, POLL_INTERVAL_MS);
         },
@@ -94,10 +92,10 @@ export function useGenerateScript(): UseGenerateScriptReturn {
     );
 
     const generate = useCallback(
-        async (story: string, style: StoryStyle, targetDuration?: number, targetScenes?: number) => {
+        async (story: string, targetDuration?: number, targetScenes?: number, tone?: string) => {
             setState({ phase: 'submitting' });
             try {
-                const { jobId } = await postGenerateScript({ story, style, targetDuration, targetScenes });
+                const { jobId } = await postGenerateScript({ story, targetDuration, targetScenes, tone });
                 setState({ phase: 'polling', jobId, attempts: 0 });
                 startPolling(jobId);
             } catch (err) {

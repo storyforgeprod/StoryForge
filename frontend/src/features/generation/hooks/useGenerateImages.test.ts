@@ -143,8 +143,8 @@ describe('useGenerateImages', () => {
 
         expect(result.current.state.phase).toBe('polling');
 
-        act(() => {
-            vi.advanceTimersByTime(201 * 5000); // 201 ticks × 5000 ms (MAX_ATTEMPTS=200)
+        await act(async () => {
+            await vi.advanceTimersByTimeAsync(401 * 5000); // 401 ticks × 5000 ms (MAX_ATTEMPTS=400)
         });
 
         expect(result.current.state.phase).toBe('error');

@@ -1,20 +1,23 @@
 import type { StoryStyle } from '../types';
 
-/** Internal art treatments borrowed from the prototype (frontend/prototipo/components/StyleThumb.tsx). */
-type ArtStyle = 'bold comic' | 'soft cartoon' | 'manga ink' | 'storybook';
+type ArtStyle = 'bold-comic' | 'soft-cartoon' | 'retro-pop' | 'manga-ink' | 'storybook' | '3d-toon';
 
 const STYLE_TO_ART: Record<StoryStyle, ArtStyle> = {
-  anime: 'bold comic',
-  manga: 'manga ink',
-  webtoon: 'soft cartoon',
-  novel: 'storybook',
+  'bold-comic':   'bold-comic',
+  'soft-cartoon': 'soft-cartoon',
+  'retro-pop':    'retro-pop',
+  'manga-ink':    'manga-ink',
+  'storybook':    'storybook',
+  '3d-toon':      '3d-toon',
 };
 
 const ACCENTS: Record<ArtStyle, [string, string, string]> = {
-  'bold comic': ['#FF3B30', '#007AFF', '#34C759'],
-  'soft cartoon': ['#5533AA', '#AA3355', '#3377AA'],
-  'manga ink': ['#111', '#111', '#111'],
-  storybook: ['#FFD080', '#FFD080', '#FFD080'],
+  'bold-comic':   ['#FF3B30', '#007AFF', '#34C759'],
+  'soft-cartoon': ['#5533AA', '#AA3355', '#3377AA'],
+  'retro-pop':    ['#E8A040', '#C05020', '#F0D080'],
+  'manga-ink':    ['#111', '#111', '#111'],
+  'storybook':    ['#FFD080', '#FFD080', '#FFD080'],
+  '3d-toon':      ['#00B4D8', '#0077B6', '#48CAE4'],
 };
 
 export type StyleThumbProps = {
@@ -52,7 +55,7 @@ export const StyleThumb = ({ style, n = 0, caption = '', className }: StyleThumb
     </>
   );
 
-  if (art === 'bold comic') {
+  if (art === 'bold-comic') {
     return (
       <svg viewBox="0 0 90 160" xmlns="http://www.w3.org/2000/svg" className={className}>
         <rect width="90" height="160" fill="#FFE320" />
@@ -85,7 +88,7 @@ export const StyleThumb = ({ style, n = 0, caption = '', className }: StyleThumb
           strokeWidth="2.5"
           strokeLinecap="round"
         />
-        <rect x="27" y="77" width="36" height="42" rx="4" fill={ACCENTS['bold comic'][v]} stroke="#111" strokeWidth="2.5" />
+        <rect x="27" y="77" width="36" height="42" rx="4" fill={ACCENTS['bold-comic'][v]} stroke="#111" strokeWidth="2.5" />
         <ellipse cx="70" cy="27" rx="17" ry="12" fill="#fff" stroke="#111" strokeWidth="2" />
         <polygon points="58,36 54,45 64,38" fill="#fff" stroke="#111" strokeWidth="1.5" />
         <text x="70" y="31" textAnchor="middle" fontSize="9" fontWeight="900" fill="#111" fontFamily="Impact,Arial Black,sans-serif">
@@ -96,7 +99,7 @@ export const StyleThumb = ({ style, n = 0, caption = '', className }: StyleThumb
     );
   }
 
-  if (art === 'soft cartoon') {
+  if (art === 'soft-cartoon') {
     return (
       <svg viewBox="0 0 90 160" xmlns="http://www.w3.org/2000/svg" className={className}>
         <rect width="90" height="160" fill="#EDD6FF" />
@@ -109,8 +112,8 @@ export const StyleThumb = ({ style, n = 0, caption = '', className }: StyleThumb
         <circle cx="45" cy="76" r="22" fill="#FFEEC4" stroke="#F0B8D0" strokeWidth="2" />
         <circle cx="37" cy="73" r="6" fill="#fff" />
         <circle cx="53" cy="73" r="6" fill="#fff" />
-        <circle cx="38" cy="74" r="4" fill={ACCENTS['soft cartoon'][v]} />
-        <circle cx="54" cy="74" r="4" fill={ACCENTS['soft cartoon'][v]} />
+        <circle cx="38" cy="74" r="4" fill={ACCENTS['soft-cartoon'][v]} />
+        <circle cx="54" cy="74" r="4" fill={ACCENTS['soft-cartoon'][v]} />
         <circle cx="39" cy="72" r="1.5" fill="#fff" />
         <circle cx="55" cy="72" r="1.5" fill="#fff" />
         <circle cx="31" cy="80" r="5" fill="#FFB0C8" opacity=".6" />
@@ -121,7 +124,40 @@ export const StyleThumb = ({ style, n = 0, caption = '', className }: StyleThumb
     );
   }
 
-  if (art === 'manga ink') {
+  if (art === 'retro-pop') {
+    return (
+      <svg viewBox="0 0 90 160" xmlns="http://www.w3.org/2000/svg" className={className}>
+        <rect width="90" height="160" fill="#F5E6C8" />
+        {Array.from({ length: 9 }, (_, i) => (
+          <line key={`h${i}`} x1="0" y1={i * 20} x2="90" y2={i * 20} stroke="#C8A060" strokeWidth=".4" opacity=".4" />
+        ))}
+        {Array.from({ length: 5 }, (_, i) => (
+          <line key={`v${i}`} x1={i * 22} y1="0" x2={i * 22} y2="160" stroke="#C8A060" strokeWidth=".4" opacity=".4" />
+        ))}
+        <circle cx="45" cy="55" r="28" fill={ACCENTS['retro-pop'][v]} />
+        {Array.from({ length: 8 }, (_, i) => {
+          const a = (i * 45 * Math.PI) / 180;
+          return (
+            <line key={i}
+              x1={45 + Math.cos(a) * 30} y1={55 + Math.sin(a) * 30}
+              x2={45 + Math.cos(a) * 40} y2={55 + Math.sin(a) * 40}
+              stroke={ACCENTS['retro-pop'][v]} strokeWidth="3" strokeLinecap="round"
+            />
+          );
+        })}
+        <circle cx="45" cy="55" r="20" fill="#F5E6C8" />
+        <circle cx="38" cy="51" r="4" fill="#111" />
+        <circle cx="52" cy="51" r="4" fill="#111" />
+        <circle cx="39" cy="49" r="1.5" fill="#fff" />
+        <circle cx="53" cy="49" r="1.5" fill="#fff" />
+        <path d={v === 1 ? 'M37 59 Q45 54 53 59' : 'M37 61 Q45 67 53 61'} fill="none" stroke="#111" strokeWidth="2.5" strokeLinecap="round" />
+        <rect x="0" y="115" width="90" height="45" fill="#C8A060" opacity=".5" />
+        {captionBar('rgba(60,30,0,0.75)', '#F5E6C8')}
+      </svg>
+    );
+  }
+
+  if (art === 'manga-ink') {
     return (
       <svg viewBox="0 0 90 160" xmlns="http://www.w3.org/2000/svg" className={className}>
         <rect width="90" height="160" fill="#F0EDE8" />
@@ -151,6 +187,30 @@ export const StyleThumb = ({ style, n = 0, caption = '', className }: StyleThumb
         <line x1="52" y1="115" x2="68" y2="115" stroke="#111" strokeWidth="1.5" />
         <line x1="52" y1="122" x2="70" y2="122" stroke="#111" strokeWidth="1.5" />
         {captionBar('rgba(0,0,0,0.88)', '#fff')}
+      </svg>
+    );
+  }
+
+  if (art === '3d-toon') {
+    return (
+      <svg viewBox="0 0 90 160" xmlns="http://www.w3.org/2000/svg" className={className}>
+        <rect width="90" height="160" fill="#87CEEB" />
+        <ellipse cx="20" cy="25" rx="16" ry="9" fill="#fff" opacity=".85" />
+        <ellipse cx="32" cy="20" rx="12" ry="8" fill="#fff" opacity=".85" />
+        <ellipse cx="72" cy="35" rx="13" ry="7" fill="#fff" opacity=".75" />
+        <ellipse cx="45" cy="145" rx="40" ry="14" fill="#5AB552" />
+        <rect x="5" y="138" width="80" height="22" fill="#4A9942" />
+        <ellipse cx="45" cy="105" rx="18" ry="22" fill={ACCENTS['3d-toon'][v]} />
+        <circle cx="45" cy="72" r="22" fill="#FFDBB5" />
+        <circle cx="37" cy="68" r="7" fill="#fff" />
+        <circle cx="53" cy="68" r="7" fill="#fff" />
+        <circle cx="38" cy="69" r="4.5" fill={ACCENTS['3d-toon'][v]} />
+        <circle cx="54" cy="69" r="4.5" fill={ACCENTS['3d-toon'][v]} />
+        <circle cx="39" cy="67" r="2" fill="#fff" />
+        <circle cx="55" cy="67" r="2" fill="#fff" />
+        <path d={v === 1 ? 'M37 80 Q45 74 53 80' : 'M37 82 Q45 89 53 82'} fill="none" stroke="#C07040" strokeWidth="2.5" strokeLinecap="round" />
+        <ellipse cx="35" cy="58" rx="6" ry="4" fill="#fff" opacity=".35" transform="rotate(-20 35 58)" />
+        {captionBar('rgba(0,50,100,0.72)', '#fff')}
       </svg>
     );
   }

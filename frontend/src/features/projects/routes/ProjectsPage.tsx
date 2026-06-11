@@ -3,10 +3,10 @@ import { ProjectCard } from '../components/ProjectCard';
 import type { Project } from '../types';
 
 const PROJECTS_PLACEHOLDER: Project[] = [
-  { id: '1', title: "The Office Plant's Revenge", style: 'anime', durationSec: 30, status: 'draft' },
-  { id: '2', title: 'Deep Sea Creatures', style: 'manga', durationSec: 45, status: 'ready' },
-  { id: '3', title: 'Coffee Shop Cat', style: 'webtoon', durationSec: 30, status: 'exported' },
-  { id: '4', title: 'The Weather Baker', style: 'novel', durationSec: 60, status: 'draft' },
+  { id: '1', title: "The Office Plant's Revenge", style: 'bold-comic',   durationSec: 30, status: 'draft' },
+  { id: '2', title: 'Deep Sea Creatures',          style: 'manga-ink',    durationSec: 45, status: 'ready' },
+  { id: '3', title: 'Coffee Shop Cat',             style: 'soft-cartoon', durationSec: 30, status: 'exported' },
+  { id: '4', title: 'The Weather Baker',           style: 'storybook',    durationSec: 60, status: 'draft' },
 ];
 
 export const ProjectsPage = () => (

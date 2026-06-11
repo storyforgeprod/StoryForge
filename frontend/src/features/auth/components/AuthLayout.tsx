@@ -5,9 +5,9 @@ import { Brand } from '@/components/layout/Brand';
 import { useTheme } from '@/app/providers/ThemeProvider';
 
 const SHOWCASE_SCENES: { style: StoryStyle; caption: string }[] = [
-  { style: 'anime', caption: 'Wait for it...' },
-  { style: 'webtoon', caption: 'The reason' },
-  { style: 'novel', caption: 'Do this' },
+  { style: 'bold-comic',   caption: 'Wait for it...' },
+  { style: 'soft-cartoon', caption: 'The reason' },
+  { style: 'storybook',    caption: 'Do this' },
 ];
 
 type AuthLayoutProps = {

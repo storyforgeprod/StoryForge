@@ -1,12 +1,5 @@
-import { IsString, IsNotEmpty, MaxLength, MinLength, IsEnum, IsOptional, IsNumber, Min, Max } from 'class-validator';
+import { IsString, IsNotEmpty, MaxLength, MinLength, IsOptional, IsNumber, Min, Max, IsIn } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
-
-export enum StoryStyle {
-  ANIME = 'anime',
-  MANGA = 'manga',
-  WEBTOON = 'webtoon',
-  NOVEL = 'novel',
-}
 
 export class GenerateScriptDto {
   @ApiProperty({
@@ -20,15 +13,6 @@ export class GenerateScriptDto {
   @MinLength(50, { message: 'Story must be at least 50 characters' })
   @MaxLength(5000, { message: 'Story must not exceed 5000 characters' })
   story!: string;
-
-  @ApiProperty({
-    description: 'Visual style for the generated content',
-    enum: StoryStyle,
-    example: StoryStyle.ANIME,
-  })
-  @IsEnum(StoryStyle)
-  @IsNotEmpty()
-  style!: StoryStyle;
 
   @ApiProperty({
     description: 'Target video duration in seconds (30-120s, default 60s)',
@@ -53,13 +37,21 @@ export class GenerateScriptDto {
   @Min(1)
   @Max(12)
   targetScenes?: number;
+
+  @ApiProperty({
+    description: 'Narration tone for script generation',
+    example: 'dramatic',
+    enum: ['playful', 'dramatic', 'suspenseful', 'energetic'],
+    required: false,
+  })
+  @IsOptional()
+  @IsString()
+  @IsIn(['playful', 'dramatic', 'suspenseful', 'energetic'])
+  tone?: string;
 }
 
 export class GenerateScriptResponseDto {
-  @ApiProperty({
-    description: 'Job ID for tracking generation status',
-    example: 'job_abc123',
-  })
+  @ApiProperty({ description: 'Job ID for tracking generation status', example: 'job_abc123' })
   jobId!: string;
 
   @ApiProperty({
@@ -69,23 +61,13 @@ export class GenerateScriptResponseDto {
   })
   status!: 'pending' | 'processing' | 'completed' | 'failed';
 
-  @ApiProperty({
-    description: 'Status message',
-    example: 'Script generation queued',
-  })
+  @ApiProperty({ description: 'Status message', example: 'Script generation queued' })
   message!: string;
 
-  @ApiProperty({
-    description: 'Target duration for video',
-    example: 60,
-    required: false,
-  })
+  @ApiProperty({ description: 'Target duration for video', example: 60, required: false })
   targetDuration?: number;
 
-  @ApiProperty({
-    description: 'Generation timestamp',
-    required: false,
-  })
+  @ApiProperty({ description: 'Generation timestamp', required: false })
   createdAt?: Date;
 
   @ApiProperty({
@@ -95,9 +77,6 @@ export class GenerateScriptResponseDto {
   })
   script?: string | null;
 
-  @ApiProperty({
-    description: 'Error message if job failed',
-    required: false,
-  })
+  @ApiProperty({ description: 'Error message if job failed', required: false })
   error?: string | null;
 }
