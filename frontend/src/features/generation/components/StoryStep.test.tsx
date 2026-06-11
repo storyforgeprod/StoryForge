@@ -9,6 +9,8 @@ const base = {
   onToneChange: vi.fn(),
   targetDuration: 30,
   onDurationChange: vi.fn(),
+  sceneCount: 5,
+  onSceneCountChange: vi.fn(),
   onGenerate: vi.fn(),
   isGenerating: false,
 };
@@ -39,4 +41,10 @@ it('fills textarea when example prompt is clicked', () => {
   const exampleButtons = screen.getAllByRole('button', { name: /cat|deep-sea|office/i });
   fireEvent.click(exampleButtons[0]);
   expect(onStoryChange).toHaveBeenCalled();
+});
+
+it('renders the Scenes select showing the current sceneCount value', () => {
+  render(<StoryStep {...base} sceneCount={8} />);
+  // Verifies value={String(sceneCount)} binding — the trigger displays the selected value
+  expect(screen.getByText('8 scenes')).toBeInTheDocument();
 });
