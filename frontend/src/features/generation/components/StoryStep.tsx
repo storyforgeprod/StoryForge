@@ -18,6 +18,16 @@ const LENGTHS = [
   { value: 90, label: '90s' },
 ];
 
+const SCENES = [
+  { value: 4,  label: '4 scenes' },
+  { value: 5,  label: '5 scenes' },
+  { value: 6,  label: '6 scenes' },
+  { value: 7,  label: '7 scenes' },
+  { value: 8,  label: '8 scenes' },
+  { value: 10, label: '10 scenes' },
+  { value: 12, label: '12 scenes' },
+];
+
 const EXAMPLES = [
   'A cat who secretly runs a black market for belly rub tokens...',
   '3 deep-sea creatures discover they\'re actually roommates...',
@@ -31,6 +41,8 @@ export type StoryStepProps = {
   onToneChange: (v: string) => void;
   targetDuration: number;
   onDurationChange: (v: number) => void;
+  sceneCount: number;
+  onSceneCountChange: (v: number) => void;
   onGenerate: () => void;
   isGenerating: boolean;
 };
@@ -42,6 +54,8 @@ export const StoryStep = ({
   onToneChange,
   targetDuration,
   onDurationChange,
+  sceneCount,
+  onSceneCountChange,
   onGenerate,
   isGenerating,
 }: StoryStepProps) => {
@@ -99,6 +113,20 @@ export const StoryStep = ({
               <SelectContent>
                 {LENGTHS.map((l) => (
                   <SelectItem key={l.value} value={String(l.value)}>{l.label}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <Select
+              value={String(sceneCount)}
+              onValueChange={(v) => onSceneCountChange(Number(v))}
+            >
+              <SelectTrigger className="h-8 w-auto gap-1 rounded-full border-border bg-elev px-3 text-[13px]">
+                <span className="text-muted-foreground">Scenes:&nbsp;</span>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {SCENES.map((s) => (
+                  <SelectItem key={s.value} value={String(s.value)}>{s.label}</SelectItem>
                 ))}
               </SelectContent>
             </Select>
