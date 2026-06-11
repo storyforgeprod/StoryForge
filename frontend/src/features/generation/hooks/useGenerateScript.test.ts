@@ -165,11 +165,8 @@ describe('useGenerateScript', () => {
 
         expect(result.current.state.phase).toBe('polling');
 
-        // The timeout guard (attemptsRef > MAX_ATTEMPTS) runs synchronously before any
-        // await inside the interval callback, so all 201 ticks can fire synchronously
-        // without waiting for 200 pending getJobStatus promises to resolve.
-        act(() => {
-            vi.advanceTimersByTime(201 * 5000); // 201 ticks × 5000ms (MAX_ATTEMPTS=200)
+        await act(async () => {
+            await vi.advanceTimersByTimeAsync(401 * 5000); // 401 ticks × 5000 ms (MAX_ATTEMPTS=400)
         });
 
         expect(result.current.state.phase).toBe('error');

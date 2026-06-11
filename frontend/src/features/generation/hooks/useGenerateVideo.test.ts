@@ -123,7 +123,9 @@ describe('useGenerateVideo', () => {
 
         expect(result.current.state.phase).toBe('polling');
 
-        act(() => { vi.advanceTimersByTime(201 * 5000); });
+        await act(async () => {
+            await vi.advanceTimersByTimeAsync(401 * 5000); // 401 ticks × 5000 ms (MAX_ATTEMPTS=400)
+        });
 
         expect(result.current.state.phase).toBe('error');
         if (result.current.state.phase === 'error') {

@@ -84,15 +84,13 @@ export function useGenerateAudio(): UseGenerateAudioReturn {
                             console.warn(`[Polling] Attempt ${attemptsRef.current}: Server busy (${status}), retrying...`);
                             return;
                         }
-                        // Permanent error: fail now
-                        if (status === 401 || status === 404) {
-                            clearPolling();
-                            setState({ phase: 'error', message: mapApiError(err) });
-                            return;
-                        }
+                        // Any other HTTP error is permanent — fail immediately
+                        clearPolling();
+                        setState({ phase: 'error', message: mapApiError(err) });
+                        return;
                     }
-                    // For unknown errors, retry (don't give up)
-                    console.warn(`[Polling] Attempt ${attemptsRef.current}: ${err}, will retry...`);
+                    // True network failure (no status): retry
+                    console.warn(`[Polling] Attempt ${attemptsRef.current}: network error, retrying...`);
                 }
             }, POLL_INTERVAL_MS);
         },
