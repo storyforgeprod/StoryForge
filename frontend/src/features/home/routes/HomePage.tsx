@@ -11,9 +11,9 @@ const STATS = [
 ];
 
 const RECENT_PROJECTS: Project[] = [
-  { id: '1', title: "The Office Plant's Revenge", style: 'anime', durationSec: 30, status: 'draft' },
-  { id: '2', title: 'Deep Sea Creatures', style: 'manga', durationSec: 45, status: 'ready' },
-  { id: '3', title: 'Coffee Shop Cat', style: 'webtoon', durationSec: 30, status: 'exported' },
+  { id: '1', title: "The Office Plant's Revenge", style: 'bold-comic',   durationSec: 30, status: 'draft' },
+  { id: '2', title: 'Deep Sea Creatures',          style: 'manga-ink',    durationSec: 45, status: 'ready' },
+  { id: '3', title: 'Coffee Shop Cat',             style: 'soft-cartoon', durationSec: 30, status: 'exported' },
 ];
 
 export function HomePage() {
