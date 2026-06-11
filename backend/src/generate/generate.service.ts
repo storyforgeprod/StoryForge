@@ -1,6 +1,6 @@
 import { Injectable, BadRequestException, NotFoundException, ForbiddenException } from '@nestjs/common';
 import { GenerateScriptDto, GenerateScriptResponseDto } from './dto/generate-script.dto';
-import { GenerateImagesDto, GenerateImagesResponseDto, ImageGenerationResult } from './dto/generate-images.dto';
+import { GenerateImagesDto, GenerateImagesResponseDto, ImageGenerationResult, StoryStyle } from './dto/generate-images.dto';
 import { GenerateAudioDto, GenerateAudioResponseDto, AudioGenerationResult } from './dto/generate-audio.dto';
 import { GenerateVideoDto, GenerateVideoResponseDto, VideoAssemblyResult } from './dto/generate-video.dto';
 import { PrismaService } from '../common/prisma/prisma.service';
@@ -67,6 +67,7 @@ export class GenerateService {
             story: dto.story,
             targetDuration,
             targetScenes,
+            tone: dto.tone,
           }),
         },
       });
@@ -85,6 +86,7 @@ export class GenerateService {
         story: dto.story,
         targetDuration,
         targetScenes,
+        tone: dto.tone,
         _startTime: Date.now(),
       });
     } catch (error) {
@@ -116,7 +118,7 @@ export class GenerateService {
    */
   async generateScriptContent(
     userId: string,
-    data: { story: string; targetDuration?: number; targetScenes?: number },
+    data: { story: string; targetDuration?: number; targetScenes?: number; tone?: string },
   ): Promise<{ script: string }> {
     const targetDuration = data.targetDuration ?? 60;
     const targetScenes = data.targetScenes ?? 12;
@@ -125,6 +127,7 @@ export class GenerateService {
       data.story,
       targetScenes,
       targetDuration,
+      data.tone,
     );
     return { script };
   }
@@ -369,7 +372,17 @@ export class GenerateService {
       .replace(/\s+/g, ' ')
       .substring(0, 400);
 
-    return `Cinematic ${style || 'novel'} style, ${cleaned}, dramatic lighting, high detail, 4k composition, cinematic framing, YouTube Shorts visual`;
+    const styleDescriptions: Record<StoryStyle, string> = {
+      [StoryStyle.BOLD_COMIC]:   'bold comic book illustration with strong outlines, halftone dots, vibrant yellows and primary colors',
+      [StoryStyle.SOFT_CARTOON]: 'soft pastel cartoon illustration, rounded forms, gentle lavender and peach palette, friendly and warm',
+      [StoryStyle.RETRO_POP]:    'retro pop art illustration, warm cream and beige tones, vintage 60s aesthetic, clean geometric shapes',
+      [StoryStyle.MANGA_INK]:    'black and white manga ink illustration, high contrast, speed lines, dramatic screentone shading',
+      [StoryStyle.STORYBOOK]:    'dark atmospheric storybook illustration, warm candlelight, deep shadows, painterly texture',
+      [StoryStyle.TOON_3D]:      '3D cartoon render, bright sky-blue background, glossy smooth surfaces, Pixar-inspired character design',
+    };
+    const stylePrompt = styleDescriptions[style as StoryStyle] ?? 'illustrated';
+
+    return `${stylePrompt}, ${cleaned}, dramatic lighting, high detail, 4k composition, cinematic framing, YouTube Shorts visual`;
   }
 
   /**

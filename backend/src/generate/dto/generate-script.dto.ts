@@ -1,4 +1,4 @@
-import { IsString, IsNotEmpty, MaxLength, MinLength, IsOptional, IsNumber, Min, Max } from 'class-validator';
+import { IsString, IsNotEmpty, MaxLength, MinLength, IsOptional, IsNumber, Min, Max, IsIn } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
 export class GenerateScriptDto {
@@ -37,6 +37,17 @@ export class GenerateScriptDto {
   @Min(1)
   @Max(12)
   targetScenes?: number;
+
+  @ApiProperty({
+    description: 'Narration tone for script generation',
+    example: 'dramatic',
+    enum: ['playful', 'dramatic', 'suspenseful', 'energetic'],
+    required: false,
+  })
+  @IsOptional()
+  @IsString()
+  @IsIn(['playful', 'dramatic', 'suspenseful', 'energetic'])
+  tone?: string;
 }
 
 export class GenerateScriptResponseDto {

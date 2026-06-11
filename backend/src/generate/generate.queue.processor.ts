@@ -12,6 +12,7 @@ interface GenerationJobData {
   story?: string;
   targetDuration?: number;
   targetScenes?: number;
+  tone?: string;
   scriptId?: string;
   style?: string;
   imageDescription?: string;
@@ -64,6 +65,7 @@ export class GenerateQueueProcessor {
           story: story || '',
           targetDuration: job.data.targetDuration,
           targetScenes: job.data.targetScenes,
+          tone: job.data.tone,
         });
         this.logger.log(`[SCRIPT] ✓ Generated script`);
       } else if (type === 'images') {
