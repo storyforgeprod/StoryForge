@@ -13,11 +13,12 @@ type VoiceMeta = {
 };
 
 const VOICES: VoiceMeta[] = [
-  { id: 'nova',  name: 'Nova',  tag: 'Energetic', description: 'Bright, fast — perfect for hooks' },
-  { id: 'atlas', name: 'Atlas', tag: 'Deep',       description: 'Calm, cinematic narrator' },
-  { id: 'lumi',  name: 'Lumi',  tag: 'Friendly',   description: 'Warm, conversational, gen-z' },
-  { id: 'rex',   name: 'Rex',   tag: 'Hype',        description: 'Loud, punchy sports-caster' },
-  { id: 'sage',  name: 'Sage',  tag: 'Soft',        description: 'Gentle ASMR-style whisper' },
+  { id: 'alloy',   name: 'Alloy',   tag: 'Balanced',   description: 'Clear, neutral — works for any genre' },
+  { id: 'echo',    name: 'Echo',    tag: 'Cinematic',  description: 'Deep, measured — epic story narrator' },
+  { id: 'fable',   name: 'Fable',   tag: 'Expressive', description: 'Warm storyteller, slight dramatic flair' },
+  { id: 'onyx',    name: 'Onyx',    tag: 'Deep',       description: 'Rich, authoritative, commanding' },
+  { id: 'nova',    name: 'Nova',    tag: 'Energetic',  description: 'Bright, fast-paced — hooks and action' },
+  { id: 'shimmer', name: 'Shimmer', tag: 'Soft',       description: 'Gentle, intimate, ASMR-adjacent' },
 ];
 
 const EQ_DELAYS = ['[animation-delay:0s]','[animation-delay:.1s]','[animation-delay:.25s]','[animation-delay:.15s]','[animation-delay:.32s]','[animation-delay:.05s]','[animation-delay:.22s]'];
