@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { Loader2, Download, RefreshCw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import type { GenerateAudioState, GenerateVideoState } from '../types';
@@ -33,6 +34,25 @@ export const VideoStep = ({
   const isGenerating = phase === 'audio' || phase === 'video';
   const videoUrl = videoState.phase === 'completed' ? videoState.videoUrl : undefined;
 
+  const [downloading, setDownloading] = useState(false);
+
+  const handleDownload = async () => {
+    if (!videoUrl) return;
+    setDownloading(true);
+    try {
+      const res = await fetch(videoUrl);
+      const blob = await res.blob();
+      const blobUrl = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = blobUrl;
+      a.download = 'storyforge-video.mp4';
+      a.click();
+      URL.revokeObjectURL(blobUrl);
+    } finally {
+      setDownloading(false);
+    }
+  };
+
   return (
     <div className="space-y-6">
       <div>
@@ -61,7 +81,14 @@ export const VideoStep = ({
         {/* Phone mockup */}
         <div className="mx-auto flex w-[160px] shrink-0 flex-col items-center">
           <div className="relative w-full overflow-hidden rounded-[24px] border-4 border-foreground/20 bg-elev shadow-2xl" style={{ aspectRatio: '9/16' }}>
-            {firstImageUrl ? (
+            {phase === 'done' && videoUrl ? (
+              <video
+                src={videoUrl}
+                poster={firstImageUrl}
+                controls
+                className="h-full w-full object-cover"
+              />
+            ) : firstImageUrl ? (
               <img src={firstImageUrl} alt="Preview" className="h-full w-full object-cover" />
             ) : (
               <div className="h-full w-full bg-elev2" />
@@ -102,10 +129,13 @@ export const VideoStep = ({
         <div className="flex items-center justify-between gap-4 rounded-2xl border border-primary/30 bg-acc-soft p-5">
           <p className="text-[15px] font-semibold text-foreground">Your video is ready!</p>
           <div className="flex gap-2">
-            <Button asChild>
-              <a href={videoUrl} download aria-label="Download video">
-                <Download className="mr-1.5 h-4 w-4" /> Download
-              </a>
+            <Button onClick={handleDownload} disabled={downloading} aria-label="Download video">
+              {downloading ? (
+                <Loader2 className="mr-1.5 h-4 w-4 animate-spin" />
+              ) : (
+                <Download className="mr-1.5 h-4 w-4" />
+              )}
+              {downloading ? 'Downloading…' : 'Download'}
             </Button>
             <Button variant="outline" onClick={onReset}>Start over</Button>
           </div>
