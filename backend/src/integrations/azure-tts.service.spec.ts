@@ -5,8 +5,8 @@ import { AzureTTSService } from './azure-tts.service';
 const mockConfig = {
   get: jest.fn((key: string) => {
     switch (key) {
-      case 'AZURE_OPENAI_ENDPOINT': return 'https://example.openai.azure.com';
-      case 'AZURE_OPENAI_API_KEY': return 'test-key';
+      case 'AZURE_TTS_ENDPOINT': return 'https://example.services.ai.azure.com/api/projects/test';
+      case 'AZURE_TTS_API_KEY': return 'test-key';
       case 'AZURE_OPENAI_API_VERSION': return '2024-05-01-preview';
       case 'AZURE_OPENAI_DEPLOYMENT_TTS': return 'gpt-4o-mini-tts';
       default: return undefined;

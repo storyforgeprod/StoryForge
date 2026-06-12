@@ -23,14 +23,14 @@ function parseEnv(filePath) {
 
 const env = { ...parseEnv(resolve(ROOT, 'backend/.env')), ...process.env };
 
-const ENDPOINT = env.AZURE_OPENAI_ENDPOINT;
-const API_KEY = env.AZURE_OPENAI_API_KEY;
+const ENDPOINT = env.AZURE_TTS_ENDPOINT;
+const API_KEY = env.AZURE_TTS_API_KEY;
 const API_VERSION = env.AZURE_OPENAI_API_VERSION;
 const DEPLOYMENT = env.AZURE_OPENAI_DEPLOYMENT_TTS;
 
 if (!ENDPOINT || !API_KEY || !API_VERSION || !DEPLOYMENT) {
   console.error(
-    'Missing env vars: AZURE_OPENAI_ENDPOINT, AZURE_OPENAI_API_KEY, AZURE_OPENAI_API_VERSION, AZURE_OPENAI_DEPLOYMENT_TTS',
+    'Missing env vars: AZURE_TTS_ENDPOINT, AZURE_TTS_API_KEY, AZURE_OPENAI_API_VERSION, AZURE_OPENAI_DEPLOYMENT_TTS',
   );
   process.exit(1);
 }

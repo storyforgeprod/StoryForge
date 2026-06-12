@@ -10,13 +10,13 @@ export class AzureTTSService {
   private readonly deployment: string;
 
   constructor(private readonly configService: ConfigService) {
-    this.endpoint = this.configService.get<string>('AZURE_OPENAI_ENDPOINT', '');
-    this.apiKey = this.configService.get<string>('AZURE_OPENAI_API_KEY', '');
+    this.endpoint = this.configService.get<string>('AZURE_TTS_ENDPOINT', '');
+    this.apiKey = this.configService.get<string>('AZURE_TTS_API_KEY', '');
     this.apiVersion = this.configService.get<string>('AZURE_OPENAI_API_VERSION', '');
     this.deployment = this.configService.get<string>('AZURE_OPENAI_DEPLOYMENT_TTS', '');
 
-    if (!this.deployment) {
-      this.logger.warn('⚠️ AZURE_OPENAI_DEPLOYMENT_TTS not configured. Azure TTS will fail.');
+    if (!this.endpoint || !this.apiKey) {
+      this.logger.warn('⚠️ AZURE_TTS_ENDPOINT or AZURE_TTS_API_KEY not configured. Azure TTS will fail.');
     }
     this.logger.log(`AzureTTS configured endpoint=${this.endpoint} deployment=${this.deployment}`);
   }
