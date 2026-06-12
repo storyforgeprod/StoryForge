@@ -5,22 +5,21 @@
 
 ## Summary
 
-Replace ElevenLabs as the primary TTS provider with Azure OpenAI `gpt-4o-mini-tts`, keeping ElevenLabs and Azure Speech SDK as fallbacks. Update the frontend `VoiceStep` to display the 6 real Azure voices with MP3 preview files pre-generated and committed to the repo.
+Replace ElevenLabs with Azure OpenAI `gpt-4o-mini-tts` as the primary TTS provider. ElevenLabs is removed entirely. The fallback chain is Azure TTS → Azure Speech SDK. Update the frontend `VoiceStep` to display the 6 real Azure voices with MP3 preview files pre-generated and committed to the repo.
 
 ---
 
 ## Architecture
 
-### Provider chain (no change to consumer interface)
+### Provider chain
 
 ```
 AudioGenerationService.generateTextToSpeech(text, voiceId)
-  Plan A → AzureTTSService          (gpt-4o-mini-tts, voiceId passed directly)
-  Plan B → ElevenLabsService        (voiceId mapped via static AZURE_TO_ELEVENLABS map)
-  Plan C → Azure Speech SDK         (fixed voice, unchanged)
+  Plan A → AzureTTSService      (gpt-4o-mini-tts, voiceId passed directly)
+  Plan B → Azure Speech SDK     (fixed voice, unchanged)
 ```
 
-If all three fail, throws `'Servicio de Text-to-Speech no disponible temporalmente.'`
+If both fail, throws `'Servicio de Text-to-Speech no disponible temporalmente.'`
 
 ---
 
@@ -54,27 +53,15 @@ Logs a startup warning if `AZURE_OPENAI_DEPLOYMENT_TTS` is not set. Throws on em
 
 ### Updated: `AudioGenerationService`
 
-Injects `AzureTTSService` as constructor dependency. Inserts Plan A before the existing ElevenLabs call.
-
-**Voice mapping** (Azure → ElevenLabs fallback):
-```ts
-const AZURE_TO_ELEVENLABS: Record<string, string> = {
-  alloy:   'EXAVITQu4vr4xnSDxMaL', // Sarah (confirmed — existing default in codebase)
-  echo:    '<verify-in-elevenlabs-account>',
-  fable:   '<verify-in-elevenlabs-account>',
-  onyx:    '<verify-in-elevenlabs-account>',
-  nova:    'EXAVITQu4vr4xnSDxMaL',  // Sarah (same default)
-  shimmer: '<verify-in-elevenlabs-account>',
-};
-```
-
-> **Note:** IDs marked `<verify-in-elevenlabs-account>` must be confirmed from the ElevenLabs dashboard before implementation. During implementation, all unknown voices can temporarily map to Sarah (`EXAVITQu4vr4xnSDxMaL`) as a safe default.
-
-Unknown voiceId values fall back to the ElevenLabs default voice.
+- Remove `ElevenLabsService` dependency entirely
+- Inject `AzureTTSService` as Plan A
+- Keep `generateWithAzureSpeechNativo` as Plan B (unchanged)
+- Remove `AZURE_TO_ELEVENLABS` voice map (no longer needed)
 
 ### Updated: Generate module
 
-`AzureTTSService` added as provider and injected into `AudioGenerationService`.
+- Remove `ElevenLabsService` from providers
+- Add `AzureTTSService` as provider
 
 ---
 
@@ -120,7 +107,7 @@ Update voice IDs and names in existing test assertions.
 | File | What it tests |
 |------|---------------|
 | `azure-tts.service.spec.ts` | Happy path, empty text error, API HTTP error (fetch mock) |
-| `audio-generation.service.spec.ts` | Plan A success, Plan A fails → Plan B activates, all fail → throws |
+| `audio-generation.service.spec.ts` | Plan A success, Plan A fails → Plan B (Azure Speech) activates, both fail → throws |
 
 ---
 
