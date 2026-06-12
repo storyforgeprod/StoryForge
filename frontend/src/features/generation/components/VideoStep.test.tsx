@@ -1,6 +1,6 @@
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import { it, expect, vi, afterEach } from 'vitest';
 import { VideoStep } from './VideoStep';
 
 const doneProps = {
@@ -15,6 +15,8 @@ const doneProps = {
   onRetryVideo: vi.fn(),
   onReset: vi.fn(),
 };
+
+afterEach(() => vi.restoreAllMocks());
 
 it('shows "Generating audio" when audio is loading', () => {
   render(
@@ -45,8 +47,7 @@ it('shows retry audio button on audio error', () => {
 
 it('shows a video element in the phone mockup when done', () => {
   render(<VideoStep {...doneProps} />);
-  const video = screen.getByRole('video') as HTMLVideoElement ?? document.querySelector('video');
-  // query directly since jsdom doesn't assign implicit role to <video>
+  // jsdom does not assign an implicit ARIA role to <video>, query directly
   const videoEl = document.querySelector('video');
   expect(videoEl).not.toBeNull();
   expect(videoEl!.src).toContain('video.mp4');
@@ -62,6 +63,9 @@ it('shows a download button (not a link) when done', () => {
 it('calls fetch with the video URL when download is clicked', async () => {
   const user = userEvent.setup();
 
+  // Render first — then spy, so React's own createElement calls are unaffected
+  render(<VideoStep {...doneProps} />);
+
   const mockAnchor = { href: '', download: '', click: vi.fn() };
   const originalCreateElement = document.createElement.bind(document);
   vi.spyOn(document, 'createElement').mockImplementation((tag: string) => {
@@ -74,13 +78,11 @@ it('calls fetch with the video URL when download is clicked', async () => {
     blob: () => Promise.resolve(new Blob(['video'], { type: 'video/mp4' })),
   }) as unknown as typeof fetch;
 
-  render(<VideoStep {...doneProps} />);
   await user.click(screen.getByRole('button', { name: /download/i }));
 
   expect(global.fetch).toHaveBeenCalledWith('https://example.com/video.mp4');
+  expect(mockAnchor.href).toBe('blob:test-url');
   expect(mockAnchor.download).toBe('storyforge-video.mp4');
   expect(mockAnchor.click).toHaveBeenCalled();
   expect(global.URL.revokeObjectURL).toHaveBeenCalledWith('blob:test-url');
-
-  vi.restoreAllMocks();
 });
