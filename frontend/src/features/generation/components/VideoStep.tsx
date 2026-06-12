@@ -41,13 +41,14 @@ export const VideoStep = ({
     setDownloading(true);
     try {
       const res = await fetch(videoUrl);
+      if (!res.ok) throw new Error(`Download failed: ${res.status}`);
       const blob = await res.blob();
       const blobUrl = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = blobUrl;
       a.download = 'storyforge-video.mp4';
       a.click();
-      URL.revokeObjectURL(blobUrl);
+      setTimeout(() => URL.revokeObjectURL(blobUrl), 100);
     } finally {
       setDownloading(false);
     }
@@ -86,6 +87,9 @@ export const VideoStep = ({
                 src={videoUrl}
                 poster={firstImageUrl}
                 controls
+                playsInline
+                controlsList="nodownload"
+                aria-label="Vista previa del video generado"
                 className="h-full w-full object-cover"
               />
             ) : firstImageUrl ? (

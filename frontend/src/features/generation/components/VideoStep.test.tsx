@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { it, expect, vi, afterEach } from 'vitest';
 import { VideoStep } from './VideoStep';
@@ -75,6 +75,7 @@ it('calls fetch with the video URL when download is clicked', async () => {
   global.URL.createObjectURL = vi.fn().mockReturnValue('blob:test-url');
   global.URL.revokeObjectURL = vi.fn();
   global.fetch = vi.fn().mockResolvedValue({
+    ok: true,
     blob: () => Promise.resolve(new Blob(['video'], { type: 'video/mp4' })),
   }) as unknown as typeof fetch;
 
@@ -84,5 +85,6 @@ it('calls fetch with the video URL when download is clicked', async () => {
   expect(mockAnchor.href).toBe('blob:test-url');
   expect(mockAnchor.download).toBe('storyforge-video.mp4');
   expect(mockAnchor.click).toHaveBeenCalled();
-  expect(global.URL.revokeObjectURL).toHaveBeenCalledWith('blob:test-url');
+  // revokeObjectURL is deferred via setTimeout(100) to avoid race condition
+  await waitFor(() => expect(global.URL.revokeObjectURL).toHaveBeenCalledWith('blob:test-url'));
 });
