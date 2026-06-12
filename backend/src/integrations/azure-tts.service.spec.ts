@@ -18,6 +18,7 @@ describe('AzureTTSService', () => {
   let service: AzureTTSService;
 
   beforeEach(async () => {
+    mockConfig.get.mockClear();
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         AzureTTSService,
