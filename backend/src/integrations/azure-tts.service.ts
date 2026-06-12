@@ -12,7 +12,8 @@ export class AzureTTSService {
   constructor(private readonly configService: ConfigService) {
     this.endpoint = this.configService.get<string>('AZURE_TTS_ENDPOINT', '');
     this.apiKey = this.configService.get<string>('AZURE_TTS_API_KEY', '');
-    this.apiVersion = this.configService.get<string>('AZURE_OPENAI_API_VERSION', '');
+    this.apiVersion = this.configService.get<string>('AZURE_TTS_API_VERSION', '')
+      || this.configService.get<string>('AZURE_OPENAI_API_VERSION', '');
     this.deployment = this.configService.get<string>('AZURE_OPENAI_DEPLOYMENT_TTS', '');
 
     if (!this.endpoint || !this.apiKey) {
