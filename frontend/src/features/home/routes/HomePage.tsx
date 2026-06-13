@@ -11,9 +11,9 @@ const STATS = [
 ];
 
 const RECENT_PROJECTS: Project[] = [
-  { id: '1', title: "The Office Plant's Revenge", style: 'bold-comic',   durationSec: 30, status: 'draft' },
-  { id: '2', title: 'Deep Sea Creatures',          style: 'manga-ink',    durationSec: 45, status: 'ready' },
-  { id: '3', title: 'Coffee Shop Cat',             style: 'soft-cartoon', durationSec: 30, status: 'exported' },
+  { id: '1', title: "The Office Plant's Revenge", style: 'bold-comic',   duration: 30, status: 'draft',     createdAt: '', output: null },
+  { id: '2', title: 'Deep Sea Creatures',          style: 'manga-ink',    duration: 45, status: 'processing', createdAt: '', output: null },
+  { id: '3', title: 'Coffee Shop Cat',             style: 'soft-cartoon', duration: 30, status: 'completed', createdAt: '', output: null },
 ];
 
 export function HomePage() {
@@ -46,7 +46,7 @@ export function HomePage() {
           </div>
           <div className="grid grid-cols-1 gap-3.5 sm:grid-cols-2 lg:grid-cols-3">
             {RECENT_PROJECTS.map((project) => (
-              <ProjectCard key={project.id} project={project} />
+              <ProjectCard key={project.id} project={project} isExpanded={false} onToggle={() => {}} />
             ))}
           </div>
         </section>
