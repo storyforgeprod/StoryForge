@@ -3,6 +3,7 @@ import { PassportStrategy } from '@nestjs/passport';
 import { ExtractJwt, Strategy } from 'passport-jwt';
 import { SupabaseService } from '../supabase/supabase.service';
 import { UsersService } from '../users/users.service';
+import { JwtConfigService } from './jwt-config.service';
 
 type SupabaseJwtPayload = {
   sub: string;
@@ -14,19 +15,11 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
   constructor(
     private readonly supabaseService: SupabaseService,
     private readonly usersService: UsersService,
+    private readonly jwtConfig: JwtConfigService,
   ) {
-    const secret = process.env.JWT_SECRET || process.env.SUPABASE_JWT_SECRET;
-    if (!secret) {
-      console.warn(
-        'JWT_SECRET is not set. Set JWT_SECRET in .env to sign and validate tokens',
-      );
-    }
-
     super({
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
-      ignoreExpiration: false,
-      secretOrKey: secret || 'dev-only-insecure',
-      algorithms: ['HS256'],
+      ...jwtConfig.getStrategyConfig(),
     });
   }
 

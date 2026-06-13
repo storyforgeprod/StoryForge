@@ -4,6 +4,7 @@ import { JwtModule } from '@nestjs/jwt';
 import { JwtStrategy } from './jwt.strategy';
 import { JwtAuthGuard } from './jwt.guard';
 import { OptionalJwtAuthGuard } from './optional-jwt.guard';
+import { JwtConfigService } from './jwt-config.service';
 import { GoogleStrategy } from './google.strategy';
 import { RolesGuard } from './roles.guard';
 import { AuthController } from './auth.controller';
@@ -14,15 +15,23 @@ import { UsersModule } from '../users/users.module';
 @Module({
   imports: [
     PassportModule,
-    JwtModule.register({
-      secret: process.env.JWT_SECRET || 'dev-secret',
-      signOptions: { expiresIn: '7d' },
+    JwtModule.registerAsync({
+      useFactory: (jwtConfig: JwtConfigService) => jwtConfig.getModuleConfig(),
+      inject: [JwtConfigService],
     }),
     SupabaseModule,
     UsersModule,
   ],
-  providers: [JwtStrategy, GoogleStrategy, JwtAuthGuard, OptionalJwtAuthGuard, RolesGuard, AuthService],
+  providers: [
+    JwtConfigService,
+    JwtStrategy,
+    GoogleStrategy,
+    JwtAuthGuard,
+    OptionalJwtAuthGuard,
+    RolesGuard,
+    AuthService,
+  ],
   controllers: [AuthController],
-  exports: [JwtAuthGuard, OptionalJwtAuthGuard, RolesGuard, AuthService, PassportModule],
+  exports: [JwtAuthGuard, OptionalJwtAuthGuard, RolesGuard, AuthService, PassportModule, JwtConfigService],
 })
 export class AuthModule {}
