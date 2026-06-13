@@ -114,10 +114,21 @@ describe('ProjectService', () => {
       ).rejects.toThrow();
     });
 
-    it('throws if image job has no result', async () => {
+    it('throws if image job is not found', async () => {
       prismaMock.job.findUnique
         .mockResolvedValueOnce(VIDEO_JOB)
         .mockResolvedValueOnce(null);
+
+      await expect(
+        service.finalizeFromVideoJob('vid-1', 'user-1', 'https://video.mp4'),
+      ).rejects.toThrow();
+    });
+
+    it('throws if image job has no result', async () => {
+      const IMAGE_JOB_NO_RESULT = { ...IMAGE_JOB, result: null };
+      prismaMock.job.findUnique
+        .mockResolvedValueOnce(VIDEO_JOB)
+        .mockResolvedValueOnce(IMAGE_JOB_NO_RESULT);
 
       await expect(
         service.finalizeFromVideoJob('vid-1', 'user-1', 'https://video.mp4'),

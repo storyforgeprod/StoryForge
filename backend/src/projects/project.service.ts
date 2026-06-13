@@ -16,7 +16,12 @@ export class ProjectService {
     await this.prisma.$transaction(async (tx) => {
       const videoJob = await tx.job.findUnique({ where: { id: videoJobId } });
       if (!videoJob) throw new Error(`Video job ${videoJobId} not found`);
-      if (videoJob.projectId) return;
+      if (videoJob.projectId) {
+        this.logger.warn(
+          `[ProjectService] Video job ${videoJobId} already has projectId ${videoJob.projectId} — skipping finalization`,
+        );
+        return;
+      }
 
       const videoMeta = JSON.parse(videoJob.metadata || '{}') as {
         imageJobId: string;
@@ -109,7 +114,7 @@ export class ProjectService {
     throw new Error('Not implemented');
   }
 
-  private _mapToDto(_project: any): ProjectResponseDto {
+  private _mapToDto(_project: Record<string, any> & { outputs?: any[] }): ProjectResponseDto {
     throw new Error('Not implemented');
   }
 }
