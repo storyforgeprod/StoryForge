@@ -83,8 +83,9 @@ export class GenerateService {
           type: "script",
           status: "pending",
           progress: 0,
-          // Store story + duration + scenes in metadata for later stages (audio generation)
+          // Store story + title + duration + scenes in metadata for later stages (audio generation)
           metadata: JSON.stringify({
+            title: dto.title,
             story: dto.story,
             targetDuration,
             targetScenes,

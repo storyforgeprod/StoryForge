@@ -33,7 +33,7 @@ async function handleResponse<T>(res: Response): Promise<T> {
 }
 
 export async function postGenerateScript(
-    body: { story: string; tone?: string; targetDuration?: number; targetScenes?: number; language?: string },
+    body: { title: string; story: string; tone?: string; targetDuration?: number; targetScenes?: number; language?: string },
 ): Promise<{ jobId: string; status: string; createdAt: string }> {
     const res = await fetch(`${API_BASE}/generate/script`, {
         method: 'POST',

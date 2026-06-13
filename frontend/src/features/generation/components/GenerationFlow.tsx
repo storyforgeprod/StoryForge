@@ -17,6 +17,7 @@ export type GenerationFlowProps = {
 
 export const GenerationFlow = ({ onStepChange }: GenerationFlowProps) => {
   const [step, setStep] = useState<WizardStep>('story');
+  const [title, setTitle] = useState('');
   const [story, setStory] = useState('');
   const [tone, setTone] = useState('playful');
   const [language, setLanguage] = useState('en');
@@ -68,14 +69,14 @@ export const GenerationFlow = ({ onStepChange }: GenerationFlowProps) => {
 
   const handleGenerateScript = () => {
     navigate('script');
-    generateScript(story, targetDuration, sceneCountTarget, tone, language);
+    generateScript(title, story, targetDuration, sceneCountTarget, tone, language);
   };
 
   const handleRetryScript = () => { resetScript(); setScriptJobId(null); };
 
   const handleReset = () => {
     resetScript(); resetImages(); resetAudio(); resetVideo();
-    setStory(''); setStyle(null); setVoiceId(null);
+    setTitle(''); setStory(''); setStyle(null); setVoiceId(null);
     setScriptJobId(null); setImageJobId(null); setAudioJobId(null);
     navigate('story');
   };
@@ -91,6 +92,7 @@ export const GenerationFlow = ({ onStepChange }: GenerationFlowProps) => {
     <div className="mx-auto max-w-3xl px-6 pb-16 pt-10 sm:px-8">
       {step === 'story' && (
         <StoryStep
+          title={title} onTitleChange={setTitle}
           story={story} onStoryChange={setStory}
           tone={tone} onToneChange={setTone}
           targetDuration={targetDuration} onDurationChange={setTargetDuration}

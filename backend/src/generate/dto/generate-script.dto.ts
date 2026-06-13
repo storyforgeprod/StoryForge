@@ -3,6 +3,18 @@ import { ApiProperty } from '@nestjs/swagger';
 
 export class GenerateScriptDto {
   @ApiProperty({
+    description: 'Story title',
+    example: 'My Amazing Story',
+    minLength: 3,
+    maxLength: 200,
+  })
+  @IsString()
+  @IsNotEmpty()
+  @MinLength(3, { message: 'Title must be at least 3 characters' })
+  @MaxLength(200, { message: 'Title must not exceed 200 characters' })
+  title!: string;
+
+  @ApiProperty({
     description: 'Story text to convert to script',
     example: 'Once upon a time...',
     minLength: 50,

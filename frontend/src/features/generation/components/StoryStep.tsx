@@ -42,6 +42,8 @@ const EXAMPLES = [
 ];
 
 export type StoryStepProps = {
+  title: string;
+  onTitleChange: (v: string) => void;
   story: string;
   onStoryChange: (v: string) => void;
   tone: string;
@@ -57,6 +59,8 @@ export type StoryStepProps = {
 };
 
 export const StoryStep = ({
+  title,
+  onTitleChange,
   story,
   onStoryChange,
   tone,
@@ -72,10 +76,11 @@ export const StoryStep = ({
 }: StoryStepProps) => {
   const [submitAttempted, setSubmitAttempted] = useState(false);
   const { valid } = validateStory(story);
+  const titleValid = title.trim().length >= 3;
 
   const handleGenerate = () => {
     setSubmitAttempted(true);
-    if (!valid) return;
+    if (!titleValid || !valid) return;
     onGenerate();
   };
 
@@ -92,6 +97,21 @@ export const StoryStep = ({
       </div>
 
       <div className="rounded-2xl border border-border bg-card p-5">
+        <p className="mb-3 font-mono text-[11px] uppercase tracking-[0.06em] text-muted-foreground">
+          PROJECT TITLE
+        </p>
+        <input
+          type="text"
+          placeholder="e.g., My Amazing Story, The Cat Chronicles..."
+          value={title}
+          onChange={(e) => onTitleChange(e.target.value)}
+          className="mb-4 w-full rounded-lg border border-border bg-elev px-4 py-2.5 font-body text-[14px] text-foreground placeholder-muted-foreground transition focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/30"
+          maxLength={200}
+        />
+        {submitAttempted && !titleValid && (
+          <p className="mb-3 text-[12px] text-destructive">Title must be at least 3 characters</p>
+        )}
+
         <p className="mb-3 font-mono text-[11px] uppercase tracking-[0.06em] text-muted-foreground">
           YOUR STORY
         </p>

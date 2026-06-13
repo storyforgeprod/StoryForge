@@ -59,6 +59,7 @@ export class ProjectService {
       const scriptJob = await tx.job.findUnique({ where: { id: scriptId } });
       if (!scriptJob) throw new Error(`Script job ${scriptId} not found`);
       const scriptMeta = JSON.parse(scriptJob.metadata || '{}') as {
+        title?: string;
         story: string;
         targetDuration: number;
       };
@@ -66,8 +67,7 @@ export class ProjectService {
         ? (JSON.parse(scriptJob.result) as { script: string })
         : { script: '' };
 
-      const projectCount = await tx.project.count({ where: { userId } });
-      const title = `Story #${projectCount + 1}`;
+      const title = scriptMeta.title || `Story #${Date.now()}`;
 
       const project = await tx.project.create({
         data: {
