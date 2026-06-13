@@ -12,12 +12,18 @@ import { AuthService } from './auth.service';
 import { SupabaseModule } from '../supabase/supabase.module';
 import { UsersModule } from '../users/users.module';
 
+// Resolve JWT secret once at module load time
+const jwtSecret =
+  process.env.JWT_SECRET ||
+  process.env.SUPABASE_JWT_SECRET ||
+  'storyforge-dev-only-insecure-key';
+
 @Module({
   imports: [
     PassportModule,
-    JwtModule.registerAsync({
-      useFactory: (jwtConfig: JwtConfigService) => jwtConfig.getModuleConfig(),
-      inject: [JwtConfigService],
+    JwtModule.register({
+      secret: jwtSecret,
+      signOptions: { expiresIn: 604800 }, // 7 days in seconds
     }),
     SupabaseModule,
     UsersModule,

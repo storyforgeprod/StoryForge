@@ -3,23 +3,29 @@ import { PassportStrategy } from '@nestjs/passport';
 import { ExtractJwt, Strategy } from 'passport-jwt';
 import { SupabaseService } from '../supabase/supabase.service';
 import { UsersService } from '../users/users.service';
-import { JwtConfigService } from './jwt-config.service';
 
 type SupabaseJwtPayload = {
   sub: string;
   email?: string;
 };
 
+// Resolve JWT secret once at module load time (same as in auth.module.ts)
+const jwtSecret =
+  process.env.JWT_SECRET ||
+  process.env.SUPABASE_JWT_SECRET ||
+  'storyforge-dev-only-insecure-key';
+
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy) {
   constructor(
     private readonly supabaseService: SupabaseService,
     private readonly usersService: UsersService,
-    private readonly jwtConfig: JwtConfigService,
   ) {
     super({
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
-      ...jwtConfig.getStrategyConfig(),
+      ignoreExpiration: false,
+      secretOrKey: jwtSecret,
+      algorithms: ['HS256'],
     });
   }
 
