@@ -477,7 +477,7 @@ export class GenerateService {
           type: "audio",
           status: "pending",
           progress: 0,
-          metadata: JSON.stringify({ scriptId: dto.scriptId }),
+          metadata: JSON.stringify({ scriptId: dto.scriptId, language: dto.language || 'en' }),
         },
       });
     } catch (error) {
@@ -494,6 +494,7 @@ export class GenerateService {
         type: "audio",
         scriptId: dto.scriptId,
         voiceId: dto.voiceId,
+        language: dto.language || 'en',
         _startTime: Date.now(),
       });
     } catch (error) {
@@ -523,7 +524,7 @@ export class GenerateService {
    */
   async generateAudioContent(
     userId: string,
-    data: { jobId: string; scriptId: string; voiceId?: string },
+    data: { jobId: string; scriptId: string; voiceId?: string; language?: string },
   ): Promise<AudioGenerationResult> {
     // 1. Fetch the script job result + metadata
     const scriptJob = await this.prisma.job.findUnique({
@@ -543,14 +544,16 @@ export class GenerateService {
       scriptText = scriptJob.result;
     }
 
-    // 3. Extract story + targetDuration from script job metadata
+    // 3. Extract story + targetDuration + language from script job metadata
     let story = "";
     let targetDuration = 60;
+    let language = data.language || 'en';
     try {
       if (scriptJob.metadata) {
         const metadata = JSON.parse(scriptJob.metadata);
         story = metadata.story || "";
         targetDuration = metadata.targetDuration || 60;
+        language = metadata.language || data.language || 'en';
       }
     } catch (e) {
       // Metadata parse error, use defaults
@@ -577,6 +580,7 @@ export class GenerateService {
     // 6. Generate audio with fallback (ElevenLabs → Azure Speech)
     const audioUrl = await this.audioGenerationService.generateTextToSpeech(
       narration,
+      language,
       data.voiceId,
     );
 

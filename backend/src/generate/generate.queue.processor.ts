@@ -93,12 +93,13 @@ export class GenerateQueueProcessor {
         this.logger.log(`[IMAGES] ✓ Generated ${imageUrls.length} images`);
       } else if (type === "audio") {
         this.logger.log(
-          `[AUDIO] 🔊 Generating audio (voice: ${job.data.voiceId || "default"})`,
+          `[AUDIO] 🔊 Generating audio (voice: ${job.data.voiceId || "default"}, language: ${job.data.language || "en"})`,
         );
         result = await this.generateService.generateAudioContent(userId, {
           jobId,
           scriptId: job.data.scriptId || "",
           voiceId: job.data.voiceId,
+          language: job.data.language,
         });
         this.logger.log(`[AUDIO] ✓ Generated audio`);
       } else if (type === "video") {

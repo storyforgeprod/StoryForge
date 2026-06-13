@@ -55,7 +55,7 @@ export const GenerationFlow = ({ onStepChange }: GenerationFlowProps) => {
   // Auto-trigger audio when video step mounts
   useEffect(() => {
     if (step === 'video' && scriptJobId && voiceId && audioState.phase === 'idle') {
-      generateAudio(scriptJobId, voiceId);
+      generateAudio(scriptJobId, language, voiceId);
     }
   }, [step]); // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -136,7 +136,7 @@ export const GenerationFlow = ({ onStepChange }: GenerationFlowProps) => {
           firstImageUrl={firstImageUrl}
           audioState={audioState}
           videoState={videoState}
-          onRetryAudio={() => { resetAudio(); if (scriptJobId && voiceId) generateAudio(scriptJobId, voiceId); }}
+          onRetryAudio={() => { resetAudio(); if (scriptJobId && voiceId) generateAudio(scriptJobId, language, voiceId); }}
           onRetryVideo={() => { resetVideo(); if (imageJobId && audioJobId) generateVideo(imageJobId, audioJobId); }}
           onReset={handleReset}
         />

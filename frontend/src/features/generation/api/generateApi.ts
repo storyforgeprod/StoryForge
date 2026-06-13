@@ -73,7 +73,7 @@ export async function postGenerateImages(
 }
 
 export async function postGenerateAudio(
-    body: { scriptId: string; voiceId?: string },
+    body: { scriptId: string; language?: string; voiceId?: string },
 ): Promise<{ jobId: string; status: string; createdAt: string }> {
     const res = await fetch(`${API_BASE}/generate/audio`, {
         method: 'POST',

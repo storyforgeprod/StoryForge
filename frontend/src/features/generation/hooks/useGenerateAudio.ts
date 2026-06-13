@@ -4,7 +4,7 @@ import type { GenerateAudioState, AudioGenerationResult } from '../types';
 
 export type UseGenerateAudioReturn = {
     state: GenerateAudioState;
-    generate: (scriptId: string, voiceId?: string) => void;
+    generate: (scriptId: string, language?: string, voiceId?: string) => void;
     reset: () => void;
 };
 
@@ -98,12 +98,12 @@ export function useGenerateAudio(): UseGenerateAudioReturn {
     );
 
     const generate = useCallback(
-        async (scriptId: string, voiceId?: string) => {
+        async (scriptId: string, language?: string, voiceId?: string) => {
             if (inFlightRef.current) return;
             inFlightRef.current = true;
             setState({ phase: 'submitting' });
             try {
-                const { jobId } = await postGenerateAudio({ scriptId, voiceId });
+                const { jobId } = await postGenerateAudio({ scriptId, language, voiceId });
                 setState({ phase: 'polling', jobId });
                 startPolling(jobId);
             } catch (err) {

@@ -3,6 +3,26 @@ import { ConfigService } from '@nestjs/config';
 import * as SpeechSDK from 'microsoft-cognitiveservices-speech-sdk';
 import { AzureTTSService } from './azure-tts.service';
 
+// Map language codes to Azure Speech neural voices
+const LANGUAGE_VOICE_MAP: Record<string, string> = {
+  'en': 'en-US-AriaNeural',        // English (US)
+  'es': 'es-MX-DaliaNeural',       // Spanish (Mexico)
+  'es-MX': 'es-MX-DaliaNeural',    // Spanish (Mexico)
+  'es-ES': 'es-ES-AlvaroNeural',   // Spanish (Spain)
+  'pt': 'pt-BR-FranciscaNeural',   // Portuguese (Brazil)
+  'pt-BR': 'pt-BR-FranciscaNeural',// Portuguese (Brazil)
+  'fr': 'fr-FR-DeniseNeural',      // French (France)
+  'fr-FR': 'fr-FR-DeniseNeural',   // French (France)
+  'de': 'de-DE-BertaNeural',       // German (Germany)
+  'de-DE': 'de-DE-BertaNeural',    // German (Germany)
+  'it': 'it-IT-IsabellaNeural',    // Italian (Italy)
+  'it-IT': 'it-IT-IsabellaNeural', // Italian (Italy)
+  'ja': 'ja-JP-NanamiNeural',      // Japanese (Japan)
+  'ja-JP': 'ja-JP-NanamiNeural',   // Japanese (Japan)
+  'zh': 'zh-CN-XiaoxuanNeural',    // Chinese (Simplified)
+  'zh-CN': 'zh-CN-XiaoxuanNeural', // Chinese (Simplified)
+};
+
 @Injectable()
 export class AudioGenerationService {
   private readonly logger = new Logger(AudioGenerationService.name);
@@ -12,18 +32,25 @@ export class AudioGenerationService {
     private readonly configService: ConfigService,
   ) {}
 
-  async generateTextToSpeech(text: string, voiceId?: string): Promise<string> {
+  /**
+   * Get Azure Speech neural voice for given language
+   */
+  private getVoiceForLanguage(language: string): string {
+    return LANGUAGE_VOICE_MAP[language] || LANGUAGE_VOICE_MAP['en'];
+  }
+
+  async generateTextToSpeech(text: string, language: string = 'en', voiceId?: string): Promise<string> {
     const voice = voiceId || 'alloy';
 
     try {
-      this.logger.log('🎙️ [Plan A] Generating audio with Azure TTS...');
+      this.logger.log(`🎙️ [Plan A] Generating audio with Azure TTS (${language})...`);
       return await this.azureTTSService.synthesize(text, voice);
     } catch (planAError: unknown) {
       const errorMsg = planAError instanceof Error ? planAError.message : String(planAError);
       this.logger.warn(`⚠️ [Plan A] Azure TTS failed: ${errorMsg}. Falling back to Azure Speech...`);
 
       try {
-        return await this.generateWithAzureSpeechNativo(text);
+        return await this.generateWithAzureSpeechNativo(text, language);
       } catch (azureError: unknown) {
         const azureMsg = azureError instanceof Error ? azureError.message : String(azureError);
         this.logger.error(`❌ [Plan B] Azure Speech also failed: ${azureMsg}`);
@@ -32,7 +59,7 @@ export class AudioGenerationService {
     }
   }
 
-  private async generateWithAzureSpeechNativo(text: string): Promise<string> {
+  private async generateWithAzureSpeechNativo(text: string, language: string = 'en'): Promise<string> {
     return new Promise((resolve, reject) => {
       const apiKey = this.configService.get('AZURE_SPEECH_API_KEY');
       const region = this.configService.get('AZURE_SPEECH_REGION');
@@ -49,10 +76,14 @@ export class AudioGenerationService {
       const speechConfig = SpeechSDK.SpeechConfig.fromSubscription(apiKey, region);
       speechConfig.speechSynthesisOutputFormat =
         SpeechSDK.SpeechSynthesisOutputFormat.Audio24Khz160KBitRateMonoMp3;
-      speechConfig.speechSynthesisVoiceName = 'es-MX-DaliaNeural';
+      
+      // Select voice based on language
+      const voiceName = this.getVoiceForLanguage(language);
+      speechConfig.speechSynthesisVoiceName = voiceName;
+      
+      this.logger.log(`🔊 [Plan B] Synthesizing with Azure Speech (${language} → ${voiceName})...`);
 
       const synthesizer = new SpeechSDK.SpeechSynthesizer(speechConfig, null);
-      this.logger.log('🔊 [Plan B] Synthesizing with Azure Speech...');
 
       synthesizer.speakTextAsync(
         text,

@@ -18,6 +18,15 @@ export class GenerateAudioDto {
   @IsOptional()
   @IsString()
   voiceId?: string;
+
+  @ApiProperty({
+    example: 'es',
+    description: 'Language code for audio generation (en, es, pt, fr, etc.)',
+    required: false,
+  })
+  @IsOptional()
+  @IsString()
+  language?: string;
 }
 
 export interface GenerateAudioResponseDto {
