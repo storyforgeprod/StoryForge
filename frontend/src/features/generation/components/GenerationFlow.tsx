@@ -19,6 +19,7 @@ export const GenerationFlow = ({ onStepChange }: GenerationFlowProps) => {
   const [step, setStep] = useState<WizardStep>('story');
   const [story, setStory] = useState('');
   const [tone, setTone] = useState('playful');
+  const [language, setLanguage] = useState('en');
   const [targetDuration, setTargetDuration] = useState(30);
   const [sceneCountTarget, setSceneCountTarget] = useState(5);
   const [style, setStyle] = useState<StoryStyle | null>(null);
@@ -67,7 +68,7 @@ export const GenerationFlow = ({ onStepChange }: GenerationFlowProps) => {
 
   const handleGenerateScript = () => {
     navigate('script');
-    generateScript(story, targetDuration, sceneCountTarget, tone);
+    generateScript(story, targetDuration, sceneCountTarget, tone, language);
   };
 
   const handleRetryScript = () => { resetScript(); setScriptJobId(null); };
@@ -94,6 +95,7 @@ export const GenerationFlow = ({ onStepChange }: GenerationFlowProps) => {
           tone={tone} onToneChange={setTone}
           targetDuration={targetDuration} onDurationChange={setTargetDuration}
           sceneCount={sceneCountTarget} onSceneCountChange={setSceneCountTarget}
+          language={language} onLanguageChange={setLanguage}
           onGenerate={handleGenerateScript}
           isGenerating={scriptState.phase === 'submitting' || scriptState.phase === 'polling'}
         />

@@ -48,6 +48,17 @@ export class GenerateScriptDto {
   @IsString()
   @IsIn(['playful', 'dramatic', 'suspenseful', 'energetic'])
   tone?: string;
+
+  @ApiProperty({
+    description: 'Output language for the generated script',
+    example: 'en',
+    enum: ['en', 'es', 'pt', 'fr'],
+    required: false,
+  })
+  @IsOptional()
+  @IsString()
+  @IsIn(['en', 'es', 'pt', 'fr'])
+  language?: string;
 }
 
 export class GenerateScriptResponseDto {

@@ -68,6 +68,7 @@ export class GenerateService {
             targetDuration,
             targetScenes,
             tone: dto.tone,
+            language: dto.language,
           }),
         },
       });
@@ -87,6 +88,7 @@ export class GenerateService {
         targetDuration,
         targetScenes,
         tone: dto.tone,
+        language: dto.language,
         _startTime: Date.now(),
       });
     } catch (error) {
@@ -118,7 +120,7 @@ export class GenerateService {
    */
   async generateScriptContent(
     userId: string,
-    data: { story: string; targetDuration?: number; targetScenes?: number; tone?: string },
+    data: { story: string; targetDuration?: number; targetScenes?: number; tone?: string; language?: string },
   ): Promise<{ script: string }> {
     const targetDuration = data.targetDuration ?? 60;
     const targetScenes = data.targetScenes ?? 12;
@@ -128,6 +130,7 @@ export class GenerateService {
       targetScenes,
       targetDuration,
       data.tone,
+      data.language,
     );
     return { script };
   }

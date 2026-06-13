@@ -5,6 +5,13 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { StoryInput } from './StoryInput';
 import { validateStory } from '../utils/validation';
 
+const LANGUAGES = [
+  { value: 'en', label: '🇺🇸 English' },
+  { value: 'es', label: '🇪🇸 Español' },
+  { value: 'pt', label: '🇧🇷 Português' },
+  { value: 'fr', label: '🇫🇷 Français' },
+];
+
 const TONES = [
   { value: 'playful',     label: 'Playful' },
   { value: 'dramatic',    label: 'Dramatic' },
@@ -43,6 +50,8 @@ export type StoryStepProps = {
   onDurationChange: (v: number) => void;
   sceneCount: number;
   onSceneCountChange: (v: number) => void;
+  language: string;
+  onLanguageChange: (v: string) => void;
   onGenerate: () => void;
   isGenerating: boolean;
 };
@@ -56,6 +65,8 @@ export const StoryStep = ({
   onDurationChange,
   sceneCount,
   onSceneCountChange,
+  language,
+  onLanguageChange,
   onGenerate,
   isGenerating,
 }: StoryStepProps) => {
@@ -90,7 +101,17 @@ export const StoryStep = ({
           showErrors={submitAttempted}
         />
         <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
-          <div className="flex gap-2">
+          <div className="flex flex-wrap gap-2">
+            <Select value={language} onValueChange={onLanguageChange}>
+              <SelectTrigger className="h-8 w-auto gap-1 rounded-full border-border bg-elev px-3 text-[13px]">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {LANGUAGES.map((l) => (
+                  <SelectItem key={l.value} value={l.value}>{l.label}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
             <Select value={tone} onValueChange={onToneChange}>
               <SelectTrigger className="h-8 w-auto gap-1 rounded-full border-border bg-elev px-3 text-[13px]">
                 <span className="text-muted-foreground">Tone:&nbsp;</span>
