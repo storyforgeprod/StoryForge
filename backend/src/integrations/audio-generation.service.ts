@@ -40,11 +40,9 @@ export class AudioGenerationService {
   }
 
   async generateTextToSpeech(text: string, language: string = 'en', voiceId?: string): Promise<string> {
-    const voice = voiceId || 'alloy';
-
     try {
       this.logger.log(`🎙️ [Plan A] Generating audio with Azure TTS (${language})...`);
-      return await this.azureTTSService.synthesize(text, voice);
+      return await this.azureTTSService.synthesize(text, voiceId, language);
     } catch (planAError: unknown) {
       const errorMsg = planAError instanceof Error ? planAError.message : String(planAError);
       this.logger.warn(`⚠️ [Plan A] Azure TTS failed: ${errorMsg}. Falling back to Azure Speech...`);

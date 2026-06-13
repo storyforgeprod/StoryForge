@@ -22,10 +22,19 @@ export class AzureTTSService {
     this.logger.log(`AzureTTS configured endpoint=${this.endpoint} deployment=${this.deployment}`);
   }
 
-  async synthesize(text: string, voiceId: string): Promise<string> {
+  async synthesize(text: string, voiceId?: string, language: string = 'en'): Promise<string> {
     if (!text || text.trim().length === 0) {
       throw new Error('Text cannot be empty');
     }
+
+    // Map language to ElevenLabs voice, or use provided voiceId
+    const LANGUAGE_VOICE_MAP: Record<string, string> = {
+      'en': 'alloy',
+      'es': 'nova',
+      'pt': 'nova', 
+      'fr': 'nova',
+    };
+    const voice = voiceId || LANGUAGE_VOICE_MAP[language] || 'alloy';
 
     const url =
       `${this.endpoint}/openai/deployments/${this.deployment}/audio/speech` +
@@ -45,7 +54,7 @@ export class AzureTTSService {
         body: JSON.stringify({
           model: this.deployment,
           input: text,
-          voice: voiceId,
+          voice: voice,
           response_format: 'mp3',
         }),
       });
