@@ -75,14 +75,15 @@ backend/src/projects/
 **`finalizeFromVideoJob(videoJobId: string, userId: string, videoUrl: string): Promise<void>`**
 
 Steps (inside a `prisma.$transaction`):
-1. Load video job metadata → `{ imageJobId, audioJobId }`
-2. Load image job + metadata → `{ scriptId, style }` + result `imageUrls[]`
-3. Load audio job result → `{ audioUrl, audioLength }`
-4. Load script job metadata → `{ story, targetDuration }` + result `script`
-5. Count user's existing projects → derive title `"Story #N"`
-6. Create `Project`
-7. Create `Output` linked to project
-8. Update `projectId` on all four jobs
+1. Load video job — if `videoJob.projectId` is already set, return early (idempotency guard against Bull retries)
+2. Parse video job metadata → `{ imageJobId, audioJobId }`
+3. Load image job + metadata → `{ scriptId, style }` + result `imageUrls[]`
+4. Load audio job result → `{ audioUrl, audioLength }`
+5. Load script job metadata → `{ story, targetDuration }` + result `script`
+6. Count user's existing projects → derive title `"Story #N"`
+7. Create `Project`
+8. Create `Output` linked to project
+9. Update `projectId` on all four jobs
 
 **`getProjects(userId: string): Promise<ProjectResponseDto[]>`**
 
@@ -132,6 +133,7 @@ When creating `images`, `audio`, and `video` jobs, populate the `metadata` field
 ## Error Handling
 
 - `finalizeFromVideoJob` is fire-and-forget from the queue processor's perspective. Errors are logged as warnings.
+- Idempotent: if `videoJob.projectId` is already set, the method returns early — safe against Bull job retries.
 - If any upstream job is missing or has no result, the method throws internally, caught by the processor wrapper.
 - `getProjects` returns `[]` (not 404) when the user has no projects.
 - `getProjectById` throws `NotFoundException` for unknown or unauthorized projects.
