@@ -1,14 +1,35 @@
-import { Injectable, BadRequestException, NotFoundException, ForbiddenException } from '@nestjs/common';
-import { GenerateScriptDto, GenerateScriptResponseDto } from './dto/generate-script.dto';
-import { GenerateImagesDto, GenerateImagesResponseDto, ImageGenerationResult, StoryStyle } from './dto/generate-images.dto';
-import { GenerateAudioDto, GenerateAudioResponseDto, AudioGenerationResult } from './dto/generate-audio.dto';
-import { GenerateVideoDto, GenerateVideoResponseDto, VideoAssemblyResult } from './dto/generate-video.dto';
-import { PrismaService } from '../common/prisma/prisma.service';
-import { QueueService } from '../common/queue/queue.service';
-import { AzureOpenAIService } from '../integrations/azure-openai.service';
-import { ImageService } from '../integrations/image.service';
-import { AudioGenerationService } from '../integrations/audio-generation.service';
-import { VideoService } from '../integrations/video.service';
+import {
+  Injectable,
+  BadRequestException,
+  NotFoundException,
+  ForbiddenException,
+} from "@nestjs/common";
+import {
+  GenerateScriptDto,
+  GenerateScriptResponseDto,
+} from "./dto/generate-script.dto";
+import {
+  GenerateImagesDto,
+  GenerateImagesResponseDto,
+  ImageGenerationResult,
+  StoryStyle,
+} from "./dto/generate-images.dto";
+import {
+  GenerateAudioDto,
+  GenerateAudioResponseDto,
+  AudioGenerationResult,
+} from "./dto/generate-audio.dto";
+import {
+  GenerateVideoDto,
+  GenerateVideoResponseDto,
+  VideoAssemblyResult,
+} from "./dto/generate-video.dto";
+import { PrismaService } from "../common/prisma/prisma.service";
+import { QueueService } from "../common/queue/queue.service";
+import { AzureOpenAIService } from "../integrations/azure-openai.service";
+import { ImageService } from "../integrations/image.service";
+import { AudioGenerationService } from "../integrations/audio-generation.service";
+import { VideoService } from "../integrations/video.service";
 
 @Injectable()
 export class GenerateService {
@@ -22,7 +43,7 @@ export class GenerateService {
     private imageService: ImageService,
     private audioGenerationService: AudioGenerationService,
     private videoService: VideoService,
-  ) { }
+  ) {}
 
   /**
    * Generate script from story text
@@ -34,19 +55,19 @@ export class GenerateService {
     dto: GenerateScriptDto,
   ): Promise<GenerateScriptResponseDto> {
     if (!dto.story || dto.story.trim().length === 0) {
-      throw new BadRequestException('Story cannot be empty');
+      throw new BadRequestException("Story cannot be empty");
     }
 
     // Validate duration if provided
     const targetDuration = dto.targetDuration ?? 60;
     if (targetDuration < 30 || targetDuration > 120) {
-      throw new BadRequestException('Duration must be between 30-120 seconds');
+      throw new BadRequestException("Duration must be between 30-120 seconds");
     }
 
     // Validate scenes if provided
     const targetScenes = dto.targetScenes ?? 12;
     if (targetScenes < 1 || targetScenes > 12) {
-      throw new BadRequestException('Scenes must be between 1-12');
+      throw new BadRequestException("Scenes must be between 1-12");
     }
 
     // 0. Ensure user exists (auto-sync for first-time users from JWT)
@@ -59,8 +80,8 @@ export class GenerateService {
         data: {
           userId,
           projectId: null,
-          type: 'script',
-          status: 'pending',
+          type: "script",
+          status: "pending",
           progress: 0,
           // Store story + duration + scenes in metadata for later stages (audio generation)
           metadata: JSON.stringify({
@@ -73,8 +94,8 @@ export class GenerateService {
         },
       });
     } catch (error) {
-      console.error('Failed to create job record:', error);
-      throw new BadRequestException('Failed to create generation job');
+      console.error("Failed to create job record:", error);
+      throw new BadRequestException("Failed to create generation job");
     }
 
     // 2. Add to queue (async processing)
@@ -83,7 +104,7 @@ export class GenerateService {
         jobId: job.id,
         userId,
         projectId: null,
-        type: 'script',
+        type: "script",
         story: dto.story,
         targetDuration,
         targetScenes,
@@ -92,23 +113,23 @@ export class GenerateService {
         _startTime: Date.now(),
       });
     } catch (error) {
-      console.error('Failed to queue job:', error);
+      console.error("Failed to queue job:", error);
       // Update job to failed if queueing fails
       await this.prisma.job.update({
         where: { id: job.id },
         data: {
-          status: 'failed',
-          error: 'Failed to queue generation job',
+          status: "failed",
+          error: "Failed to queue generation job",
         },
       });
-      throw new BadRequestException('Failed to queue generation job');
+      throw new BadRequestException("Failed to queue generation job");
     }
 
     // 3. Return immediately (client doesn't wait for async processing)
     return {
       jobId: job.id,
-      status: 'pending',
-      message: 'Script generation queued',
+      status: "pending",
+      message: "Script generation queued",
       createdAt: job.createdAt,
     };
   }
@@ -120,7 +141,13 @@ export class GenerateService {
    */
   async generateScriptContent(
     userId: string,
-    data: { story: string; targetDuration?: number; targetScenes?: number; tone?: string; language?: string },
+    data: {
+      story: string;
+      targetDuration?: number;
+      targetScenes?: number;
+      tone?: string;
+      language?: string;
+    },
   ): Promise<{ script: string }> {
     const targetDuration = data.targetDuration ?? 60;
     const targetScenes = data.targetScenes ?? 12;
@@ -144,11 +171,11 @@ export class GenerateService {
     });
 
     if (!job) {
-      throw new NotFoundException('Job not found');
+      throw new NotFoundException("Job not found");
     }
 
     if (job.userId !== userId) {
-      throw new BadRequestException('Unauthorized access to this job');
+      throw new BadRequestException("Unauthorized access to this job");
     }
 
     return {
@@ -161,7 +188,6 @@ export class GenerateService {
       processingTimeMs: job.processingTimeMs,
     };
   }
-
 
   /**
    * Generate images from script
@@ -177,7 +203,7 @@ export class GenerateService {
 
     // 1. Validate input
     if (!dto.scriptId || dto.scriptId.trim().length === 0) {
-      throw new BadRequestException('scriptId is required');
+      throw new BadRequestException("scriptId is required");
     }
 
     // 2. Verify script job exists and belongs to user
@@ -186,11 +212,11 @@ export class GenerateService {
     });
 
     if (!scriptJob) {
-      throw new NotFoundException('Script job not found');
+      throw new NotFoundException("Script job not found");
     }
 
     if (scriptJob.userId !== userId) {
-      throw new ForbiddenException('Unauthorized access to this script');
+      throw new ForbiddenException("Unauthorized access to this script");
     }
 
     // 3. Create Image Job
@@ -200,15 +226,18 @@ export class GenerateService {
         data: {
           userId,
           projectId: scriptJob.projectId,
-          type: 'images',
-          status: 'pending',
+          type: "images",
+          status: "pending",
           progress: 0,
-          metadata: JSON.stringify({ scriptId: dto.scriptId, style: dto.style }),
+          metadata: JSON.stringify({
+            scriptId: dto.scriptId,
+            style: dto.style,
+          }),
         },
       });
     } catch (error) {
-      console.error('Failed to create image job:', error);
-      throw new BadRequestException('Failed to create image generation job');
+      console.error("Failed to create image job:", error);
+      throw new BadRequestException("Failed to create image generation job");
     }
 
     // 4. Queue image generation job
@@ -217,29 +246,29 @@ export class GenerateService {
         jobId: imageJob.id,
         userId,
         projectId: scriptJob.projectId,
-        type: 'images',
+        type: "images",
         scriptId: dto.scriptId,
         style: dto.style,
         imageDescription: dto.imageDescription,
         _startTime: Date.now(),
       });
     } catch (error) {
-      console.error('Failed to queue image job:', error);
+      console.error("Failed to queue image job:", error);
       await this.prisma.job.update({
         where: { id: imageJob.id },
         data: {
-          status: 'failed',
-          error: 'Failed to queue image generation job',
+          status: "failed",
+          error: "Failed to queue image generation job",
         },
       });
-      throw new BadRequestException('Failed to queue image generation job');
+      throw new BadRequestException("Failed to queue image generation job");
     }
 
     // 5. Return immediately
     return {
       jobId: imageJob.id,
-      status: 'pending',
-      message: 'Image generation queued',
+      status: "pending",
+      message: "Image generation queued",
       createdAt: imageJob.createdAt,
     };
   }
@@ -250,7 +279,12 @@ export class GenerateService {
    */
   async generateImageContent(
     userId: string,
-    data: { jobId: string; scriptId: string; style?: string; imageDescription?: string },
+    data: {
+      jobId: string;
+      scriptId: string;
+      style?: string;
+      imageDescription?: string;
+    },
   ): Promise<ImageGenerationResult> {
     // 1. Fetch script result
     const scriptJob = await this.prisma.job.findUnique({
@@ -258,7 +292,7 @@ export class GenerateService {
     });
 
     if (!scriptJob?.result) {
-      throw new BadRequestException('Script job not found or incomplete');
+      throw new BadRequestException("Script job not found or incomplete");
     }
 
     // 2. Parse script text
@@ -274,13 +308,13 @@ export class GenerateService {
     const scenes = this._extractScenes(scriptContent);
 
     if (!scenes.length) {
-      throw new BadRequestException('No scenes found in script');
+      throw new BadRequestException("No scenes found in script");
     }
 
     // 3.5 Validate scene count (prevent OOM on Render 512MB)
     if (scenes.length > this.MAX_SCENES) {
       throw new BadRequestException(
-        `Maximum ${this.MAX_SCENES} scenes allowed to prevent memory saturation. Your script has ${scenes.length} scenes.`
+        `Maximum ${this.MAX_SCENES} scenes allowed to prevent memory saturation. Your script has ${scenes.length} scenes.`,
       );
     }
 
@@ -298,7 +332,7 @@ export class GenerateService {
 
     return {
       imageUrls,
-      prompt: prompts.join('\n---\n'),
+      prompt: prompts.join("\n---\n"),
       generatedAt: new Date(),
     };
   }
@@ -321,8 +355,8 @@ export class GenerateService {
             id: userId,
             email: `user-${userId}@storyforge.local`,
             name: `User ${userId.substring(0, 8)}`,
-            role: 'USER',
-            provider: 'jwt',
+            role: "USER",
+            provider: "jwt",
           },
         });
       }
@@ -335,13 +369,15 @@ export class GenerateService {
    * Extract scene blocks from script (Scene 1, Scene 2, etc.)
    */
   private _extractScenes(script: string): string[] {
-    const matches = script.match(/(?:Scene\s+\d+[:\-]?.*?)(?=Scene\s+\d+|$)/gis);
+    const matches = script.match(
+      /(?:Scene\s+\d+[:\-]?.*?)(?=Scene\s+\d+|$)/gis,
+    );
 
     if (!matches?.length) {
       return [script];
     }
 
-    return matches.map(scene => scene.trim());
+    return matches.map((scene) => scene.trim());
   }
 
   /**
@@ -359,7 +395,7 @@ export class GenerateService {
     const matches = script.match(/\((\d+)s?\)/g) || [];
     let total = 0;
     for (const match of matches) {
-      const num = parseInt(match.replace(/\D/g, '') || '0', 10);
+      const num = parseInt(match.replace(/\D/g, "") || "0", 10);
       if (!isNaN(num)) {
         total += num;
       }
@@ -372,19 +408,25 @@ export class GenerateService {
    */
   private _buildScenePrompt(scene: string, style?: string): string {
     const cleaned = scene
-      .replace(/[*_#\[\]()]/g, '')
-      .replace(/\s+/g, ' ')
+      .replace(/[*_#\[\]()]/g, "")
+      .replace(/\s+/g, " ")
       .substring(0, 400);
 
     const styleDescriptions: Record<StoryStyle, string> = {
-      [StoryStyle.BOLD_COMIC]:   'bold comic book illustration with strong outlines, halftone dots, vibrant yellows and primary colors',
-      [StoryStyle.SOFT_CARTOON]: 'soft pastel cartoon illustration, rounded forms, gentle lavender and peach palette, friendly and warm',
-      [StoryStyle.RETRO_POP]:    'retro pop art illustration, warm cream and beige tones, vintage 60s aesthetic, clean geometric shapes',
-      [StoryStyle.MANGA_INK]:    'black and white manga ink illustration, high contrast, speed lines, dramatic screentone shading',
-      [StoryStyle.STORYBOOK]:    'dark atmospheric storybook illustration, warm candlelight, deep shadows, painterly texture',
-      [StoryStyle.TOON_3D]:      '3D cartoon render, bright sky-blue background, glossy smooth surfaces, Pixar-inspired character design',
+      [StoryStyle.BOLD_COMIC]:
+        "bold comic book illustration with strong outlines, halftone dots, vibrant yellows and primary colors",
+      [StoryStyle.SOFT_CARTOON]:
+        "soft pastel cartoon illustration, rounded forms, gentle lavender and peach palette, friendly and warm",
+      [StoryStyle.RETRO_POP]:
+        "retro pop art illustration, warm cream and beige tones, vintage 60s aesthetic, clean geometric shapes",
+      [StoryStyle.MANGA_INK]:
+        "black and white manga ink illustration, high contrast, speed lines, dramatic screentone shading",
+      [StoryStyle.STORYBOOK]:
+        "dark atmospheric storybook illustration, warm candlelight, deep shadows, painterly texture",
+      [StoryStyle.TOON_3D]:
+        "3D cartoon render, bright sky-blue background, glossy smooth surfaces, Pixar-inspired character design",
     };
-    const stylePrompt = styleDescriptions[style as StoryStyle] ?? 'illustrated';
+    const stylePrompt = styleDescriptions[style as StoryStyle] ?? "illustrated";
 
     return `${stylePrompt}, ${cleaned}, dramatic lighting, high detail, 4k composition, cinematic framing, YouTube Shorts visual`;
   }
@@ -403,7 +445,7 @@ export class GenerateService {
 
     // 1. Validate input
     if (!dto.scriptId || dto.scriptId.trim().length === 0) {
-      throw new BadRequestException('scriptId is required');
+      throw new BadRequestException("scriptId is required");
     }
 
     // 2. Verify script job exists and belongs to user
@@ -412,14 +454,14 @@ export class GenerateService {
     });
 
     if (!scriptJob) {
-      throw new NotFoundException('Script job not found');
+      throw new NotFoundException("Script job not found");
     }
 
     if (scriptJob.userId !== userId) {
-      throw new ForbiddenException('Unauthorized access to this script');
+      throw new ForbiddenException("Unauthorized access to this script");
     }
 
-    if (scriptJob.status !== 'completed') {
+    if (scriptJob.status !== "completed") {
       throw new BadRequestException(
         `Script job must be completed first (current: ${scriptJob.status})`,
       );
@@ -432,15 +474,15 @@ export class GenerateService {
         data: {
           userId,
           projectId: scriptJob.projectId,
-          type: 'audio',
-          status: 'pending',
+          type: "audio",
+          status: "pending",
           progress: 0,
           metadata: JSON.stringify({ scriptId: dto.scriptId }),
         },
       });
     } catch (error) {
-      console.error('Failed to create audio job:', error);
-      throw new BadRequestException('Failed to create audio generation job');
+      console.error("Failed to create audio job:", error);
+      throw new BadRequestException("Failed to create audio generation job");
     }
 
     // 4. Queue audio generation job
@@ -449,28 +491,28 @@ export class GenerateService {
         jobId: audioJob.id,
         userId,
         projectId: scriptJob.projectId,
-        type: 'audio',
+        type: "audio",
         scriptId: dto.scriptId,
         voiceId: dto.voiceId,
         _startTime: Date.now(),
       });
     } catch (error) {
-      console.error('Failed to queue audio job:', error);
+      console.error("Failed to queue audio job:", error);
       await this.prisma.job.update({
         where: { id: audioJob.id },
         data: {
-          status: 'failed',
-          error: 'Failed to queue audio generation job',
+          status: "failed",
+          error: "Failed to queue audio generation job",
         },
       });
-      throw new BadRequestException('Failed to queue audio generation job');
+      throw new BadRequestException("Failed to queue audio generation job");
     }
 
     // 5. Return immediately
     return {
       jobId: audioJob.id,
-      status: 'pending',
-      message: 'Audio generation queued',
+      status: "pending",
+      message: "Audio generation queued",
       createdAt: audioJob.createdAt,
     };
   }
@@ -489,7 +531,7 @@ export class GenerateService {
     });
 
     if (!scriptJob || !scriptJob.result) {
-      throw new BadRequestException('Script job not found or incomplete');
+      throw new BadRequestException("Script job not found or incomplete");
     }
 
     // 2. Parse script text
@@ -502,12 +544,12 @@ export class GenerateService {
     }
 
     // 3. Extract story + targetDuration from script job metadata
-    let story = '';
+    let story = "";
     let targetDuration = 60;
     try {
       if (scriptJob.metadata) {
         const metadata = JSON.parse(scriptJob.metadata);
-        story = metadata.story || '';
+        story = metadata.story || "";
         targetDuration = metadata.targetDuration || 60;
       }
     } catch (e) {
@@ -539,7 +581,7 @@ export class GenerateService {
     );
 
     // 4. Calculate audio length (rough estimate: 150 words per minute)
-    const wordCount = scriptText.split(' ').length;
+    const wordCount = scriptText.split(" ").length;
     const audioLength = Math.ceil((wordCount / 150) * 60);
 
     return {
@@ -564,11 +606,11 @@ export class GenerateService {
 
     // 1. Validate inputs
     if (!dto.imageJobId || dto.imageJobId.trim().length === 0) {
-      throw new BadRequestException('imageJobId is required');
+      throw new BadRequestException("imageJobId is required");
     }
 
     if (!dto.audioJobId || dto.audioJobId.trim().length === 0) {
-      throw new BadRequestException('audioJobId is required');
+      throw new BadRequestException("audioJobId is required");
     }
 
     // 2. Verify image job exists and belongs to user
@@ -577,10 +619,10 @@ export class GenerateService {
     });
 
     if (!imageJob || imageJob.userId !== userId) {
-      throw new ForbiddenException('Unauthorized access to this image job');
+      throw new ForbiddenException("Unauthorized access to this image job");
     }
 
-    if (imageJob.status !== 'completed') {
+    if (imageJob.status !== "completed") {
       throw new BadRequestException(
         `Image job must be completed first (current: ${imageJob.status})`,
       );
@@ -592,10 +634,10 @@ export class GenerateService {
     });
 
     if (!audioJob || audioJob.userId !== userId) {
-      throw new ForbiddenException('Unauthorized access to this audio job');
+      throw new ForbiddenException("Unauthorized access to this audio job");
     }
 
-    if (audioJob.status !== 'completed') {
+    if (audioJob.status !== "completed") {
       throw new BadRequestException(
         `Audio job must be completed first (current: ${audioJob.status})`,
       );
@@ -608,15 +650,18 @@ export class GenerateService {
         data: {
           userId,
           projectId: imageJob.projectId,
-          type: 'video',
-          status: 'pending',
+          type: "video",
+          status: "pending",
           progress: 0,
-          metadata: JSON.stringify({ imageJobId: dto.imageJobId, audioJobId: dto.audioJobId }),
+          metadata: JSON.stringify({
+            imageJobId: dto.imageJobId,
+            audioJobId: dto.audioJobId,
+          }),
         },
       });
     } catch (error) {
-      console.error('Failed to create video job:', error);
-      throw new BadRequestException('Failed to create video assembly job');
+      console.error("Failed to create video job:", error);
+      throw new BadRequestException("Failed to create video assembly job");
     }
 
     // 5. Queue the job
@@ -625,7 +670,7 @@ export class GenerateService {
         jobId: videoJob.id,
         userId,
         projectId: imageJob.projectId,
-        type: 'video',
+        type: "video",
         imageJobId: dto.imageJobId,
         audioJobId: dto.audioJobId,
         fps: dto.fps,
@@ -633,22 +678,22 @@ export class GenerateService {
         _startTime: Date.now(),
       });
     } catch (error) {
-      console.error('Failed to queue video job:', error);
+      console.error("Failed to queue video job:", error);
       await this.prisma.job.update({
         where: { id: videoJob.id },
         data: {
-          status: 'failed',
-          error: 'Failed to queue video assembly job',
+          status: "failed",
+          error: "Failed to queue video assembly job",
         },
       });
-      throw new BadRequestException('Failed to queue video assembly job');
+      throw new BadRequestException("Failed to queue video assembly job");
     }
 
     // 6. Return immediately
     return {
       jobId: videoJob.id,
-      status: 'pending',
-      message: 'Video assembly queued',
+      status: "pending",
+      message: "Video assembly queued",
       createdAt: videoJob.createdAt,
     };
   }
@@ -659,18 +704,24 @@ export class GenerateService {
    */
   async generateVideoContent(
     userId: string,
-    data: { jobId: string; imageJobId: string; audioJobId: string; fps?: number; bitrate?: string },
+    data: {
+      jobId: string;
+      imageJobId: string;
+      audioJobId: string;
+      fps?: number;
+      bitrate?: string;
+    },
   ): Promise<VideoAssemblyResult> {
     // 1. Fetch the image job result
     const imageJob = await this.prisma.job.findUnique({
       where: { id: data.imageJobId },
     });
 
-    if (!imageJob || imageJob.status !== 'completed') {
-      throw new BadRequestException('Image job not completed');
+    if (!imageJob || imageJob.status !== "completed") {
+      throw new BadRequestException("Image job not completed");
     }
 
-    const imageResult = JSON.parse(imageJob.result || '{}');
+    const imageResult = JSON.parse(imageJob.result || "{}");
     const imageUrls = imageResult.imageUrls || [];
 
     // 2. Fetch the audio job result
@@ -678,30 +729,34 @@ export class GenerateService {
       where: { id: data.audioJobId },
     });
 
-    if (!audioJob || audioJob.status !== 'completed') {
-      throw new BadRequestException('Audio job not completed');
+    if (!audioJob || audioJob.status !== "completed") {
+      throw new BadRequestException("Audio job not completed");
     }
 
-    const audioResult = JSON.parse(audioJob.result || '{}');
-    const audioUrl = audioResult.audioUrl || '';
+    const audioResult = JSON.parse(audioJob.result || "{}");
+    const audioUrl = audioResult.audioUrl || "";
 
     // 3. Validate we have both resources
     if (!imageUrls || imageUrls.length === 0) {
-      throw new BadRequestException('No image URLs found in image job result');
+      throw new BadRequestException("No image URLs found in image job result");
     }
 
     if (!audioUrl) {
-      throw new BadRequestException('No audio URL found in audio job result');
+      throw new BadRequestException("No audio URL found in audio job result");
     }
 
     // 4. Call VideoService to assemble video
     // Pass actual audio duration so video isn't cut off
-    const videoUrl = await this.videoService.assembleVideo(imageUrls, audioUrl, {
-      fps: data.fps,
-      bitrate: data.bitrate,
-      jobId: data.jobId,
-      audioDuration: audioResult.audioLength || 60,
-    });
+    const videoUrl = await this.videoService.assembleVideo(
+      imageUrls,
+      audioUrl,
+      {
+        fps: data.fps,
+        bitrate: data.bitrate,
+        jobId: data.jobId,
+        audioDuration: audioResult.audioLength || 60,
+      },
+    );
 
     const duration = audioResult.audioLength || 60;
     const fileSize = 0; // video is in cloud storage; local size not available
@@ -710,7 +765,7 @@ export class GenerateService {
       videoUrl,
       duration,
       fileSize,
-      format: 'mp4',
+      format: "mp4",
       generatedAt: new Date(),
     };
   }
@@ -724,13 +779,17 @@ export class GenerateService {
     type: string,
     body: { content?: string; jobId?: string },
   ): Promise<{ jobId: string; type: string }> {
-    const validTypes = ['script', 'images', 'audio'];
+    const validTypes = ["script", "images", "audio"];
     if (!validTypes.includes(type)) {
-      throw new BadRequestException(`Invalid preset type. Must be one of: ${validTypes.join(', ')}`);
+      throw new BadRequestException(
+        `Invalid preset type. Must be one of: ${validTypes.join(", ")}`,
+      );
     }
 
     if (!body.content && !body.jobId) {
-      throw new BadRequestException('Either "content" or "jobId" must be provided');
+      throw new BadRequestException(
+        'Either "content" or "jobId" must be provided',
+      );
     }
 
     try {
@@ -740,9 +799,9 @@ export class GenerateService {
           userId,
           projectId: null,
           type,
-          status: 'completed',
+          status: "completed",
           progress: 100,
-          result: body.content || body.jobId || '',
+          result: body.content || body.jobId || "",
           createdAt: new Date(),
           updatedAt: new Date(),
         },
@@ -753,8 +812,8 @@ export class GenerateService {
         type,
       };
     } catch (error) {
-      console.error('Failed to save preset:', error);
-      throw new BadRequestException('Failed to save preset job');
+      console.error("Failed to save preset:", error);
+      throw new BadRequestException("Failed to save preset job");
     }
   }
 }

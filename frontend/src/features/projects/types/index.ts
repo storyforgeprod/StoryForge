@@ -1,4 +1,4 @@
-export type ProjectStatus = 'draft' | 'processing' | 'completed' | 'failed';
+export type ProjectStatus = "draft" | "processing" | "completed" | "failed";
 
 export type ProjectOutput = {
   videoUrl: string;
