@@ -4,5 +4,3 @@ dist
 correcciones
 avances
 .env.production
-frontend/pnpm-lock.yaml
-frontend/pnpm-workspace.yaml
