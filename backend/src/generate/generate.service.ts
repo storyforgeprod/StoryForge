@@ -203,6 +203,7 @@ export class GenerateService {
           type: 'images',
           status: 'pending',
           progress: 0,
+          metadata: JSON.stringify({ scriptId: dto.scriptId, style: dto.style }),
         },
       });
     } catch (error) {
@@ -434,6 +435,7 @@ export class GenerateService {
           type: 'audio',
           status: 'pending',
           progress: 0,
+          metadata: JSON.stringify({ scriptId: dto.scriptId }),
         },
       });
     } catch (error) {
@@ -609,6 +611,7 @@ export class GenerateService {
           type: 'video',
           status: 'pending',
           progress: 0,
+          metadata: JSON.stringify({ imageJobId: dto.imageJobId, audioJobId: dto.audioJobId }),
         },
       });
     } catch (error) {
