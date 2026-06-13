@@ -44,6 +44,8 @@ export function useProjects(): { state: State; refresh: () => void } {
       })
       .catch((err: unknown) => {
         if (cancelled) return;
+        // Native Error instances (e.g. from fetch itself) use the fallback —
+        // only plain API error objects { status, message } expose their message.
         const message =
           typeof err === 'object' &&
           err !== null &&
@@ -61,6 +63,7 @@ export function useProjects(): { state: State; refresh: () => void } {
     };
   }, [fetchKey, stopPoll]);
 
+  // stopPoll is returned directly as the cleanup function — clears interval on unmount.
   useEffect(() => stopPoll, [stopPoll]);
 
   return { state, refresh };
