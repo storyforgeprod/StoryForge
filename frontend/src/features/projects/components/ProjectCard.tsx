@@ -34,16 +34,25 @@ export const ProjectCard = ({ project, isExpanded, onToggle }: ProjectCardProps)
   const canExpand = project.status === 'completed' && project.output !== null;
 
   return (
-    <div className="overflow-hidden rounded-xl border border-border bg-card">
+    <div
+      className={cn(
+        'overflow-hidden rounded-xl border border-border bg-card',
+        canExpand && 'transition hover:-translate-y-[3px] hover:border-bd2',
+      )}
+    >
       <button
         type="button"
         onClick={canExpand ? onToggle : undefined}
-        className={cn(
-          'w-full text-left transition',
-          canExpand && 'cursor-pointer hover:-translate-y-[3px] hover:border-bd2',
-          !canExpand && 'cursor-default',
-        )}
+        tabIndex={canExpand ? undefined : -1}
+        className={cn('w-full text-left', canExpand ? 'cursor-pointer' : 'cursor-default')}
         aria-expanded={canExpand ? isExpanded : undefined}
+        aria-label={
+          canExpand
+            ? isExpanded
+              ? 'Collapse video panel'
+              : 'Expand video panel'
+            : undefined
+        }
       >
         <div className="relative aspect-[9/16] max-h-[180px] overflow-hidden">
           <StyleThumb style={project.style} className="h-full w-full object-cover" />
@@ -79,8 +88,7 @@ export const ProjectCard = ({ project, isExpanded, onToggle }: ProjectCardProps)
           <video
             controls
             src={project.output.videoUrl}
-            className="w-full rounded-lg"
-            style={{ maxHeight: '400px' }}
+            className="w-full rounded-lg max-h-[400px]"
           />
           <a href={project.output.videoUrl} download className="mt-3 block">
             <Button variant="outline" size="sm" className="w-full gap-2">
