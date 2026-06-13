@@ -59,13 +59,16 @@ describe('Azure integration wrappers', () => {
     });
 
     it('should generate image URLs from AzureFoundryImageService', async () => {
-        (foundryImageService as any).client = {
-            getImages: jest.fn().mockResolvedValue({
-                data: [{ url: 'https://example.com/image-1.png' }],
-            }),
-        };
+        const mockFetch = jest.spyOn(global, 'fetch').mockResolvedValueOnce({
+            ok: true,
+            text: jest.fn().mockResolvedValue(JSON.stringify({
+                data: [{ b64_json: 'abc123' }],
+            })),
+        } as any);
 
         const urls = await foundryImageService.generateImages('user-2', 'A shiny robot in a neon city', 1);
-        expect(urls).toEqual(['https://example.com/image-1.png']);
+        expect(urls).toEqual(['data:image/png;base64,abc123']);
+
+        mockFetch.mockRestore();
     });
 });
