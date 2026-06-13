@@ -103,18 +103,47 @@ export class ProjectService {
     });
   }
 
-  async getProjects(_userId: string): Promise<ProjectResponseDto[]> {
-    throw new Error('Not implemented');
+  async getProjects(userId: string): Promise<ProjectResponseDto[]> {
+    const projects = await this.prisma.project.findMany({
+      where: { userId },
+      orderBy: { createdAt: 'desc' },
+      include: { outputs: { orderBy: { createdAt: 'desc' }, take: 1 } },
+    });
+    return projects.map((p) => this._mapToDto(p));
   }
 
   async getProjectById(
-    _projectId: string,
-    _userId: string,
+    projectId: string,
+    userId: string,
   ): Promise<ProjectResponseDto> {
-    throw new Error('Not implemented');
+    const project = await this.prisma.project.findUnique({
+      where: { id: projectId },
+      include: { outputs: { orderBy: { createdAt: 'desc' }, take: 1 } },
+    });
+    if (!project || project.userId !== userId) {
+      throw new NotFoundException(`Project ${projectId} not found`);
+    }
+    return this._mapToDto(project);
   }
 
-  private _mapToDto(_project: Record<string, any> & { outputs?: any[] }): ProjectResponseDto {
-    throw new Error('Not implemented');
+  private _mapToDto(project: Record<string, any> & { outputs?: any[] }): ProjectResponseDto {
+    const output = project.outputs?.[0] ?? null;
+    return {
+      id: project.id,
+      title: project.title,
+      style: project.style,
+      duration: project.duration,
+      status: project.status,
+      createdAt: project.createdAt,
+      output: output
+        ? {
+            videoUrl: output.videoUrl ?? '',
+            audioUrl: output.audioUrl ?? null,
+            images: output.images ?? [],
+            script: output.script ?? null,
+            duration: output.duration ?? null,
+          }
+        : null,
+    };
   }
 }
