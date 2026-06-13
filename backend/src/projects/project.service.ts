@@ -1,4 +1,5 @@
 import { Injectable, Logger, NotFoundException } from '@nestjs/common';
+import { Project, Output } from '@prisma/client';
 import { PrismaService } from '../common/prisma/prisma.service';
 import { ProjectResponseDto } from './dto/project-response.dto';
 
@@ -126,7 +127,7 @@ export class ProjectService {
     return this._mapToDto(project);
   }
 
-  private _mapToDto(project: Record<string, any> & { outputs?: any[] }): ProjectResponseDto {
+  private _mapToDto(project: Project & { outputs: Output[] }): ProjectResponseDto {
     const output = project.outputs?.[0] ?? null;
     return {
       id: project.id,
