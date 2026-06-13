@@ -2,6 +2,7 @@ import { Processor, Process } from '@nestjs/bull';
 import { Job } from 'bull';
 import { GenerateService } from './generate.service';
 import { PrismaService } from '../common/prisma/prisma.service';
+import { ProjectService } from '../projects/project.service';
 import { Logger } from '@nestjs/common';
 
 interface GenerationJobData {
@@ -32,6 +33,7 @@ export class GenerateQueueProcessor {
   constructor(
     private prisma: PrismaService,
     private generateService: GenerateService,
+    private readonly projectService: ProjectService,
   ) {
     this.logger.log('✅ Queue processor initialized for "generation" queue');
   }
@@ -121,6 +123,19 @@ export class GenerateQueueProcessor {
       this.logger.log(
         `✅ [${type.toUpperCase()}] Job ${jobId} COMPLETE ⏱️  (exec: ${executionTimeMs}ms, db: ${Date.now() - dbCompleteStart}ms, total: ${totalTimeMs}ms)`,
       );
+
+      if (type === 'video') {
+        const videoUrl = (result as { videoUrl?: string })?.videoUrl;
+        if (videoUrl) {
+          try {
+            await this.projectService.finalizeFromVideoJob(jobId, userId, videoUrl);
+            this.logger.log(`[VIDEO] ✅ Project finalized for job ${jobId}`);
+          } catch (err) {
+            this.logger.warn(`[VIDEO] ⚠️  Project finalization failed for job ${jobId}: ${err}`);
+          }
+        }
+      }
+
       return { success: true, jobId, executionTimeMs };
     } catch (error) {
       const errorMsg = error instanceof Error ? error.message : 'Unknown error';
