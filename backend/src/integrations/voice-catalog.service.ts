@@ -48,6 +48,8 @@ export class VoiceCatalogService {
   };
 
   // Azure TTS Voices (Plan A - OpenAI voices)
+  // NOTE: Plan A only works reliably for English; removed from es/pt/fr to prevent 404 errors
+  // Users for non-English languages will use Plan B (Azure Speech) voices only
   private AZURE_TTS_VOICES: Record<string, VoiceMeta[]> = {
     en: [
       { id: 'alloy', name: 'Alloy', provider: 'azure-tts', tag: 'Balanced' },
@@ -61,15 +63,6 @@ export class VoiceCatalogService {
         provider: 'azure-tts',
         tag: 'Soft',
       },
-    ],
-    es: [
-      { id: 'nova', name: 'Nova', provider: 'azure-tts', tag: 'Energetic' },
-    ],
-    pt: [
-      { id: 'nova', name: 'Nova', provider: 'azure-tts', tag: 'Energetic' },
-    ],
-    fr: [
-      { id: 'nova', name: 'Nova', provider: 'azure-tts', tag: 'Energetic' },
     ],
   };
 

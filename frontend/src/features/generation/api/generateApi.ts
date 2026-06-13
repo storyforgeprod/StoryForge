@@ -21,13 +21,28 @@ function getHeaders(additionalHeaders: Record<string, string> = {}) {
 
 async function handleResponse<T>(res: Response): Promise<T> {
     if (res.ok) return res.json() as Promise<T>;
+    
     let message = 'Error de conexión. Revisá tu internet.';
     try {
         const body = await res.json();
-        if (typeof body.message === 'string') message = body.message;
+        if (typeof body.message === 'string') {
+          message = body.message;
+        }
     } catch {
         // ignore parse error
     }
+    
+    // Map specific error patterns to user-friendly messages
+    if (message.includes('not available') && message.includes('language')) {
+      message = 'Esta voz no está disponible para este idioma.';
+    } else if (message.includes('Unsupported voice')) {
+      message = 'Esta voz no está disponible en este momento. Intenta con otra.';
+    } else if (res.status === 500 && message === 'Internal server error') {
+      message = 'Error temporal en el servicio de voz. Intenta de nuevo.';
+    } else if (res.status === 404) {
+      message = 'Recurso no encontrado. Intenta con otra voz.';
+    }
+    
     const err: ApiError = { status: res.status, message };
     throw err;
 }

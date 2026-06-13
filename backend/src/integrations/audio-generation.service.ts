@@ -63,9 +63,25 @@ export class AudioGenerationService {
         const errorMsg =
           planAError instanceof Error ? planAError.message : String(planAError);
         this.logger.warn(
-          `⚠️ [Plan A] Azure TTS failed: ${errorMsg}. Falling back to Azure Speech (${voiceId})...`,
+          `⚠️ [Plan A] Azure TTS failed: ${errorMsg}. Validating fallback to Plan B...`,
         );
-        // Fallback to Plan B with same voiceId if it's valid for Azure Speech
+
+        // Before attempting fallback, validate that voiceId exists in Plan B catalog
+        if (voiceId) {
+          const voiceInPlanB = this.voiceCatalogService.getVoice(
+            voiceId,
+            language,
+          );
+          if (!voiceInPlanB || voiceInPlanB.provider !== 'azure-speech') {
+            const msg = `Voice ${voiceId} not available for language ${language} in fallback provider (Plan B)`;
+            this.logger.error(`❌ [Fallback Validation] ${msg}`);
+            throw new Error(msg);
+          }
+        }
+
+        this.logger.log(
+          `↪️ [Fallback] Attempting Plan B (Azure Speech) with voice: ${voiceId}...`,
+        );
         return await this.generateWithAzureSpeechNativo(
           text,
           language,

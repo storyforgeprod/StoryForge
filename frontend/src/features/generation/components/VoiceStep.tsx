@@ -1,5 +1,5 @@
 import { useRef, useState } from 'react';
-import { Pause, Play, Loader2 } from 'lucide-react';
+import { Pause, Play, Loader2, AlertCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Label } from '@/components/ui/label';
@@ -18,7 +18,7 @@ export type VoiceStepProps = {
 };
 
 export const VoiceStep = ({ value, language = 'en', onChange, onContinue }: VoiceStepProps) => {
-  const { voices, loading, error } = useAvailableVoices(language);
+  const { voices, loading, error, isVoiceAvailable } = useAvailableVoices(language);
   const [playingId, setPlayingId] = useState<string | null>(null);
   const [sampleLoading, setSampleLoading] = useState<string | null>(null);
   const audioRefs = useRef<Record<string, HTMLAudioElement | null>>({});
@@ -112,61 +112,101 @@ export const VoiceStep = ({ value, language = 'en', onChange, onContinue }: Voic
           const isChecked = value === voice.id;
           const isPlaying = playingId === voice.id;
           const isLoadingSample = sampleLoading === voice.id;
+          const isAvailable = isVoiceAvailable(voice.id);
 
           return (
-            <div
-              key={voice.id}
-              className={cn(
-                'flex items-center gap-3.5 rounded-xl border p-4 transition-all',
-                isChecked
-                  ? 'border-primary bg-acc-soft shadow-[0_0_0_1px_var(--primary)]'
-                  : 'border-border bg-card hover:border-bd2',
-              )}
-            >
-              <button
-                type="button"
-                onClick={() => handlePlay(voice)}
-                disabled={isLoadingSample}
-                aria-label={`${isPlaying ? 'Pause' : 'Play'} ${voice.name}`}
-                className={cn(
-                  'grid h-11 w-11 flex-none place-items-center rounded-full border transition disabled:opacity-50',
-                  isPlaying
-                    ? 'border-transparent bg-primary text-on-acc'
-                    : 'border-border bg-elev text-foreground hover:border-transparent hover:bg-primary hover:text-on-acc',
-                )}
-              >
-                {isLoadingSample ? (
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                ) : isPlaying ? (
-                  <Pause className="h-4 w-4" />
-                ) : (
-                  <Play className="h-4 w-4" />
-                )}
-              </button>
-
-              <Label htmlFor={radioId} className="min-w-0 flex-1 cursor-pointer">
-                <span className="flex items-center gap-2 text-[14.5px] font-bold text-foreground">
-                  {voice.name}
-                  <span className="rounded-full bg-elev2 px-[7px] py-0.5 text-[10.5px] font-semibold text-muted-foreground">
-                    {voice.tag}
-                  </span>
-                </span>
-              </Label>
-
+            <div key={voice.id} className="group relative">
               <div
-                className={cn('flex h-[26px] w-[78px] items-end gap-[3px] transition-opacity', isPlaying ? 'opacity-100' : 'opacity-25')}
-                aria-hidden="true"
+                className={cn(
+                  'flex items-center gap-3.5 rounded-xl border p-4 transition-all',
+                  !isAvailable && 'opacity-50 cursor-not-allowed',
+                  isChecked
+                    ? 'border-primary bg-acc-soft shadow-[0_0_0_1px_var(--primary)]'
+                    : 'border-border bg-card hover:border-bd2',
+                  !isAvailable && 'border-muted-foreground/50',
+                )}
               >
-                {EQ_DELAYS.map((delay, i) => (
-                  <span key={i} className={cn('h-[30%] flex-1 rounded-[2px] bg-primary', isPlaying && `animate-eq ${delay}`)} />
-                ))}
+                <button
+                  type="button"
+                  onClick={() => isAvailable && handlePlay(voice)}
+                  disabled={isLoadingSample || !isAvailable}
+                  aria-label={`${isPlaying ? 'Pause' : 'Play'} ${voice.name}`}
+                  className={cn(
+                    'grid h-11 w-11 flex-none place-items-center rounded-full border transition disabled:opacity-50',
+                    isPlaying
+                      ? 'border-transparent bg-primary text-on-acc'
+                      : 'border-border bg-elev text-foreground hover:border-transparent hover:bg-primary hover:text-on-acc',
+                  )}
+                >
+                  {isLoadingSample ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : isPlaying ? (
+                    <Pause className="h-4 w-4" />
+                  ) : (
+                    <Play className="h-4 w-4" />
+                  )}
+                </button>
+
+                <Label
+                  htmlFor={isAvailable ? radioId : undefined}
+                  className={cn(
+                    'min-w-0 flex-1',
+                    isAvailable ? 'cursor-pointer' : 'cursor-not-allowed',
+                  )}
+                >
+                  <span className="flex items-center gap-2 text-[14.5px] font-bold text-foreground">
+                    {voice.name}
+                    <span className="rounded-full bg-elev2 px-[7px] py-0.5 text-[10.5px] font-semibold text-muted-foreground">
+                      {voice.tag}
+                    </span>
+                    {!isAvailable && (
+                      <AlertCircle className="h-3.5 w-3.5 text-muted-foreground" />
+                    )}
+                  </span>
+                </Label>
+
+                <div
+                  className={cn(
+                    'flex h-[26px] w-[78px] items-end gap-[3px] transition-opacity',
+                    isPlaying ? 'opacity-100' : 'opacity-25',
+                  )}
+                  aria-hidden="true"
+                >
+                  {EQ_DELAYS.map((delay, i) => (
+                    <span
+                      key={i}
+                      className={cn(
+                        'h-[30%] flex-1 rounded-[2px] bg-primary',
+                        isPlaying && `animate-eq ${delay}`,
+                      )}
+                    />
+                  ))}
+                </div>
+
+                {isAvailable ? (
+                  <RadioGroupItem
+                    id={radioId}
+                    value={voice.id}
+                    aria-label={voice.name}
+                    className="h-[22px] w-[22px] flex-none"
+                  />
+                ) : (
+                  <div className="h-[22px] w-[22px] flex-none" />
+                )}
+
+                <audio
+                  ref={(el) => {
+                    audioRefs.current[voice.id] = el;
+                  }}
+                  onEnded={() => setPlayingId(null)}
+                />
               </div>
 
-              <RadioGroupItem id={radioId} value={voice.id} aria-label={voice.name} className="h-[22px] w-[22px] flex-none" />
-              <audio
-                ref={(el) => { audioRefs.current[voice.id] = el; }}
-                onEnded={() => setPlayingId(null)}
-              />
+              {!isAvailable && (
+                <div className="absolute -top-8 left-4 hidden group-hover:block bg-slate-900 text-white text-xs px-2 py-1 rounded whitespace-nowrap z-10">
+                  Not available for {language.toUpperCase()}
+                </div>
+              )}
             </div>
           );
         })}
