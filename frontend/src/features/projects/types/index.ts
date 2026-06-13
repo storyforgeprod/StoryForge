@@ -1,3 +1,5 @@
+import type { StoryStyle } from '@/features/generation';
+
 export type ProjectStatus = "draft" | "processing" | "completed" | "failed";
 
 export type ProjectOutput = {
@@ -11,7 +13,7 @@ export type ProjectOutput = {
 export type Project = {
   id: string;
   title: string;
-  style: string;
+  style: StoryStyle;
   duration: number;
   status: ProjectStatus;
   createdAt: string;
