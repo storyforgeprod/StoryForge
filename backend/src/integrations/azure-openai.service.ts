@@ -198,12 +198,13 @@ Provide only the script in the exact format above, no additional commentary.`;
         story: string,
         targetDuration: number = 60,
         sceneCount: number = 1,
+        language: string = 'en',
     ): Promise<string> {
         if (!story || story.trim().length === 0) {
             throw new Error('Story cannot be empty');
         }
 
-        const prompt = this.buildAudioNarrationPrompt(story, targetDuration, sceneCount);
+        const prompt = this.buildAudioNarrationPrompt(story, targetDuration, sceneCount, language);
         const start = Date.now();
 
         try {
@@ -232,11 +233,20 @@ Provide only the script in the exact format above, no additional commentary.`;
         }
     }
 
-    private buildAudioNarrationPrompt(story: string, targetDuration: number = 60, sceneCount: number = 1): string {
+    private buildAudioNarrationPrompt(story: string, targetDuration: number = 60, sceneCount: number = 1, language: string = 'en'): string {
         const wordsPerSecond = 2.5; // Average speaking rate
         const targetWords = Math.round(targetDuration * wordsPerSecond);
         
+        const LANGUAGE_NAMES: Record<string, string> = {
+            'en': 'English',
+            'es': 'Spanish',
+            'pt': 'Portuguese',
+            'fr': 'French',
+        };
+        const languageName = LANGUAGE_NAMES[language] || 'English';
+        
         return `You are a professional voice-over artist specializing in YouTube Shorts narration.
+You will respond ONLY in ${languageName}.
 
 Create a compelling ${targetDuration}-second narration for a short-form video.
 

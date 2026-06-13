@@ -572,6 +572,7 @@ export class GenerateService {
         story,
         targetDuration,
         sceneCount,
+        language,
       );
     } else {
       // Fallback: use script if story not available
