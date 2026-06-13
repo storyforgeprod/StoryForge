@@ -8,3 +8,4 @@ dist-ssr
 correcciones
 avances
 .env.production
+.pnpm-lock.yaml
