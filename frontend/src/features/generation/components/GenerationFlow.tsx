@@ -124,6 +124,7 @@ export const GenerationFlow = ({ onStepChange }: GenerationFlowProps) => {
       {step === 'voice' && (
         <VoiceStep
           value={voiceId}
+          language={language}
           onChange={setVoiceId}
           onContinue={() => navigate('video')}
         />

@@ -12,6 +12,7 @@ import { ImageService } from "../integrations/image.service";
 import { AzureTTSService } from "../integrations/azure-tts.service";
 import { AudioGenerationService } from "../integrations/audio-generation.service";
 import { VideoService } from "../integrations/video.service";
+import { VoiceCatalogService } from "../integrations/voice-catalog.service";
 
 @Module({
   imports: [
@@ -32,6 +33,7 @@ import { VideoService } from "../integrations/video.service";
     AzureTTSService,
     AudioGenerationService,
     VideoService,
+    VoiceCatalogService,
   ],
   exports: [
     GenerateService,
@@ -41,6 +43,7 @@ import { VideoService } from "../integrations/video.service";
     AzureTTSService,
     AudioGenerationService,
     VideoService,
+    VoiceCatalogService,
   ],
 })
 export class GenerateModule {}

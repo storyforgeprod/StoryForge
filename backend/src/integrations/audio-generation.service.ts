@@ -2,6 +2,7 @@ import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import * as SpeechSDK from 'microsoft-cognitiveservices-speech-sdk';
 import { AzureTTSService } from './azure-tts.service';
+import { VoiceCatalogService } from './voice-catalog.service';
 
 // Map language codes to Azure Speech neural voices
 const LANGUAGE_VOICE_MAP: Record<string, string> = {
@@ -29,6 +30,7 @@ export class AudioGenerationService {
 
   constructor(
     private readonly azureTTSService: AzureTTSService,
+    private readonly voiceCatalogService: VoiceCatalogService,
     private readonly configService: ConfigService,
   ) {}
 
@@ -39,25 +41,52 @@ export class AudioGenerationService {
     return LANGUAGE_VOICE_MAP[language] || LANGUAGE_VOICE_MAP['en'];
   }
 
-  async generateTextToSpeech(text: string, language: string = 'en', voiceId?: string): Promise<string> {
-    try {
-      this.logger.log(`🎙️ [Plan A] Generating audio with Azure TTS (${language})...`);
-      return await this.azureTTSService.synthesize(text, voiceId, language);
-    } catch (planAError: unknown) {
-      const errorMsg = planAError instanceof Error ? planAError.message : String(planAError);
-      this.logger.warn(`⚠️ [Plan A] Azure TTS failed: ${errorMsg}. Falling back to Azure Speech...`);
+  async generateTextToSpeech(
+    text: string,
+    language: string = 'en',
+    voiceId?: string,
+    voiceProvider?: 'azure-tts' | 'azure-speech',
+  ): Promise<string> {
+    // Determine which provider to use
+    const provider =
+      voiceProvider ||
+      this.voiceCatalogService.getVoiceProvider(voiceId || '', language);
 
+    // If Plan A (Azure TTS) is requested, try it first with fallback to Plan B
+    if (provider === 'azure-tts') {
       try {
-        return await this.generateWithAzureSpeechNativo(text, language);
-      } catch (azureError: unknown) {
-        const azureMsg = azureError instanceof Error ? azureError.message : String(azureError);
-        this.logger.error(`❌ [Plan B] Azure Speech also failed: ${azureMsg}`);
-        throw new Error('Servicio de Text-to-Speech no disponible temporalmente.');
+        this.logger.log(
+          `🎙️ [Plan A] Generating audio with Azure TTS (voice: ${voiceId}, language: ${language})...`,
+        );
+        return await this.azureTTSService.synthesize(text, voiceId, language);
+      } catch (planAError: unknown) {
+        const errorMsg =
+          planAError instanceof Error ? planAError.message : String(planAError);
+        this.logger.warn(
+          `⚠️ [Plan A] Azure TTS failed: ${errorMsg}. Falling back to Azure Speech (${voiceId})...`,
+        );
+        // Fallback to Plan B with same voiceId if it's valid for Azure Speech
+        return await this.generateWithAzureSpeechNativo(
+          text,
+          language,
+          voiceId,
+        );
       }
+    } else {
+      // Plan B (Azure Speech) direct
+      return await this.generateWithAzureSpeechNativo(
+        text,
+        language,
+        voiceId,
+      );
     }
   }
 
-  private async generateWithAzureSpeechNativo(text: string, language: string = 'en'): Promise<string> {
+  private async generateWithAzureSpeechNativo(
+    text: string,
+    language: string = 'en',
+    voiceId?: string,
+  ): Promise<string> {
     return new Promise((resolve, reject) => {
       const apiKey = this.configService.get('AZURE_SPEECH_API_KEY');
       const region = this.configService.get('AZURE_SPEECH_REGION');
@@ -71,22 +100,34 @@ export class AudioGenerationService {
         return;
       }
 
-      const speechConfig = SpeechSDK.SpeechConfig.fromSubscription(apiKey, region);
+      const speechConfig = SpeechSDK.SpeechConfig.fromSubscription(
+        apiKey,
+        region,
+      );
       speechConfig.speechSynthesisOutputFormat =
         SpeechSDK.SpeechSynthesisOutputFormat.Audio24Khz160KBitRateMonoMp3;
-      
-      // Select voice based on language
-      const voiceName = this.getVoiceForLanguage(language);
-      speechConfig.speechSynthesisVoiceName = voiceName;
-      
-      this.logger.log(`🔊 [Plan B] Synthesizing with Azure Speech (${language} → ${voiceName})...`);
 
-      const synthesizer = new SpeechSDK.SpeechSynthesizer(speechConfig, null);
+      // Use provided voiceId, or map language to default
+      const voiceName =
+        voiceId || this.getVoiceForLanguage(language);
+      speechConfig.speechSynthesisVoiceName = voiceName;
+
+      this.logger.log(
+        `🔊 [Plan B] Synthesizing with Azure Speech (voice: ${voiceName}, language: ${language})...`,
+      );
+
+      const synthesizer = new SpeechSDK.SpeechSynthesizer(
+        speechConfig,
+        null,
+      );
 
       synthesizer.speakTextAsync(
         text,
         (result: SpeechSDK.SpeechSynthesisResult) => {
-          if (result.reason === SpeechSDK.ResultReason.SynthesizingAudioCompleted) {
+          if (
+            result.reason ===
+            SpeechSDK.ResultReason.SynthesizingAudioCompleted
+          ) {
             synthesizer.close();
             const audioBuffer = Buffer.from(result.audioData);
             const base64 = audioBuffer.toString('base64');
@@ -94,7 +135,11 @@ export class AudioGenerationService {
             resolve(`data:audio/mpeg;base64,${base64}`);
           } else {
             synthesizer.close();
-            reject(new Error(`Azure Speech failed: ${result.errorDetails || 'Unknown error'}`));
+            reject(
+              new Error(
+                `Azure Speech failed: ${result.errorDetails || 'Unknown error'}`,
+              ),
+            );
           }
         },
         (error: string) => {

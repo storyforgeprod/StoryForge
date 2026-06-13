@@ -1,51 +1,98 @@
 import { useRef, useState } from 'react';
-import { Pause, Play } from 'lucide-react';
+import { Pause, Play, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Label } from '@/components/ui/label';
 import { cn } from '@/lib/utils';
-
-type VoiceMeta = {
-  id: string;
-  name: string;
-  tag: string;
-  description: string;
-};
-
-const VOICES: VoiceMeta[] = [
-  { id: 'alloy',   name: 'Alloy',   tag: 'Balanced',   description: 'Clear, neutral — works for any genre' },
-  { id: 'echo',    name: 'Echo',    tag: 'Cinematic',  description: 'Deep, measured — epic story narrator' },
-  { id: 'fable',   name: 'Fable',   tag: 'Expressive', description: 'Warm storyteller, slight dramatic flair' },
-  { id: 'onyx',    name: 'Onyx',    tag: 'Deep',       description: 'Rich, authoritative, commanding' },
-  { id: 'nova',    name: 'Nova',    tag: 'Energetic',  description: 'Bright, fast-paced — hooks and action' },
-  { id: 'shimmer', name: 'Shimmer', tag: 'Soft',       description: 'Gentle, intimate, ASMR-adjacent' },
-];
+import { useAvailableVoices } from '../hooks/useAvailableVoices';
+import { VoiceMeta } from '../types/voice.types';
+import { getVoiceSample } from '../api/generateApi';
 
 const EQ_DELAYS = ['[animation-delay:0s]','[animation-delay:.1s]','[animation-delay:.25s]','[animation-delay:.15s]','[animation-delay:.32s]','[animation-delay:.05s]','[animation-delay:.22s]'];
 
 export type VoiceStepProps = {
   value: string | null;
+  language?: string;
   onChange: (voiceId: string) => void;
   onContinue: () => void;
 };
 
-export const VoiceStep = ({ value, onChange, onContinue }: VoiceStepProps) => {
+export const VoiceStep = ({ value, language = 'en', onChange, onContinue }: VoiceStepProps) => {
+  const { voices, loading, error } = useAvailableVoices(language);
   const [playingId, setPlayingId] = useState<string | null>(null);
+  const [sampleLoading, setSampleLoading] = useState<string | null>(null);
   const audioRefs = useRef<Record<string, HTMLAudioElement | null>>({});
+  const audioUrlCache = useRef<Record<string, string>>({});
 
-  const handlePlay = (id: string) => {
-    const audio = audioRefs.current[id];
+  const handlePlay = async (voice: VoiceMeta) => {
+    const audio = audioRefs.current[voice.id];
     if (!audio) return;
-    if (playingId === id) {
+
+    if (playingId === voice.id) {
       audio.pause();
       audio.currentTime = 0;
       setPlayingId(null);
-    } else {
+      return;
+    }
+
+    try {
+      setSampleLoading(voice.id);
+
+      // Check cache first
+      if (audioUrlCache.current[voice.id]) {
+        audio.src = audioUrlCache.current[voice.id];
+        Object.values(audioRefs.current).forEach((a) => { if (a) { a.pause(); a.currentTime = 0; } });
+        setPlayingId(voice.id);
+        audio.play().catch(() => setPlayingId(null));
+        return;
+      }
+
+      // Fetch sample from API
+      const sample = await getVoiceSample(voice.id, language, voice.provider);
+      audioUrlCache.current[voice.id] = sample.audioUrl;
+      audio.src = sample.audioUrl;
+
       Object.values(audioRefs.current).forEach((a) => { if (a) { a.pause(); a.currentTime = 0; } });
-      setPlayingId(id);
+      setPlayingId(voice.id);
       audio.play().catch(() => setPlayingId(null));
+    } catch (err) {
+      console.error(`Failed to load voice sample for ${voice.id}:`, err);
+      setPlayingId(null);
+    } finally {
+      setSampleLoading(null);
     }
   };
+
+  if (loading) {
+    return (
+      <div className="flex flex-col items-center justify-center gap-4 py-12">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        <p className="text-sm text-muted-foreground">Loading voices...</p>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="space-y-6">
+        <div>
+          <h1 className="font-head text-[32px] font-extrabold tracking-[-0.04em]">Choose a voice</h1>
+          <p className="mt-1.5 text-[14px] text-destructive">{error}</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (voices.length === 0) {
+    return (
+      <div className="space-y-6">
+        <div>
+          <h1 className="font-head text-[32px] font-extrabold tracking-[-0.04em]">Choose a voice</h1>
+          <p className="mt-1.5 text-[14px] text-muted-foreground">No voices available for this language.</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -60,10 +107,12 @@ export const VoiceStep = ({ value, onChange, onContinue }: VoiceStepProps) => {
         aria-label="Select voice"
         className="flex flex-col gap-2.5"
       >
-        {VOICES.map((voice) => {
+        {voices.map((voice) => {
           const radioId = `voice-${voice.id}`;
           const isChecked = value === voice.id;
           const isPlaying = playingId === voice.id;
+          const isLoadingSample = sampleLoading === voice.id;
+
           return (
             <div
               key={voice.id}
@@ -76,16 +125,23 @@ export const VoiceStep = ({ value, onChange, onContinue }: VoiceStepProps) => {
             >
               <button
                 type="button"
-                onClick={() => handlePlay(voice.id)}
+                onClick={() => handlePlay(voice)}
+                disabled={isLoadingSample}
                 aria-label={`${isPlaying ? 'Pause' : 'Play'} ${voice.name}`}
                 className={cn(
-                  'grid h-11 w-11 flex-none place-items-center rounded-full border transition',
+                  'grid h-11 w-11 flex-none place-items-center rounded-full border transition disabled:opacity-50',
                   isPlaying
                     ? 'border-transparent bg-primary text-on-acc'
                     : 'border-border bg-elev text-foreground hover:border-transparent hover:bg-primary hover:text-on-acc',
                 )}
               >
-                {isPlaying ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
+                {isLoadingSample ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : isPlaying ? (
+                  <Pause className="h-4 w-4" />
+                ) : (
+                  <Play className="h-4 w-4" />
+                )}
               </button>
 
               <Label htmlFor={radioId} className="min-w-0 flex-1 cursor-pointer">
@@ -95,7 +151,6 @@ export const VoiceStep = ({ value, onChange, onContinue }: VoiceStepProps) => {
                     {voice.tag}
                   </span>
                 </span>
-                <span className="mt-0.5 block text-[12.5px] text-mut2">{voice.description}</span>
               </Label>
 
               <div
@@ -110,7 +165,6 @@ export const VoiceStep = ({ value, onChange, onContinue }: VoiceStepProps) => {
               <RadioGroupItem id={radioId} value={voice.id} aria-label={voice.name} className="h-[22px] w-[22px] flex-none" />
               <audio
                 ref={(el) => { audioRefs.current[voice.id] = el; }}
-                src={`/voices/${voice.id}.mp3`}
                 onEnded={() => setPlayingId(null)}
               />
             </div>

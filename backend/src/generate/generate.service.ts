@@ -30,6 +30,7 @@ import { AzureOpenAIService } from "../integrations/azure-openai.service";
 import { ImageService } from "../integrations/image.service";
 import { AudioGenerationService } from "../integrations/audio-generation.service";
 import { VideoService } from "../integrations/video.service";
+import { VoiceCatalogService } from "../integrations/voice-catalog.service";
 
 @Injectable()
 export class GenerateService {
@@ -43,6 +44,7 @@ export class GenerateService {
     private imageService: ImageService,
     private audioGenerationService: AudioGenerationService,
     private videoService: VideoService,
+    private voiceCatalogService: VoiceCatalogService,
   ) {}
 
   /**
@@ -821,5 +823,52 @@ export class GenerateService {
       console.error("Failed to save preset:", error);
       throw new BadRequestException("Failed to save preset job");
     }
+  }
+
+  /**
+   * Get available voices for a language
+   */
+  getAvailableVoices(language: string = 'en') {
+    const voices = this.voiceCatalogService.getVoicesByLanguage(language);
+    return {
+      language,
+      voices,
+      count: voices.length,
+    };
+  }
+
+  /**
+   * Get voice sample for preview (generates or retrieves from cache)
+   */
+  async getVoiceSample(
+    voiceId: string,
+    language: string = 'en',
+    provider?: 'azure-tts' | 'azure-speech',
+  ): Promise<{ audioUrl: string; voiceId: string; language: string }> {
+    // Validate voice exists
+    const voice = this.voiceCatalogService.getVoice(voiceId, language);
+    if (!voice) {
+      throw new BadRequestException(
+        `Voice ${voiceId} not available for language ${language}`,
+      );
+    }
+
+    // Generate sample using existing audio generation service
+    const sampleText =
+      'In a distant galaxy, a hero rises to answer the call of destiny. The fate of worlds hangs in balance.';
+    const voiceProvider = provider || voice.provider;
+
+    const audioUrl = await this.audioGenerationService.generateTextToSpeech(
+      sampleText,
+      language,
+      voiceId,
+      voiceProvider,
+    );
+
+    return {
+      audioUrl,
+      voiceId,
+      language,
+    };
   }
 }

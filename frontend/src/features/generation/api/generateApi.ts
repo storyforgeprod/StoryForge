@@ -105,3 +105,29 @@ export async function postPreset(
     });
     return handleResponse(res);
 }
+
+export async function getAvailableVoices(language: string = 'en'): Promise<{
+    language: string;
+    voices: Array<{ id: string; name: string; provider: 'azure-tts' | 'azure-speech'; tag: string }>;
+    count: number;
+}> {
+    const res = await fetch(`${API_BASE}/generate/voices?language=${language}`, {
+        headers: getHeaders(),
+    });
+    return handleResponse(res);
+}
+
+export async function getVoiceSample(
+    voiceId: string,
+    language: string = 'en',
+    provider?: 'azure-tts' | 'azure-speech',
+): Promise<{ audioUrl: string; voiceId: string; language: string }> {
+    const url = new URL(`${API_BASE}/generate/voice-sample/${voiceId}`);
+    url.searchParams.set('language', language);
+    if (provider) url.searchParams.set('provider', provider);
+
+    const res = await fetch(url.toString(), {
+        headers: getHeaders(),
+    });
+    return handleResponse(res);
+}

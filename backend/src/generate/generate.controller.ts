@@ -6,6 +6,7 @@ import {
   HttpStatus,
   Get,
   Param,
+  Query,
   UseGuards,
 } from "@nestjs/common";
 import { OptionalJwtAuthGuard } from "@/common/auth/optional-jwt.guard";
@@ -176,5 +177,45 @@ export class GenerateController {
     @Body() body: { content?: string; jobId?: string },
   ): Promise<{ jobId: string; type: string }> {
     return this.generateService.savePreset(user.sub, type, body);
+  }
+
+  @Get("voices")
+  @SkipThrottle()
+  @ApiOperation({
+    summary: "Get available voices for a language",
+    description:
+      "Returns voices from both Azure TTS and Azure Speech providers",
+  })
+  @ApiResponse({
+    status: 200,
+    description: "Available voices retrieved",
+  })
+  async getAvailableVoices(
+    @Query("language") language: string = "en",
+  ) {
+    return this.generateService.getAvailableVoices(language);
+  }
+
+  @Get("voice-sample/:voiceId")
+  @SkipThrottle()
+  @ApiOperation({
+    summary: "Get voice sample for preview",
+    description:
+      "Generate or retrieve audio sample for a voice to preview before selection",
+  })
+  @ApiResponse({
+    status: 200,
+    description: "Voice sample audio generated",
+  })
+  @ApiResponse({
+    status: 400,
+    description: "Invalid voice or language",
+  })
+  async getVoiceSample(
+    @Param("voiceId") voiceId: string,
+    @Query("language") language: string = "en",
+    @Query("provider") provider?: "azure-tts" | "azure-speech",
+  ) {
+    return this.generateService.getVoiceSample(voiceId, language, provider);
   }
 }
