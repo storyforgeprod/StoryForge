@@ -34,12 +34,13 @@ export class AzureOpenAIService {
         targetScenes: number = 12,
         targetDuration: number = 60,
         tone?: string,
+        language?: string,
     ): Promise<string> {
         if (!story || story.trim().length === 0) {
             throw new Error('Story cannot be empty');
         }
 
-        const prompt = this.buildScriptPrompt(story, targetScenes, targetDuration, tone);
+        const prompt = this.buildScriptPrompt(story, targetScenes, targetDuration, tone, language);
         const start = Date.now();
 
         try {
@@ -143,12 +144,16 @@ export class AzureOpenAIService {
         }
     }
 
-    private buildScriptPrompt(story: string, targetScenes: number = 12, targetDuration: number = 60, tone?: string): string {
+    private buildScriptPrompt(story: string, targetScenes: number = 12, targetDuration: number = 60, tone?: string, language?: string): string {
         const secondsPerScene = Math.round(targetDuration / targetScenes);
         const toneInstruction = tone
             ? `\nNARRATION TONE: Write with a ${tone} tone throughout all scenes.`
             : '';
-        return `You are a professional screenwriter specializing in short-form video content for YouTube Shorts.${toneInstruction}
+        const LANGUAGE_NAMES: Record<string, string> = { en: 'English', es: 'Spanish', pt: 'Portuguese', fr: 'French' };
+        const languageInstruction = language && language !== 'en'
+            ? `\nOUTPUT LANGUAGE: Write the entire script in ${LANGUAGE_NAMES[language] ?? language}. All scene descriptions, sound effects, and music notes must be in ${LANGUAGE_NAMES[language] ?? language}.`
+            : '';
+        return `You are a professional screenwriter specializing in short-form video content for YouTube Shorts.${toneInstruction}${languageInstruction}
 
 Convert the following story into a script suitable for a video lasting approximately ${targetDuration} seconds with exactly ${targetScenes} scenes.
 

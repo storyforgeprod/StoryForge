@@ -11,6 +11,7 @@ export interface GenerationJobData {
   targetDuration?: number; // For script generation (default 60s)
   targetScenes?: number; // For script generation (default 12 scenes)
   tone?: string; // Narration tone for script generation
+  language?: string; // Output language for script generation
   scriptId?: string; // For images/audio/video (references script job)
   style?: string; // Visual style for image generation
   imageDescription?: string; // Optional custom description for images
