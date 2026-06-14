@@ -224,20 +224,22 @@ export class GenerateController {
   @ApiOperation({
     summary: "Check voice availability for a language",
     description:
-      "Verify if a specific voice is available for a language before attempting synthesis. Prevents cascading errors.",
+      "Verify if a specific voice is available for a language by testing real synthesis. Returns comprehensive info including provider health status and cache info.",
   })
   @ApiResponse({
     status: 200,
-    description: "Voice availability check result",
+    description: "Voice availability check result with real synthesis testing",
     schema: {
       example: {
-        voiceId: "nova",
+        voiceId: "alloy",
         language: "en",
         available: true,
-        provider: "azure-tts",
-        name: "Nova",
-        tag: "Energetic",
-        message: "Voice nova is available for language en",
+        provider: "azure-speech",
+        name: "Alloy",
+        tag: "Professional",
+        reason: "Voice tested and working via azure-speech",
+        testedAt: "2026-06-13T10:30:00.000Z",
+        cacheStatus: "fresh",
       },
     },
   })

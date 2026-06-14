@@ -41,6 +41,69 @@ export class AudioGenerationService {
     return LANGUAGE_VOICE_MAP[language] || LANGUAGE_VOICE_MAP['en'];
   }
 
+  /**
+   * Test if a voice is actually available by attempting real synthesis with minimal text
+   * Returns { provider, success } if successful, throws error if both plans fail
+   * @internal Used by checkVoiceAvailability for real-world service health testing
+   */
+  async testVoiceSynthesis(
+    voiceId: string,
+    language: string,
+    attemptedProvider?: 'azure-tts' | 'azure-speech',
+  ): Promise<{ provider: 'azure-tts' | 'azure-speech'; testedAt: string }> {
+    const testText = '.'; // Minimal text for fastest test
+    const voiceMeta = this.voiceCatalogService.getVoice(voiceId, language);
+
+    if (!voiceMeta) {
+      throw new Error(`Voice "${voiceId}" not found in catalog for language "${language}"`);
+    }
+
+    // Determine which provider to test
+    const providersToTest: Array<'azure-tts' | 'azure-speech'> = [];
+
+    if (attemptedProvider) {
+      // If a specific provider was attempted and failed, start with Plan B
+      providersToTest.push(attemptedProvider === 'azure-tts' ? 'azure-speech' : 'azure-tts');
+      providersToTest.push(attemptedProvider);
+    } else {
+      // Test Plan A first, then Plan B
+      providersToTest.push('azure-tts', 'azure-speech');
+    }
+
+    let lastError: Error | null = null;
+
+    for (const provider of providersToTest) {
+      try {
+        if (provider === 'azure-tts') {
+          this.logger.log(
+            `🧪 [Test] Testing Plan A (Azure TTS) voice: ${voiceId} for language: ${language}`,
+          );
+          await this.azureTTSService.synthesize(testText, voiceId, language);
+          this.logger.log(`✅ [Test] Plan A test PASSED for voice: ${voiceId}`);
+          return { provider: 'azure-tts', testedAt: new Date().toISOString() };
+        } else {
+          this.logger.log(
+            `🧪 [Test] Testing Plan B (Azure Speech) voice: ${voiceId} for language: ${language}`,
+          );
+          await this.generateWithAzureSpeechNativo(testText, language, voiceId);
+          this.logger.log(`✅ [Test] Plan B test PASSED for voice: ${voiceId}`);
+          return { provider: 'azure-speech', testedAt: new Date().toISOString() };
+        }
+      } catch (err) {
+        lastError = err instanceof Error ? err : new Error(String(err));
+        const planName = provider === 'azure-tts' ? 'Plan A' : 'Plan B';
+        this.logger.warn(
+          `❌ [Test] ${planName} test FAILED for voice: ${voiceId} - ${lastError.message}`,
+        );
+      }
+    }
+
+    // Both plans failed
+    throw new Error(
+      `Voice "${voiceId}" failed testing on all providers. Last error: ${lastError?.message || 'Unknown'}`,
+    );
+  }
+
   async generateTextToSpeech(
     text: string,
     language: string = 'en',

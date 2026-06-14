@@ -37,6 +37,11 @@ export class GenerateService {
   // Maximum number of scenes per video to avoid OOM on Render 512MB
   private readonly MAX_SCENES = 12;
 
+  // Voice availability cache with TTL (5 min for success, 2 min for failures)
+  private readonly CACHE_TTL_SUCCESS_MS = 5 * 60 * 1000; // 5 minutes
+  private readonly CACHE_TTL_FAILURE_MS = 2 * 60 * 1000; // 2 minutes
+  private voiceAvailabilityCache = new Map<string, { data: unknown; expiresAt: number }>();
+
   constructor(
     private prisma: PrismaService,
     private queue: QueueService,
@@ -875,26 +880,112 @@ export class GenerateService {
   /**
    * Check if a voice is available for a language (prevents cascading errors)
    * Used by frontend to pre-validate before attempting synthesis
+   * 
+   * Now performs REAL synthesis testing with cached results for performance:
+   * - 1st check: Tests with minimal text ("."), caches result
+   * - 2nd+ checks: Returns cached result (instant)
+   * 
+   * Returns comprehensive availability info including reason and cache status
    */
-  checkVoiceAvailability(voiceId: string, language: string = 'en') {
+  async checkVoiceAvailability(voiceId: string, language: string = 'en') {
+    const cacheKey = this._getCacheKey(voiceId, language);
+    const now = Date.now();
+
+    // Step 1: Check cache first (fast path)
+    const cached = this.voiceAvailabilityCache.get(cacheKey);
+    if (cached && now < cached.expiresAt) {
+      return { ...(cached.data as any), cacheStatus: 'cached' };
+    }
+
+    // Step 2: Check if voice exists in catalog
     const voice = this.voiceCatalogService.getVoice(voiceId, language);
     if (!voice) {
-      return {
+      const result = {
         voiceId,
         language,
         available: false,
-        message: `Voice "${voiceId}" is not available for language "${language}"`,
+        provider: null as string | null,
+        reason: `Voice "${voiceId}" not found in catalog for language "${language}"`,
+        testedAt: new Date().toISOString(),
+        cacheStatus: 'fresh' as const,
       };
+      // Cache failures for shorter duration (faster retry)
+      this._setCache(cacheKey, result, this.CACHE_TTL_FAILURE_MS);
+      return result;
     }
 
-    return {
-      voiceId,
-      language,
-      available: true,
-      provider: voice.provider,
-      name: voice.name,
-      tag: voice.tag,
-      message: `Voice "${voice.name}" is available for language "${language}" via ${voice.provider}`,
-    };
+    // Step 3: Test with REAL synthesis (most important step!)
+    try {
+      const testResult = await this.audioGenerationService.testVoiceSynthesis(
+        voiceId,
+        language,
+      );
+
+      const result = {
+        voiceId,
+        language,
+        available: true,
+        provider: testResult.provider,
+        name: voice.name,
+        tag: voice.tag,
+        reason: `Voice "${voice.name}" tested and working via ${testResult.provider}`,
+        testedAt: testResult.testedAt,
+        cacheStatus: 'fresh' as const,
+      };
+
+      // Cache success for longer duration (service likely stable)
+      this._setCache(cacheKey, result, this.CACHE_TTL_SUCCESS_MS);
+      return result;
+    } catch (err) {
+      const errorMsg = err instanceof Error ? err.message : String(err);
+      const result = {
+        voiceId,
+        language,
+        available: false,
+        provider: null as string | null,
+        reason: `Voice testing failed: ${errorMsg}`,
+        testedAt: new Date().toISOString(),
+        cacheStatus: 'fresh' as const,
+      };
+
+      // Cache failures for shorter duration
+      this._setCache(cacheKey, result, this.CACHE_TTL_FAILURE_MS);
+      return result;
+    }
+  }
+
+  /**
+   * Cache helper: Generate cache key from voiceId and language
+   */
+  private _getCacheKey(voiceId: string, language: string): string {
+    return `${voiceId}:${language}`;
+  }
+
+  /**
+   * Cache helper: Retrieve from cache with TTL check
+   */
+  private _getCache(key: string): unknown | null {
+    const cached = this.voiceAvailabilityCache.get(key);
+    if (!cached) return null;
+
+    if (Date.now() > cached.expiresAt) {
+      this.voiceAvailabilityCache.delete(key);
+      return null;
+    }
+
+    return cached.data;
+  }
+
+  /**
+   * Cache helper: Store in cache with TTL
+   */
+  private _setCache(key: string, data: unknown, ttlMs: number): void {
+    const expiresAt = Date.now() + ttlMs;
+    this.voiceAvailabilityCache.set(key, { data, expiresAt });
+
+    // Auto-cleanup after TTL
+    setTimeout(() => {
+      this.voiceAvailabilityCache.delete(key);
+    }, ttlMs);
   }
 }
