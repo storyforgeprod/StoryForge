@@ -218,4 +218,33 @@ export class GenerateController {
   ) {
     return this.generateService.getVoiceSample(voiceId, language, provider);
   }
+
+  @Get("voice-availability/:voiceId")
+  @SkipThrottle()
+  @ApiOperation({
+    summary: "Check voice availability for a language",
+    description:
+      "Verify if a specific voice is available for a language before attempting synthesis. Prevents cascading errors.",
+  })
+  @ApiResponse({
+    status: 200,
+    description: "Voice availability check result",
+    schema: {
+      example: {
+        voiceId: "nova",
+        language: "en",
+        available: true,
+        provider: "azure-tts",
+        name: "Nova",
+        tag: "Energetic",
+        message: "Voice nova is available for language en",
+      },
+    },
+  })
+  async checkVoiceAvailability(
+    @Param("voiceId") voiceId: string,
+    @Query("language") language: string = "en",
+  ) {
+    return this.generateService.checkVoiceAvailability(voiceId, language);
+  }
 }

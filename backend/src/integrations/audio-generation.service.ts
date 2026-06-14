@@ -47,6 +47,19 @@ export class AudioGenerationService {
     voiceId?: string,
     voiceProvider?: 'azure-tts' | 'azure-speech',
   ): Promise<string> {
+    // Defensive: Validate voice exists in catalog BEFORE attempting synthesis
+    if (voiceId) {
+      const voiceMeta = this.voiceCatalogService.getVoice(voiceId, language);
+      if (!voiceMeta) {
+        const msg = `🚫 [Validation] Voice "${voiceId}" not available for language "${language}"`;
+        this.logger.error(msg);
+        throw new Error(msg);
+      }
+      this.logger.log(
+        `✓ [Validation] Voice "${voiceId}" (${voiceMeta.provider}) available for language "${language}"`,
+      );
+    }
+
     // Determine which provider to use
     const provider =
       voiceProvider ||
@@ -63,7 +76,7 @@ export class AudioGenerationService {
         const errorMsg =
           planAError instanceof Error ? planAError.message : String(planAError);
         this.logger.warn(
-          `⚠️ [Plan A] Azure TTS failed: ${errorMsg}. Validating fallback to Plan B...`,
+          `⚠️ [Plan A] Azure TTS failed: ${errorMsg}. Checking Plan B availability...`,
         );
 
         // Before attempting fallback, validate that voiceId exists in Plan B catalog
@@ -73,8 +86,8 @@ export class AudioGenerationService {
             language,
           );
           if (!voiceInPlanB || voiceInPlanB.provider !== 'azure-speech') {
-            const msg = `Voice ${voiceId} not available for language ${language} in fallback provider (Plan B)`;
-            this.logger.error(`❌ [Fallback Validation] ${msg}`);
+            const msg = `❌ [Fallback] Voice "${voiceId}" exists only in Plan A but Plan A failed. No Plan B fallback available for language "${language}"`;
+            this.logger.error(msg);
             throw new Error(msg);
           }
         }

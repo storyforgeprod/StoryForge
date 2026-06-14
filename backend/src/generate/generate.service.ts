@@ -871,4 +871,30 @@ export class GenerateService {
       language,
     };
   }
+
+  /**
+   * Check if a voice is available for a language (prevents cascading errors)
+   * Used by frontend to pre-validate before attempting synthesis
+   */
+  checkVoiceAvailability(voiceId: string, language: string = 'en') {
+    const voice = this.voiceCatalogService.getVoice(voiceId, language);
+    if (!voice) {
+      return {
+        voiceId,
+        language,
+        available: false,
+        message: `Voice "${voiceId}" is not available for language "${language}"`,
+      };
+    }
+
+    return {
+      voiceId,
+      language,
+      available: true,
+      provider: voice.provider,
+      name: voice.name,
+      tag: voice.tag,
+      message: `Voice "${voice.name}" is available for language "${language}" via ${voice.provider}`,
+    };
+  }
 }
