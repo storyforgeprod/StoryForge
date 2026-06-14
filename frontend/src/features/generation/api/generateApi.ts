@@ -146,3 +146,28 @@ export async function getVoiceSample(
     });
     return handleResponse(res);
 }
+
+/**
+ * Check if a voice is available for a language
+ * Pre-validates before attempting synthesis to prevent cascading errors
+ */
+export async function checkVoiceAvailability(
+    voiceId: string,
+    language: string = 'en',
+): Promise<{
+    voiceId: string;
+    language: string;
+    available: boolean;
+    provider?: 'azure-tts' | 'azure-speech';
+    name?: string;
+    tag?: string;
+    message: string;
+}> {
+    const url = new URL(`${API_BASE}/generate/voice-availability/${voiceId}`);
+    url.searchParams.set('language', language);
+
+    const res = await fetch(url.toString(), {
+        headers: getHeaders(),
+    });
+    return handleResponse(res);
+}

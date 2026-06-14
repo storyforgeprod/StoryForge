@@ -1,12 +1,12 @@
-import { useRef, useState } from 'react';
-import { Pause, Play, Loader2, AlertCircle } from 'lucide-react';
+import { useRef, useState, useEffect } from 'react';
+import { Pause, Play, Loader2, AlertCircle, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Label } from '@/components/ui/label';
 import { cn } from '@/lib/utils';
 import { useAvailableVoices } from '../hooks/useAvailableVoices';
 import { VoiceMeta } from '../types/voice.types';
-import { getVoiceSample } from '../api/generateApi';
+import { getVoiceSample, checkVoiceAvailability } from '../api/generateApi';
 
 const EQ_DELAYS = ['[animation-delay:0s]','[animation-delay:.1s]','[animation-delay:.25s]','[animation-delay:.15s]','[animation-delay:.32s]','[animation-delay:.05s]','[animation-delay:.22s]'];
 
@@ -21,8 +21,16 @@ export const VoiceStep = ({ value, language = 'en', onChange, onContinue }: Voic
   const { voices, loading, error, isVoiceAvailable } = useAvailableVoices(language);
   const [playingId, setPlayingId] = useState<string | null>(null);
   const [sampleLoading, setSampleLoading] = useState<string | null>(null);
+  const [playError, setPlayError] = useState<{ voiceId: string; message: string } | null>(null);
   const audioRefs = useRef<Record<string, HTMLAudioElement | null>>({});
   const audioUrlCache = useRef<Record<string, string>>({});
+
+  // Auto-dismiss error after 5 seconds
+  useEffect(() => {
+    if (!playError) return;
+    const timer = setTimeout(() => setPlayError(null), 5000);
+    return () => clearTimeout(timer);
+  }, [playError]);
 
   const handlePlay = async (voice: VoiceMeta) => {
     const audio = audioRefs.current[voice.id];
@@ -37,8 +45,21 @@ export const VoiceStep = ({ value, language = 'en', onChange, onContinue }: Voic
 
     try {
       setSampleLoading(voice.id);
+      setPlayError(null);
 
-      // Check cache first
+      // Step 1: Pre-validate voice availability before attempting synthesis
+      const availabilityCheck = await checkVoiceAvailability(voice.id, language);
+      if (!availabilityCheck.available) {
+        setPlayError({
+          voiceId: voice.id,
+          message: `⚠️ ${availabilityCheck.message}`,
+        });
+        console.warn(`Voice ${voice.id} not available for ${language}:`, availabilityCheck.message);
+        setSampleLoading(null);
+        return;
+      }
+
+      // Step 2: Check cache first
       if (audioUrlCache.current[voice.id]) {
         audio.src = audioUrlCache.current[voice.id];
         Object.values(audioRefs.current).forEach((a) => { if (a) { a.pause(); a.currentTime = 0; } });
@@ -47,7 +68,7 @@ export const VoiceStep = ({ value, language = 'en', onChange, onContinue }: Voic
         return;
       }
 
-      // Fetch sample from API
+      // Step 3: Fetch sample from API
       const sample = await getVoiceSample(voice.id, language, voice.provider);
       audioUrlCache.current[voice.id] = sample.audioUrl;
       audio.src = sample.audioUrl;
@@ -56,6 +77,11 @@ export const VoiceStep = ({ value, language = 'en', onChange, onContinue }: Voic
       setPlayingId(voice.id);
       audio.play().catch(() => setPlayingId(null));
     } catch (err) {
+      const errorMsg = err instanceof Error ? err.message : 'Failed to load voice sample';
+      setPlayError({
+        voiceId: voice.id,
+        message: `❌ ${errorMsg}`,
+      });
       console.error(`Failed to load voice sample for ${voice.id}:`, err);
       setPlayingId(null);
     } finally {
@@ -113,9 +139,25 @@ export const VoiceStep = ({ value, language = 'en', onChange, onContinue }: Voic
           const isPlaying = playingId === voice.id;
           const isLoadingSample = sampleLoading === voice.id;
           const isAvailable = isVoiceAvailable(voice.id);
+          const hasError = playError?.voiceId === voice.id;
 
           return (
             <div key={voice.id} className="group relative">
+              {/* Error banner */}
+              {hasError && (
+                <div className="mb-2 flex items-center gap-2 rounded-lg bg-destructive/10 px-3 py-2 text-sm text-destructive animate-in fade-in slide-in-from-top-2">
+                  <AlertCircle className="h-4 w-4 flex-shrink-0" />
+                  <span className="flex-1">{playError.message}</span>
+                  <button
+                    type="button"
+                    onClick={() => setPlayError(null)}
+                    className="flex-shrink-0 opacity-70 hover:opacity-100"
+                  >
+                    <X className="h-4 w-4" />
+                  </button>
+                </div>
+              )}
+
               <div
                 className={cn(
                   'flex items-center gap-3.5 rounded-xl border p-4 transition-all',
