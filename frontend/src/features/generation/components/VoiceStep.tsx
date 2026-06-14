@@ -18,10 +18,12 @@ export type VoiceStepProps = {
 };
 
 export const VoiceStep = ({ value, language = 'en', onChange, onContinue }: VoiceStepProps) => {
-  const { voices, loading, error, isVoiceAvailable } = useAvailableVoices(language);
+  const { voices, loading, error, isVoiceAvailable, batchValidateVoices } = useAvailableVoices(language);
   const [playingId, setPlayingId] = useState<string | null>(null);
   const [sampleLoading, setSampleLoading] = useState<string | null>(null);
   const [playError, setPlayError] = useState<{ voiceId: string; message: string } | null>(null);
+  const [preValidatedVoices, setPreValidatedVoices] = useState<Set<string>>(new Set());
+  const [isValidating, setIsValidating] = useState(false);
   const audioRefs = useRef<Record<string, HTMLAudioElement | null>>({});
   const audioUrlCache = useRef<Record<string, string>>({});
 
@@ -31,6 +33,47 @@ export const VoiceStep = ({ value, language = 'en', onChange, onContinue }: Voic
     const timer = setTimeout(() => setPlayError(null), 5000);
     return () => clearTimeout(timer);
   }, [playError]);
+
+  // Batch validate all voices on load or language change
+  useEffect(() => {
+    if (voices.length === 0) {
+      setPreValidatedVoices(new Set());
+      return;
+    }
+
+    const validateAll = async () => {
+      setIsValidating(true);
+      try {
+        const validVoices = await batchValidateVoices(voices);
+        setPreValidatedVoices(validVoices);
+
+        // If selected voice is no longer valid, clear selection
+        if (value && !validVoices.has(value)) {
+          onChange('');
+        }
+      } finally {
+        setIsValidating(false);
+      }
+    };
+
+    validateAll();
+  }, [voices, language, batchValidateVoices]);
+
+  const handleContinue = () => {
+    if (!value) return;
+
+    // Double-check that selected voice is still valid (defensive guardrail)
+    if (!preValidatedVoices.has(value)) {
+      setPlayError({
+        voiceId: value,
+        message: '⚠️ Selected voice is no longer available. Please choose another.',
+      });
+      onChange('');
+      return;
+    }
+
+    onContinue();
+  };
 
   const handlePlay = async (voice: VoiceMeta) => {
     const audio = audioRefs.current[voice.id];
@@ -54,6 +97,16 @@ export const VoiceStep = ({ value, language = 'en', onChange, onContinue }: Voic
           voiceId: voice.id,
           message: `⚠️ ${availabilityCheck.message}`,
         });
+        // Remove from pre-validated if it fails
+        setPreValidatedVoices((prev) => {
+          const next = new Set(prev);
+          next.delete(voice.id);
+          return next;
+        });
+        // Clear selection if user had selected this voice
+        if (value === voice.id) {
+          onChange('');
+        }
         console.warn(`Voice ${voice.id} not available for ${language}:`, availabilityCheck.message);
         setSampleLoading(null);
         return;
@@ -82,6 +135,16 @@ export const VoiceStep = ({ value, language = 'en', onChange, onContinue }: Voic
         voiceId: voice.id,
         message: `❌ ${errorMsg}`,
       });
+      // Remove from pre-validated if it fails
+      setPreValidatedVoices((prev) => {
+        const next = new Set(prev);
+        next.delete(voice.id);
+        return next;
+      });
+      // Clear selection if user had selected this voice
+      if (value === voice.id) {
+        onChange('');
+      }
       console.error(`Failed to load voice sample for ${voice.id}:`, err);
       setPlayingId(null);
     } finally {
@@ -89,11 +152,11 @@ export const VoiceStep = ({ value, language = 'en', onChange, onContinue }: Voic
     }
   };
 
-  if (loading) {
+  if (loading || isValidating) {
     return (
       <div className="flex flex-col items-center justify-center gap-4 py-12">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
-        <p className="text-sm text-muted-foreground">Loading voices...</p>
+        <p className="text-sm text-muted-foreground">{isValidating ? 'Checking voice availability...' : 'Loading voices...'}</p>
       </div>
     );
   }
@@ -139,6 +202,8 @@ export const VoiceStep = ({ value, language = 'en', onChange, onContinue }: Voic
           const isPlaying = playingId === voice.id;
           const isLoadingSample = sampleLoading === voice.id;
           const isAvailable = isVoiceAvailable(voice.id);
+          const isPreValidated = preValidatedVoices.has(voice.id);
+          const isSelectable = isAvailable && isPreValidated;
           const hasError = playError?.voiceId === voice.id;
 
           return (
@@ -161,17 +226,17 @@ export const VoiceStep = ({ value, language = 'en', onChange, onContinue }: Voic
               <div
                 className={cn(
                   'flex items-center gap-3.5 rounded-xl border p-4 transition-all',
-                  !isAvailable && 'opacity-50 cursor-not-allowed',
+                  !isSelectable && 'opacity-50 cursor-not-allowed pointer-events-none',
                   isChecked
                     ? 'border-primary bg-acc-soft shadow-[0_0_0_1px_var(--primary)]'
                     : 'border-border bg-card hover:border-bd2',
-                  !isAvailable && 'border-muted-foreground/50',
+                  !isSelectable && 'border-muted-foreground/50',
                 )}
               >
                 <button
                   type="button"
-                  onClick={() => isAvailable && handlePlay(voice)}
-                  disabled={isLoadingSample || !isAvailable}
+                  onClick={() => isSelectable && handlePlay(voice)}
+                  disabled={isLoadingSample || !isSelectable}
                   aria-label={`${isPlaying ? 'Pause' : 'Play'} ${voice.name}`}
                   className={cn(
                     'grid h-11 w-11 flex-none place-items-center rounded-full border transition disabled:opacity-50',
@@ -190,10 +255,10 @@ export const VoiceStep = ({ value, language = 'en', onChange, onContinue }: Voic
                 </button>
 
                 <Label
-                  htmlFor={isAvailable ? radioId : undefined}
+                  htmlFor={isSelectable ? radioId : undefined}
                   className={cn(
                     'min-w-0 flex-1',
-                    isAvailable ? 'cursor-pointer' : 'cursor-not-allowed',
+                    isSelectable ? 'cursor-pointer' : 'cursor-not-allowed',
                   )}
                 >
                   <span className="flex items-center gap-2 text-[14.5px] font-bold text-foreground">
@@ -201,7 +266,7 @@ export const VoiceStep = ({ value, language = 'en', onChange, onContinue }: Voic
                     <span className="rounded-full bg-elev2 px-[7px] py-0.5 text-[10.5px] font-semibold text-muted-foreground">
                       {voice.tag}
                     </span>
-                    {!isAvailable && (
+                    {!isSelectable && (
                       <AlertCircle className="h-3.5 w-3.5 text-muted-foreground" />
                     )}
                   </span>
@@ -225,7 +290,7 @@ export const VoiceStep = ({ value, language = 'en', onChange, onContinue }: Voic
                   ))}
                 </div>
 
-                {isAvailable ? (
+                {isSelectable ? (
                   <RadioGroupItem
                     id={radioId}
                     value={voice.id}
@@ -244,9 +309,9 @@ export const VoiceStep = ({ value, language = 'en', onChange, onContinue }: Voic
                 />
               </div>
 
-              {!isAvailable && (
+              {!isSelectable && (
                 <div className="absolute -top-8 left-4 hidden group-hover:block bg-slate-900 text-white text-xs px-2 py-1 rounded whitespace-nowrap z-10">
-                  Not available for {language.toUpperCase()}
+                  {!isPreValidated ? 'Not available for this language' : 'Failed to load'}
                 </div>
               )}
             </div>
@@ -255,7 +320,7 @@ export const VoiceStep = ({ value, language = 'en', onChange, onContinue }: Voic
       </RadioGroup>
 
       <div className="flex justify-end">
-        <Button disabled={!value} onClick={onContinue}>Continue</Button>
+        <Button disabled={!value || !preValidatedVoices.has(value ?? '')} onClick={handleContinue}>Continue</Button>
       </div>
     </div>
   );
