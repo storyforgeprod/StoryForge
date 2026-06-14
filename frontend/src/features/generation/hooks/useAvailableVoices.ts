@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { VoiceMeta } from '../types/voice.types';
 import { getAvailableVoices, checkVoiceAvailability } from '../api/generateApi';
 
@@ -50,23 +50,26 @@ export const useAvailableVoices = (language: string) => {
     return voiceMap[voiceId] || null;
   };
 
-  const batchValidateVoices = async (voicesToValidate: VoiceMeta[]): Promise<Set<string>> => {
-    if (voicesToValidate.length === 0) return new Set();
-    try {
-      const checks = await Promise.all(
-        voicesToValidate.map((v) => checkVoiceAvailability(v.id, language)),
-      );
-      const validVoices = new Set(
-        checks
-          .filter((check) => check.available)
-          .map((check) => check.voiceId),
-      );
-      return validVoices;
-    } catch (err) {
-      console.error('Error during batch voice validation:', err);
-      return new Set();
-    }
-  };
+  const batchValidateVoices = useCallback(
+    async (voicesToValidate: VoiceMeta[]): Promise<Set<string>> => {
+      if (voicesToValidate.length === 0) return new Set();
+      try {
+        const checks = await Promise.all(
+          voicesToValidate.map((v) => checkVoiceAvailability(v.id, language)),
+        );
+        const validVoices = new Set(
+          checks
+            .filter((check) => check.available)
+            .map((check) => check.voiceId),
+        );
+        return validVoices;
+      } catch (err) {
+        console.error('Error during batch voice validation:', err);
+        return new Set();
+      }
+    },
+    [language],
+  );
 
   return { voices, loading, error, isVoiceAvailable, getVoiceMetadata, batchValidateVoices };
 };

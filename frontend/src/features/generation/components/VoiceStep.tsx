@@ -24,6 +24,7 @@ export const VoiceStep = ({ value, language = 'en', onChange, onContinue }: Voic
   const [playError, setPlayError] = useState<{ voiceId: string; message: string } | null>(null);
   const [preValidatedVoices, setPreValidatedVoices] = useState<Set<string>>(new Set());
   const [isValidating, setIsValidating] = useState(false);
+  const [validationError, setValidationError] = useState<string | null>(null); // NEW: Track validation errors
   const audioRefs = useRef<Record<string, HTMLAudioElement | null>>({});
   const audioUrlCache = useRef<Record<string, string>>({});
 
@@ -38,26 +39,50 @@ export const VoiceStep = ({ value, language = 'en', onChange, onContinue }: Voic
   useEffect(() => {
     if (voices.length === 0) {
       setPreValidatedVoices(new Set());
+      setValidationError(null);
       return;
     }
 
+    let isMounted = true; // Prevent state updates if component unmounted
+
     const validateAll = async () => {
       setIsValidating(true);
+      setValidationError(null); // Clear previous errors
       try {
         const validVoices = await batchValidateVoices(voices);
-        setPreValidatedVoices(validVoices);
+        if (!isMounted) return;
+
+        // If no voices validated and we have voices, it's likely a backend connectivity issue
+        if (validVoices.size === 0 && voices.length > 0) {
+          console.warn('⚠️ No voices validated - backend may be unreachable or all voices failed');
+          setValidationError('No voices available. Check your internet or try refreshing.');
+          setPreValidatedVoices(new Set());
+        } else {
+          setPreValidatedVoices(validVoices);
+          setValidationError(null);
+        }
 
         // If selected voice is no longer valid, clear selection
         if (value && !validVoices.has(value)) {
           onChange('');
         }
+      } catch (err) {
+        console.error('Batch validation failed:', err);
+        if (isMounted) {
+          setValidationError(`Voice validation failed: ${err instanceof Error ? err.message : 'Unknown error'}`);
+          setPreValidatedVoices(new Set());
+        }
       } finally {
-        setIsValidating(false);
+        if (isMounted) setIsValidating(false);
       }
     };
 
     validateAll();
-  }, [voices, language, batchValidateVoices]);
+
+    return () => {
+      isMounted = false; // Cleanup on unmount
+    };
+  }, [voices, language]); // REMOVED batchValidateVoices to prevent infinite loop
 
   const handleContinue = () => {
     if (!value) return;
@@ -156,17 +181,27 @@ export const VoiceStep = ({ value, language = 'en', onChange, onContinue }: Voic
     return (
       <div className="flex flex-col items-center justify-center gap-4 py-12">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
-        <p className="text-sm text-muted-foreground">{isValidating ? 'Checking voice availability...' : 'Loading voices...'}</p>
+        <div className="flex flex-col items-center gap-2">
+          <p className="text-sm text-muted-foreground">{isValidating ? 'Checking voice availability...' : 'Loading voices...'}</p>
+          {validationError && (
+            <p className="text-sm text-destructive font-medium">⚠️ {validationError}</p>
+          )}
+        </div>
       </div>
     );
   }
 
-  if (error) {
+  if (error || validationError) {
     return (
       <div className="space-y-6">
         <div>
           <h1 className="font-head text-[32px] font-extrabold tracking-[-0.04em]">Choose a voice</h1>
-          <p className="mt-1.5 text-[14px] text-destructive">{error}</p>
+          <p className="mt-1.5 text-[14px] text-destructive">{validationError || error}</p>
+          {!validationError && !error && (
+            <p className="mt-2 text-[12px] text-muted-foreground">
+              💡 Ensure backend is running on http://localhost:3000
+            </p>
+          )}
         </div>
       </div>
     );
