@@ -1,0 +1,76 @@
+/**
+ * storyForge — CSS Custom Properties
+ * Pegá este bloque en tu archivo CSS global (index.css o globals.css)
+ * ANTES de cualquier otro estilo.
+ *
+ * La variante editorial dark es la principal.
+ * Agregá [data-theme="light"] a tu elemento raíz para el modo claro.
+ */
+
+/* ── Fuentes (también agregá el link en index.html) ── */
+@import url('https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap');
+
+/* ── Tokens base (Editorial Dark) ── */
+:root,
+[data-theme="dark"] {
+  --bg:       #0c0a09;
+  --card:     #16110c;
+  --elev:     #1a1714;
+  --elev2:    #221d18;
+  --bd:       #2a241f;
+  --bd2:      #382f27;
+  --fg:       #faf7f2;
+  --mut:      #b8aea2;
+  --mut2:     #847a6e;
+
+  --acc:      oklch(0.72 0.18 38);
+  --acc2:     oklch(0.74 0.16 55);
+  --on-acc:   #1a0f06;
+  --acc-soft: oklch(0.72 0.18 38 / 0.14);
+  --acc-bd:   oklch(0.72 0.18 38 / 0.34);
+
+  --r:        10px;
+  --r-lg:     16px;
+  --r-sm:     8px;
+
+  --font:      "Plus Jakarta Sans", system-ui, sans-serif;
+  --font-head: "Bricolage Grotesque", system-ui, sans-serif;
+  --mono:      "JetBrains Mono", monospace;
+
+  --ph-a:     #322a22;
+  --ph-b:     #15100b;
+  --ph-tx:    #7a6e60;
+}
+
+/* ── Tokens Light Mode ── */
+[data-theme="light"] {
+  --bg:       #faf6f0;
+  --card:     #ffffff;
+  --elev:     #f4ede3;
+  --elev2:    #ece0d2;
+  --bd:       #e9ddcd;
+  --bd2:      #d9c9b4;
+  --fg:       #1c140d;
+  --mut:      #6b5d4d;
+  --mut2:     #9c8c77;
+
+  --acc:      oklch(0.58 0.19 38);
+  --acc2:     oklch(0.6 0.17 55);
+  --on-acc:   #ffffff;
+  --acc-soft: oklch(0.58 0.19 38 / 0.12);
+  --acc-bd:   oklch(0.58 0.19 38 / 0.30);
+
+  --ph-a:     #e3d6c4;
+  --ph-b:     #f3ebdf;
+  --ph-tx:    #a8967e;
+}
+
+/* ── Utilidades base ── */
+* { box-sizing: border-box; }
+
+body {
+  background:              var(--bg);
+  color:                   var(--fg);
+  font-family:             var(--font);
+  -webkit-font-smoothing:  antialiased;
+}
