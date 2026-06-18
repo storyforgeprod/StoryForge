@@ -7,7 +7,7 @@ import { validateStory } from '../utils/validation';
 
 const LANGUAGES = [
   { value: 'en', label: '🇺🇸 English' },
-  { value: 'es', label: '🇪🇸 Español' },
+  { value: 'es', label: '🇪🇸 Spanish' },
   { value: 'pt', label: '🇧🇷 Português' },
   { value: 'fr', label: '🇫🇷 Français' },
 ];

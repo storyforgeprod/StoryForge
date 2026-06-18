@@ -27,7 +27,7 @@ describe('AudioPlayer', () => {
             />
         );
 
-        expect(screen.getByText('Duración estimada: 1m 5s')).toBeInTheDocument();
+        expect(screen.getByText('Estimated duration: 1m 5s')).toBeInTheDocument();
     });
 
     it('formats duration correctly for short clips', () => {
@@ -38,7 +38,7 @@ describe('AudioPlayer', () => {
             />
         );
 
-        expect(screen.getByText('Duración estimada: 45s')).toBeInTheDocument();
+        expect(screen.getByText('Estimated duration: 45s')).toBeInTheDocument();
     });
 
     it('formats duration correctly for long clips', () => {
@@ -49,13 +49,13 @@ describe('AudioPlayer', () => {
             />
         );
 
-        expect(screen.getByText('Duración estimada: 2m 30s')).toBeInTheDocument();
+        expect(screen.getByText('Estimated duration: 2m 30s')).toBeInTheDocument();
     });
 
     it('does not display duration text when durationSeconds is undefined', () => {
         render(<AudioPlayer src="https://example.com/audio.mp3" />);
 
-        expect(screen.queryByText(/Duración estimada:/)).not.toBeInTheDocument();
+        expect(screen.queryByText(/Estimated duration:/)).not.toBeInTheDocument();
     });
 
     it('accepts custom className', () => {

@@ -7,7 +7,7 @@ type ApiError = { status: number; message: string };
 
 async function handleResponse<T>(res: Response): Promise<T> {
   if (res.ok) return res.json() as Promise<T>;
-  let message = 'Error de conexión. Revisá tu internet.';
+  let message = 'Connection error. Check your internet.';
   try {
     const body = await res.json();
     if (typeof body.message === 'string') message = body.message;

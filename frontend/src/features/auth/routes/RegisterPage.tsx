@@ -20,9 +20,9 @@ import {
 } from '@/components/ui/form';
 
 const registerSchema = z.object({
-  name: z.string().min(1, 'El nombre es requerido'),
-  email: z.string().email('Ingresa un email válido'),
-  password: z.string().min(6, 'La contraseña debe tener al menos 6 caracteres'),
+  name: z.string().min(1, 'Name is required'),
+  email: z.string().email('Enter a valid email'),
+  password: z.string().min(6, 'Password must be at least 6 characters'),
 });
 
 type RegisterFormValues = z.infer<typeof registerSchema>;
@@ -48,7 +48,7 @@ export const RegisterPage = () => {
       await register(values.email, values.password, values.name);
       navigate('/login', { state: { registered: true } });
     } catch (err: unknown) {
-      const message = err instanceof Error ? err.message : 'Error al registrarse';
+      const message = err instanceof Error ? err.message : 'Registration failed';
       setError(message);
     }
   };
@@ -71,9 +71,9 @@ export const RegisterPage = () => {
             name="name"
             render={({ field }) => (
               <FormItem>
-                <FormLabel className={labelClass}>Nombre</FormLabel>
+                <FormLabel className={labelClass}>Name</FormLabel>
                 <FormControl>
-                  <Input type="text" placeholder="Tu nombre" disabled={isLoading} className={inputClass} {...field} />
+                  <Input type="text" placeholder="Your name" disabled={isLoading} className={inputClass} {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -109,7 +109,7 @@ export const RegisterPage = () => {
                 <FormControl>
                   <Input
                     type="password"
-                    placeholder="Mínimo 6 caracteres"
+                    placeholder="Minimum 6 characters"
                     disabled={isLoading}
                     className={inputClass}
                     {...field}
@@ -128,7 +128,7 @@ export const RegisterPage = () => {
           )}
 
           <Button type="submit" size="lg" className="mt-5 w-full gap-2 font-bold" disabled={isLoading}>
-            {isLoading ? 'Creando cuenta...' : 'Sign up'}
+            {isLoading ? 'Creating account...' : 'Sign up'}
             {!isLoading && <ArrowRight className="h-4 w-4" />}
           </Button>
         </form>

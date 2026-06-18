@@ -14,25 +14,25 @@ describe('DownloadCard', () => {
         expect(screen.getByText('1.0 MB')).toBeInTheDocument();
     });
 
-    it('renders duration formatted (45 → "45 segundos")', () => {
+    it('renders duration formatted (45 → "45 seconds")', () => {
         render(<DownloadCard {...defaultProps} />);
-        expect(screen.getByText('45 segundos')).toBeInTheDocument();
+        expect(screen.getByText('45 seconds')).toBeInTheDocument();
     });
 
     it('shows expiry notice', () => {
         render(<DownloadCard {...defaultProps} />);
-        expect(screen.getByText('El enlace de descarga expira en 24 horas.')).toBeInTheDocument();
+        expect(screen.getByText('The download link expires in 24 hours.')).toBeInTheDocument();
     });
 
     it('anchor href equals videoUrl', () => {
         render(<DownloadCard {...defaultProps} />);
-        const link = screen.getByRole('link', { name: /Descargar MP4/i });
+        const link = screen.getByRole('link', { name: /Download MP4/i });
         expect(link).toHaveAttribute('href', defaultProps.videoUrl);
     });
 
     it('anchor has download attribute set to storyforge-video.mp4', () => {
         render(<DownloadCard {...defaultProps} />);
-        const link = screen.getByRole('link', { name: /Descargar MP4/i });
+        const link = screen.getByRole('link', { name: /Download MP4/i });
         expect(link).toHaveAttribute('download', 'storyforge-video.mp4');
     });
 
@@ -43,6 +43,6 @@ describe('DownloadCard', () => {
 
     it('rounds duration seconds', () => {
         render(<DownloadCard {...defaultProps} durationSeconds={45.7} />);
-        expect(screen.getByText('46 segundos')).toBeInTheDocument();
+        expect(screen.getByText('46 seconds')).toBeInTheDocument();
     });
 });

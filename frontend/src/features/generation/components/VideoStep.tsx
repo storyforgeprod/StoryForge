@@ -89,7 +89,7 @@ export const VideoStep = ({
                 controls
                 playsInline
                 controlsList="nodownload"
-                aria-label="Vista previa del video generado"
+                aria-label="Generated video preview"
                 className="h-full w-full object-cover"
               />
             ) : firstImageUrl ? (

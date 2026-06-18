@@ -57,7 +57,7 @@ describe('useGenerateVideo', () => {
         }
     });
 
-    it('400 error → "Las imágenes o el audio aún no están listos."', async () => {
+    it('400 error → "Images or audio are not ready yet."', async () => {
         mockPost.mockRejectedValue({ status: 400, message: 'Image job not completed' });
 
         const { result } = renderHook(() => useGenerateVideo());
@@ -70,7 +70,7 @@ describe('useGenerateVideo', () => {
         expect(result.current.state.phase).toBe('error');
         if (result.current.state.phase === 'error') {
             expect(result.current.state.message).toBe(
-                'Las imágenes o el audio aún no están listos.',
+                'Images or audio are not ready yet.',
             );
         }
     });
@@ -87,7 +87,7 @@ describe('useGenerateVideo', () => {
 
         expect(result.current.state.phase).toBe('error');
         if (result.current.state.phase === 'error') {
-            expect(result.current.state.message).toBe('Límite alcanzado. Intentá en un minuto.');
+            expect(result.current.state.message).toBe('Limit reached. Try again in a minute.');
         }
     });
 
@@ -129,7 +129,7 @@ describe('useGenerateVideo', () => {
 
         expect(result.current.state.phase).toBe('error');
         if (result.current.state.phase === 'error') {
-            expect(result.current.state.message).toBe('El ensamblado tardó demasiado. Intentá de nuevo.');
+            expect(result.current.state.message).toBe('Assembly took too long. Try again.');
         }
     });
 

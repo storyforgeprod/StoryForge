@@ -3,6 +3,8 @@ import { describe, it, expect, vi } from 'vitest';
 import { StoryStep } from './StoryStep';
 
 const base = {
+  title: '',
+  onTitleChange: vi.fn(),
   story: '',
   onStoryChange: vi.fn(),
   tone: 'playful',
@@ -11,6 +13,8 @@ const base = {
   onDurationChange: vi.fn(),
   sceneCount: 5,
   onSceneCountChange: vi.fn(),
+  language: 'en',
+  onLanguageChange: vi.fn(),
   onGenerate: vi.fn(),
   isGenerating: false,
 };

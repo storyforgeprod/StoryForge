@@ -97,14 +97,14 @@ Errors map to user-readable Spanish messages **inside the hook**, never inside t
 ```ts
 const ERROR_MAP: Record<number, string> = {
   400: 'Revisá el texto o el estilo seleccionado.',
-  401: 'Tu sesión expiró. Volvé a iniciar sesión.',
-  429: 'Límite alcanzado. Intentá en un minuto.',
+  401: 'Your session expired. Sign in again.',
+  429: 'Limit reached. Try again in a minute.',
 };
 
-const NETWORK_ERROR = 'Error de conexión. Revisá tu internet.';
+const NETWORK_ERROR = 'Connection error. Check your internet.';
 ```
 
-User-facing strings are Spanish to match the app's audience. Code, comments, rules, commits: English.
+User-facing strings are English. Code, comments, rules, commits: English.
 
 `API_BASE` always comes from `import.meta.env.VITE_API_URL` with a localhost fallback. Never hardcode URLs at call sites.
 
@@ -179,7 +179,7 @@ Before you call a frontend change done:
 - [ ] No hardcoded brand colors — use the `brand-gradient` token or semantic tokens.
 - [ ] No `any` (see `typescript-patterns`).
 - [ ] Hooks return discriminated unions, not parallel `isLoading`/`error` booleans (see `react-patterns`).
-- [ ] User-facing strings are Spanish; code identifiers, comments, and commits are English.
+- [ ] User-facing strings are English; code identifiers, comments, and commits are English.
 - [ ] Accessibility: `aria-label` / `htmlFor` / keyboard handlers where needed.
 
 ---

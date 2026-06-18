@@ -53,7 +53,7 @@ export function useProjects(): { state: State; refresh: () => void } {
           'message' in err &&
           typeof (err as { message: unknown }).message === 'string'
             ? (err as { message: string }).message
-            : 'Error de conexión. Revisá tu internet.';
+            : 'Connection error. Check your internet.';
         setState({ phase: 'error', message });
         stopPoll();
       });

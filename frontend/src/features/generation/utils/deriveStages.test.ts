@@ -5,7 +5,7 @@ describe('deriveStages', () => {
     it('returns all four stages in canonical order', () => {
         const stages = deriveStages('idle', 'idle', 'idle', 'idle');
         expect(stages.map((s) => s.id)).toEqual(['script', 'images', 'audio', 'video']);
-        expect(stages.map((s) => s.label)).toEqual(['Guión', 'Imágenes', 'Audio', 'Video']);
+        expect(stages.map((s) => s.label)).toEqual(['Script', 'Images', 'Audio', 'Video']);
     });
 
     it('marks the script stage as pending while idle, submitting, or polling', () => {

@@ -49,10 +49,10 @@ export function HomePage() {
     <AppShell crumb="Home">
       <div className="mx-auto max-w-[900px] px-6 pb-20 pt-11 sm:px-12">
         <h1 className="font-head text-[38px] font-extrabold leading-[1.05] tracking-[-0.04em]">
-          Hola, <span className="text-primary">{displayName}</span>.
+          Hello, <span className="text-primary">{displayName}</span>.
         </h1>
         <p className="mt-2.5 text-[15px] text-muted-foreground">
-          Esto es lo que tenés en tu tablero.
+          Here is what you have on your dashboard.
         </p>
 
         <div className="mt-7 flex flex-wrap gap-3.5">
@@ -74,7 +74,7 @@ export function HomePage() {
         <section className="mt-11">
           <div className="mb-4 flex items-center justify-between">
             <h2 className="font-head text-[20px] font-extrabold tracking-[-0.025em]">
-              Recientes
+              Recent
             </h2>
           </div>
           <div className="grid grid-cols-1 gap-3.5 sm:grid-cols-2 lg:grid-cols-3">
@@ -97,10 +97,10 @@ export function HomePage() {
           >
             <div>
               <div className="font-head text-[17px] font-extrabold">
-                Crear un nuevo video
+                Create a new video
               </div>
               <div className="mt-1 text-[13px] text-muted-foreground">
-                Convertí tu historia en un Short narrado, paso a paso.
+                Turn your story into a narrated Short, step by step.
               </div>
             </div>
             <ArrowRight className="h-5 w-5 flex-none text-primary" />

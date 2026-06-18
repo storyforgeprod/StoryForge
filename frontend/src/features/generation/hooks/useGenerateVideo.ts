@@ -9,13 +9,13 @@ export type UseGenerateVideoReturn = {
 };
 
 const ERROR_MAP: Record<number, string> = {
-    400: 'Las imágenes o el audio aún no están listos.',
-    401: 'Tu sesión expiró. Volvé a iniciar sesión.',
-    429: 'Límite alcanzado. Intentá en un minuto.',
+    400: 'Images or audio are not ready yet.',
+    401: 'Your session expired. Sign in again.',
+    429: 'Limit reached. Try again in a minute.',
 };
 
-const NETWORK_ERROR = 'Error de conexión. Revisá tu internet.';
-const TIMEOUT_ERROR = 'El ensamblado tardó demasiado. Intentá de nuevo.';
+const NETWORK_ERROR = 'Connection error. Check your internet.';
+const TIMEOUT_ERROR = 'Assembly took too long. Try again.';
 // 400 attempts × 5s = 2000s ≈ 33 min timeout (video encoding can be slow on Render)
 const MAX_ATTEMPTS = 400;
 const POLL_INTERVAL_MS = 5000;

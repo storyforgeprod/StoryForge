@@ -22,8 +22,8 @@ export function deriveStages(
     videoPhase: StagePhase,
 ): PipelineStageView[] {
     return [
-        { id: 'script', label: 'Guión', status: scriptStatus(genPhase) },
-        { id: 'images', label: 'Imágenes', status: downstreamStatus(imagesPhase) },
+        { id: 'script', label: 'Script', status: scriptStatus(genPhase) },
+        { id: 'images', label: 'Images', status: downstreamStatus(imagesPhase) },
         { id: 'audio', label: 'Audio', status: downstreamStatus(audioPhase) },
         { id: 'video', label: 'Video', status: downstreamStatus(videoPhase) },
     ];

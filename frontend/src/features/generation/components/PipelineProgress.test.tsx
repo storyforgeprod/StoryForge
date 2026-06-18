@@ -5,8 +5,8 @@ import type { PipelineStageView } from '../types';
 
 describe('PipelineProgress', () => {
     const mockStages: PipelineStageView[] = [
-        { id: 'script', label: 'Guión', status: 'done' },
-        { id: 'images', label: 'Imágenes', status: 'active' },
+        { id: 'script', label: 'Script', status: 'done' },
+        { id: 'images', label: 'Images', status: 'active' },
         { id: 'audio', label: 'Audio', status: 'pending' },
         { id: 'video', label: 'Video', status: 'error' },
     ];
@@ -30,8 +30,8 @@ describe('PipelineProgress', () => {
     it('displays all stage labels on non-mobile', () => {
         render(<PipelineProgress stages={ mockStages } />);
 
-        expect(screen.getByText('Guión')).toBeInTheDocument();
-        expect(screen.getByText('Imágenes')).toBeInTheDocument();
+        expect(screen.getByText('Script')).toBeInTheDocument();
+        expect(screen.getByText('Images')).toBeInTheDocument();
         expect(screen.getByText('Audio')).toBeInTheDocument();
         expect(screen.getByText('Video')).toBeInTheDocument();
     });
@@ -117,11 +117,11 @@ describe('PipelineProgress', () => {
 
         expect(screen.getByTestId('stage-script')).toHaveAttribute(
             'aria-label',
-            'Guión: done',
+            'Script: done',
         );
         expect(screen.getByTestId('stage-images')).toHaveAttribute(
             'aria-label',
-            'Imágenes: active',
+            'Images: active',
         );
         expect(screen.getByTestId('stage-audio')).toHaveAttribute(
             'aria-label',

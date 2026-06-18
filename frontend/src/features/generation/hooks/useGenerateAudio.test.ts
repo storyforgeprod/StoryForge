@@ -131,7 +131,7 @@ describe('useGenerateAudio', () => {
 
         expect(result.current.state.phase).toBe('error');
         if (result.current.state.phase === 'error') {
-            expect(result.current.state.message).toBe('Tu sesión expiró. Volvé a iniciar sesión.');
+            expect(result.current.state.message).toBe('Your session expired. Sign in again.');
         }
     });
 
@@ -147,7 +147,7 @@ describe('useGenerateAudio', () => {
 
         expect(result.current.state.phase).toBe('error');
         if (result.current.state.phase === 'error') {
-            expect(result.current.state.message).toBe('Límite alcanzado. Intentá en un minuto.');
+            expect(result.current.state.message).toBe('Limit reached. Try again in a minute.');
         }
     });
 
@@ -171,7 +171,7 @@ describe('useGenerateAudio', () => {
         expect(result.current.state.phase).toBe('error');
         if (result.current.state.phase === 'error') {
             expect(result.current.state.message).toBe(
-                'La generación de audio tardó demasiado. Intentá de nuevo.',
+                'Audio generation took too long. Try again.',
             );
         }
     });

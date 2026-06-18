@@ -43,7 +43,7 @@ export function StoryInput({
   return (
     <div className={cn('space-y-2', className)}>
       <div className="flex items-end justify-between gap-2">
-        <Label htmlFor={id}>Texto de la historia</Label>
+        <Label htmlFor={id}>Story text</Label>
         <span className={cn('text-xs tabular-nums', counterTone)} aria-live="polite">
           {charCount} / {STORY_MAX_LENGTH}
         </span>
@@ -53,7 +53,7 @@ export function StoryInput({
         id={id}
         value={value}
         disabled={disabled}
-        placeholder="Pegá aquí la sinopsis o un capítulo de tu manhwa, webtoon o novela…"
+        placeholder="Paste here the synopsis or a chapter of your manhwa, webtoon, or novel…"
         maxLength={STORY_MAX_LENGTH + 200}
         aria-invalid={displayError}
         aria-describedby={displayError ? `${hintId} ${errorId}` : hintId}
@@ -63,8 +63,7 @@ export function StoryInput({
       />
 
       <p id={hintId} className="text-xs text-muted-foreground">
-        Entre {STORY_MIN_LENGTH} y {STORY_MAX_LENGTH} caracteres. Ideal: un capítulo o sinopsis con
-        suficiente contexto para el guión.
+        Between {STORY_MIN_LENGTH} and {STORY_MAX_LENGTH} characters. Ideal: a chapter or synopsis with enough context for the script.
       </p>
 
       {displayError && validation.error && (

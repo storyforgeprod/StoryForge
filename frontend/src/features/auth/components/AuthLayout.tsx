@@ -39,7 +39,7 @@ export const AuthLayout = ({ children }: AuthLayoutProps) => {
         <button
           type="button"
           onClick={toggleTheme}
-          aria-label={theme === 'dark' ? 'Activar modo claro' : 'Activar modo oscuro'}
+          aria-label={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
           className="absolute right-6 top-5 grid h-9 w-9 place-items-center rounded-sm border border-border text-muted-foreground transition hover:border-bd2 hover:text-foreground"
         >
           {theme === 'dark' ? <Sun className="h-[17px] w-[17px]" /> : <Moon className="h-[17px] w-[17px]" />}

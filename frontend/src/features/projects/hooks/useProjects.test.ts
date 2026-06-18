@@ -71,7 +71,7 @@ describe('useProjects', () => {
 
     expect(result.current.state.phase).toBe('error');
     if (result.current.state.phase === 'error') {
-      expect(result.current.state.message).toBe('Error de conexión. Revisá tu internet.');
+      expect(result.current.state.message).toBe('Connection error. Check your internet.');
     }
   });
 

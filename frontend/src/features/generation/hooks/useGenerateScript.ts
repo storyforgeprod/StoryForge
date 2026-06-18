@@ -9,13 +9,13 @@ export type UseGenerateScriptReturn = {
 };
 
 const ERROR_MAP: Record<number, string> = {
-    400: 'Revisá el texto ingresado.',
-    401: 'Tu sesión expiró. Volvé a iniciar sesión.',
-    429: 'Límite alcanzado. Intentá en un minuto.',
+    400: 'Check the entered text.',
+    401: 'Your session expired. Sign in again.',
+    429: 'Limit reached. Try again in a minute.',
 };
 
-const NETWORK_ERROR = 'Error de conexión. Revisá tu internet.';
-const TIMEOUT_ERROR = 'La generación tardó demasiado. Intentá de nuevo.';
+const NETWORK_ERROR = 'Connection error. Check your internet.';
+const TIMEOUT_ERROR = 'Generation took too long. Try again.';
 const MAX_ATTEMPTS = 400; // 400 × 5s = 2000s ≈ 33 min
 const POLL_INTERVAL_MS = 5000;
 const TEMP_ERROR_CODES = new Set([502, 503, 504]);
@@ -65,7 +65,7 @@ export function useGenerateScript(): UseGenerateScriptReturn {
                         clearPolling();
                         setState({
                             phase: 'error',
-                            message: job.message ?? 'No se pudo generar el guión.',
+                            message: job.message ?? 'Could not generate the script.',
                         });
                     }
                 } catch (err) {
