@@ -4,6 +4,7 @@ import {
   Palette, Globe, Zap, ChevronDown, ArrowRight,
 } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
+import demoVideo from '@/assets/video/20337909-uhd_1862_3936_24fps.mp4';
 import { useAuth } from '@/features/auth';
 import { useTheme } from '@/app/providers/ThemeProvider';
 import { Button } from '@/components/ui/button';
@@ -74,24 +75,17 @@ const VideoVisual = () => (
 const PhoneMockup = () => (
   <div className="relative w-[200px] sm:w-[240px]">
     <div
-      className="relative overflow-hidden rounded-[32px] border-4 border-border bg-card shadow-2xl"
-      style={{ aspectRatio: '9/18' }}
+      className="relative overflow-hidden rounded-[32px] border-4 border-border bg-black shadow-2xl"
+      style={{ aspectRatio: '9/16' }}
     >
-      <div
-        className="absolute inset-0 flex flex-col"
-        style={{ background: 'linear-gradient(to bottom, var(--acc-soft), var(--card))' }}
-      >
-        <div className="m-3 flex-1 rounded-xl bg-elev" />
-        <div className="mx-3 mb-2 space-y-1.5">
-          <div className="h-2 w-3/4 rounded-full bg-bd2" />
-          <div className="h-2 w-1/2 rounded-full bg-bd2" />
-          <div className="h-2 w-2/3 rounded-full bg-bd2" />
-        </div>
-        <div className="mx-3 mb-3 flex gap-2">
-          <div className="h-6 w-14 rounded-md bg-primary/70" />
-          <div className="h-6 flex-1 rounded-md bg-elev2" />
-        </div>
-      </div>
+      <video
+        src={demoVideo}
+        className="absolute inset-0 h-full w-full object-cover"
+        autoPlay
+        muted
+        loop
+        playsInline
+      />
     </div>
     <div className="pointer-events-none absolute -inset-6 -z-10 rounded-full bg-primary/10 blur-3xl" />
   </div>
@@ -104,7 +98,7 @@ type Step = { n: string; Icon: LucideIcon; title: string; desc: string };
 const STEPS: Step[] = [
   { n: '01', Icon: FileText, title: 'Paste your story',     desc: 'Drop any excerpt from your webtoon or novel.' },
   { n: '02', Icon: Wand2,    title: 'AI writes the script', desc: 'GPT-4.1 turns your text into punchy short-form narration.' },
-  { n: '03', Icon: Mic,      title: 'Pick style & voice',   desc: 'Choose a visual style and an ElevenLabs narrator.' },
+  { n: '03', Icon: Mic,      title: 'Pick style & voice',   desc: 'Choose a visual style and an AI narrator.' },
   { n: '04', Icon: Download, title: 'Download your Short',  desc: 'A vertical video, ready to upload.' },
 ];
 
@@ -124,7 +118,7 @@ const FEATURE_BLOCKS = [
   {
     tag: 'Voice synthesis',
     headline: 'Professional narration, no microphone',
-    desc: 'ElevenLabs voices deliver natural, expressive narration in multiple styles and languages.',
+    desc: 'Azure AI voices deliver natural, expressive narration in multiple styles and languages.',
     Visual: VoiceVisual,
   },
   {
@@ -143,8 +137,6 @@ const SECONDARIES: Secondary[] = [
   { Icon: Zap,     title: 'Instant export',     desc: 'MP4 ready for YouTube Shorts, TikTok, and Reels.' },
 ];
 
-const TECH_PILLS = ['Azure OpenAI', 'ElevenLabs', 'Azure Foundry', 'FFmpeg'] as const;
-
 // ── Component ─────────────────────────────────────────────────────────────────
 
 export function LandingPage() {
@@ -161,7 +153,6 @@ export function LandingPage() {
           <div className="hidden gap-6 md:flex">
             <a href="#features"     className="text-sm text-muted-foreground transition-colors hover:text-foreground">Features</a>
             <a href="#how-it-works" className="text-sm text-muted-foreground transition-colors hover:text-foreground">How it works</a>
-            <a href="#pricing"      className="text-sm text-muted-foreground transition-colors hover:text-foreground">Pricing</a>
           </div>
           <div className="flex items-center gap-3">
             <Button
@@ -233,16 +224,6 @@ export function LandingPage() {
           </div>
         </div>
       </section>
-
-      {/* 3. Social Proof Bar */}
-      <div className="border-y border-border bg-card py-5">
-        <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-center gap-6 px-6">
-          <span className="font-mono text-xs uppercase tracking-widest text-mut2">Powered by</span>
-          {TECH_PILLS.map((name) => (
-            <span key={name} className="text-sm font-medium text-muted-foreground">{name}</span>
-          ))}
-        </div>
-      </div>
 
       {/* 4. Problem */}
       <section className="py-24">
