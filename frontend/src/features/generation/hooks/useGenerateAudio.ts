@@ -9,12 +9,12 @@ export type UseGenerateAudioReturn = {
 };
 
 const ERROR_MAP: Record<number, string> = {
-    401: 'Tu sesión expiró. Volvé a iniciar sesión.',
-    429: 'Límite alcanzado. Intentá en un minuto.',
+    401: 'Your session expired. Sign in again.',
+    429: 'Limit reached. Try again in a minute.',
 };
 
-const NETWORK_ERROR = 'Error de conexión. Revisá tu internet.';
-const TIMEOUT_ERROR = 'La generación de audio tardó demasiado. Intentá de nuevo.';
+const NETWORK_ERROR = 'Connection error. Check your internet.';
+const TIMEOUT_ERROR = 'Audio generation took too long. Try again.';
 // 400 attempts × 5s = 2000s ≈ 33 min (fallback to Azure Speech can add latency)
 const MAX_ATTEMPTS = 400;
 const POLL_INTERVAL_MS = 5000;
@@ -71,7 +71,7 @@ export function useGenerateAudio(): UseGenerateAudioReturn {
                             message:
                                 (typeof job.error === 'string' ? job.error : undefined) ??
                                 job.message ??
-                                'No se pudo generar el audio.',
+                                'Could not generate the audio.',
                         });
                     }
                 } catch (err) {

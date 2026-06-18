@@ -16,13 +16,13 @@ function formatFileSize(bytes: number): string {
 }
 
 function formatDuration(seconds: number): string {
-    return `${Math.round(seconds)} segundos`;
+    return `${Math.round(seconds)} seconds`;
 }
 
 export const DownloadCard = ({ videoUrl, durationSeconds, fileSizeBytes }: DownloadCardProps) => (
     <Card>
         <CardHeader>
-            <CardTitle className="font-head text-2xl tracking-[-0.03em]">¡Tu video está listo!</CardTitle>
+            <CardTitle className="font-head text-2xl tracking-[-0.03em]">Your video is ready!</CardTitle>
         </CardHeader>
         <CardContent className="space-y-5">
             <div className="mx-auto w-[270px] max-w-full rounded-[30px] border border-bd2 bg-black p-[7px] shadow-[0_50px_90px_-36px_rgba(0,0,0,.95)]">
@@ -31,19 +31,19 @@ export const DownloadCard = ({ videoUrl, durationSeconds, fileSizeBytes }: Downl
                         src={videoUrl}
                         controls
                         className="h-full w-full object-cover"
-                        aria-label="Vista previa del video"
+                        aria-label="Video preview"
                     />
                 </div>
             </div>
             <div className="flex flex-wrap justify-center gap-x-4 gap-y-1 text-center font-mono text-xs text-mut2">
                 <span>{formatFileSize(fileSizeBytes)}</span>
                 <span>{formatDuration(durationSeconds)}</span>
-                <span>El enlace de descarga expira en 24 horas.</span>
+                <span>The download link expires in 24 hours.</span>
             </div>
             <Button asChild className="w-full">
                 <a href={videoUrl} download="storyforge-video.mp4">
                     <Download className="mr-2 h-4 w-4" />
-                    Descargar MP4
+                    Download MP4
                 </a>
             </Button>
         </CardContent>

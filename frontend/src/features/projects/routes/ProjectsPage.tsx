@@ -23,7 +23,7 @@ export const ProjectsPage = () => {
               Projects
             </h1>
             <p className="mt-1.5 text-[13.5px] text-muted-foreground">
-              Todos tus shorts en un solo lugar.
+              All your shorts in one place.
             </p>
           </div>
         </header>
@@ -46,7 +46,7 @@ export const ProjectsPage = () => {
         {state.phase === "success" && state.projects.length === 0 && (
           <div className="rounded-xl border border-dashed border-bd2 py-16 text-center">
             <p className="mb-4 text-sm text-muted-foreground">
-              Todavía no tenés proyectos. ¡Creá uno!
+              You don't have any projects yet. Create one!
             </p>
             <Button size="sm" onClick={() => navigate("/app")}>
               Create your first story

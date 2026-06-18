@@ -8,7 +8,6 @@ import { AlertCircle, ArrowRight } from 'lucide-react';
 import { useAuth } from '../providers/AuthProvider';
 import { AuthLayout } from '../components/AuthLayout';
 import { AuthTabs } from '../components/AuthTabs';
-import { AuthSocial } from '../components/AuthSocial';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Alert, AlertDescription } from '@/components/ui/alert';
@@ -22,8 +21,8 @@ import {
 } from '@/components/ui/form';
 
 const loginSchema = z.object({
-  email: z.string().email('Ingresa un email válido'),
-  password: z.string().min(1, 'La contraseña es requerida'),
+  email: z.string().email('Enter a valid email'),
+  password: z.string().min(1, 'Password is required'),
 });
 
 type LoginFormValues = z.infer<typeof loginSchema>;
@@ -40,7 +39,7 @@ export const LoginPage = () => {
   useEffect(() => {
     const state = location.state as { registered?: boolean } | null;
     if (state?.registered) {
-      toast.success('Cuenta creada. Iniciá sesión para continuar.');
+      toast.success('Account created. Sign in to continue.');
       navigate(location.pathname, { replace: true, state: null });
     }
   }, [location, navigate]);
@@ -58,7 +57,7 @@ export const LoginPage = () => {
       await login(values.email, values.password);
       navigate('/home');
     } catch (err: unknown) {
-      const message = err instanceof Error ? err.message : 'Error al iniciar sesión';
+      const message = err instanceof Error ? err.message : 'Login failed';
       setError(message);
     }
   };
@@ -124,13 +123,12 @@ export const LoginPage = () => {
           )}
 
           <Button type="submit" size="lg" className="mt-5 w-full gap-2 font-bold" disabled={isLoading}>
-            {isLoading ? 'Iniciando sesión...' : 'Log in'}
+            {isLoading ? 'Signing in...' : 'Log in'}
             {!isLoading && <ArrowRight className="h-4 w-4" />}
           </Button>
         </form>
       </Form>
 
-      <AuthSocial />
     </AuthLayout>
   );
 };

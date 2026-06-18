@@ -31,7 +31,7 @@ export const AudioPlayer = ({
                 />
                 {durationSeconds !== undefined && (
                     <p className="text-sm text-muted-foreground">
-                        Duración estimada: {formatDuration(durationSeconds)}
+                        Estimated duration: {formatDuration(durationSeconds)}
                     </p>
                 )}
             </CardContent>

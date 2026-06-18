@@ -110,7 +110,7 @@ describe('useGenerateImages', () => {
 
         expect(result.current.state.phase).toBe('error');
         if (result.current.state.phase === 'error') {
-            expect(result.current.state.message).toBe('Tu sesión expiró. Volvé a iniciar sesión.');
+            expect(result.current.state.message).toBe('Your session expired. Sign in again.');
         }
     });
 
@@ -126,7 +126,7 @@ describe('useGenerateImages', () => {
 
         expect(result.current.state.phase).toBe('error');
         if (result.current.state.phase === 'error') {
-            expect(result.current.state.message).toBe('Límite alcanzado. Intentá en un minuto.');
+            expect(result.current.state.message).toBe('Limit reached. Try again in a minute.');
         }
     });
 
@@ -150,7 +150,7 @@ describe('useGenerateImages', () => {
         expect(result.current.state.phase).toBe('error');
         if (result.current.state.phase === 'error') {
             expect(result.current.state.message).toBe(
-                'La generación de imágenes tardó demasiado. Intentá de nuevo.',
+                'Image generation took too long. Try again.',
             );
         }
     });

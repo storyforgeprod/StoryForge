@@ -23,10 +23,10 @@ describe('ImageGrid', () => {
         expect(container.firstChild).toBeNull();
     });
 
-    it('alt text follows "Escena N" pattern', () => {
+    it('alt text follows "Scene N" pattern', () => {
         const urls = ['https://example.com/1.jpg', 'https://example.com/2.jpg'];
         render(<ImageGrid imageUrls={urls} />);
-        expect(screen.getByAltText('Escena 1')).toBeInTheDocument();
-        expect(screen.getByAltText('Escena 2')).toBeInTheDocument();
+        expect(screen.getByAltText('Scene 1')).toBeInTheDocument();
+        expect(screen.getByAltText('Scene 2')).toBeInTheDocument();
     });
 });

@@ -87,7 +87,7 @@ export const AppSidebar = ({ steps }: AppSidebarProps) => {
           <button
             type="button"
             onClick={toggleTheme}
-            aria-label={theme === 'dark' ? 'Activar modo claro' : 'Activar modo oscuro'}
+            aria-label={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
             className="grid h-9 w-9 place-items-center rounded-sm border border-border text-muted-foreground transition hover:border-bd2 hover:text-foreground"
           >
             {theme === 'dark' ? <Sun className="h-[17px] w-[17px]" /> : <Moon className="h-[17px] w-[17px]" />}
@@ -98,7 +98,7 @@ export const AppSidebar = ({ steps }: AppSidebarProps) => {
             className="flex items-center gap-2 rounded-sm border border-border px-3 py-2 text-[13px] font-semibold text-muted-foreground transition hover:border-bd2 hover:text-foreground"
           >
             <LogOut className="h-4 w-4" />
-            Salir
+            Sign out
           </button>
         </div>
       </div>

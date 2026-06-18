@@ -15,7 +15,7 @@ export function ImageGrid({ imageUrls, className }: ImageGridProps) {
                 >
                     <img
                         src={url}
-                        alt={`Escena ${index + 1}`}
+                        alt={`Scene ${index + 1}`}
                         loading="lazy"
                         className="h-full w-full object-cover"
                     />

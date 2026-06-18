@@ -74,7 +74,7 @@ describe('useGenerateScript', () => {
         expect(result.current.state.phase).toBe('error');
         if (result.current.state.phase === 'error') {
             expect(result.current.state.message).toBe(
-                'Límite alcanzado. Intentá en un minuto.',
+                'Limit reached. Try again in a minute.',
             );
         }
     });
@@ -92,7 +92,7 @@ describe('useGenerateScript', () => {
         expect(result.current.state.phase).toBe('error');
         if (result.current.state.phase === 'error') {
             expect(result.current.state.message).toBe(
-                'Error de conexión. Revisá tu internet.',
+                'Connection error. Check your internet.',
             );
         }
     });
@@ -172,7 +172,7 @@ describe('useGenerateScript', () => {
         expect(result.current.state.phase).toBe('error');
         if (result.current.state.phase === 'error') {
             expect(result.current.state.message).toBe(
-                'La generación tardó demasiado. Intentá de nuevo.',
+                'Generation took too long. Try again.',
             );
         }
     });

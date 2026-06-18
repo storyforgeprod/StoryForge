@@ -6,7 +6,7 @@ import {
   useAuth,
 } from "@/features/auth";
 import { GeneratePage } from "@/features/generation";
-import { HomePage, NotFoundPage } from "@/features/home";
+import { HomePage, NotFoundPage, LandingPage } from "@/features/home";
 import { ProjectsPage } from "@/features/projects";
 
 const BYPASS_AUTH = import.meta.env.VITE_BYPASS_AUTH === "true";
@@ -44,15 +44,7 @@ export const AppRoutes = () => {
             )
           }
         />
-        <Route
-          path="/"
-          element={
-            <Navigate
-              to={BYPASS_AUTH || isAuthenticated ? "/home" : "/login"}
-              replace
-            />
-          }
-        />
+        <Route path="/" element={<LandingPage />} />
         <Route
           path="/home"
           element={

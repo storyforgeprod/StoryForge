@@ -46,49 +46,49 @@ export const PresetDialogs = ({
 
     const applyScript = async () => {
         if (!scriptContent.trim()) {
-            toast.error('Por favor ingresa contenido para el guión');
+            toast.error('Please enter content for the script');
             return;
         }
         try {
             const result = await postPreset('script', { content: scriptContent });
             onScriptApplied(result.jobId);
-            toast.success('Preset de guión aplicado');
+            toast.success('Script preset applied');
             handleClose();
         } catch (error) {
             console.error('Error saving script preset:', error);
-            toast.error('Error al guardar el preset del guión');
+            toast.error('Error saving script preset');
         }
     };
 
     const applyImages = async () => {
         if (!imagesInput.trim()) {
-            toast.error('Por favor ingresa un Job ID válido o carga imágenes');
+            toast.error('Please enter a valid Job ID or upload images');
             return;
         }
         try {
             const result = await postPreset('images', { content: imagesInput });
             onImagesApplied(result.jobId);
-            toast.success('Preset de imágenes aplicado');
+            toast.success('Images preset applied');
             handleClose();
         } catch (error) {
             console.error('Error saving images preset:', error);
-            toast.error('Error al guardar el preset de imágenes');
+            toast.error('Error saving images preset');
         }
     };
 
     const applyAudio = async () => {
         if (!audioInput.trim()) {
-            toast.error('Por favor ingresa un Job ID válido');
+            toast.error('Please enter a valid Job ID');
             return;
         }
         try {
             const result = await postPreset('audio', { content: audioInput });
             onAudioApplied(result.jobId);
-            toast.success('Preset de audio aplicado');
+            toast.success('Audio preset applied');
             handleClose();
         } catch (error) {
             console.error('Error saving audio preset:', error);
-            toast.error('Error al guardar el preset de audio');
+            toast.error('Error saving audio preset');
         }
     };
 
@@ -102,23 +102,23 @@ export const PresetDialogs = ({
             >
                 <DialogContent className="max-w-md">
                     <DialogHeader>
-                        <DialogTitle>Usar preset - Guión</DialogTitle>
+                        <DialogTitle>Use preset - Script</DialogTitle>
                         <DialogDescription>
-                            Pega o escribe el contenido del guión que deseas usar
+                            Paste or write the script content you want to use
                         </DialogDescription>
                     </DialogHeader>
                     <div className="space-y-4">
                         <Textarea
                             value={scriptContent}
                             onChange={(e) => setScriptContent(e.target.value)}
-                            placeholder="Pega el guión aquí (JSON o texto)..."
+                            placeholder="Paste the script here (JSON or text)..."
                             className="h-40 min-h-0"
                         />
                         <div className="flex gap-2 justify-end">
                             <Button variant="outline" onClick={handleClose}>
-                                Cancelar
+                                Cancel
                             </Button>
-                            <Button onClick={applyScript}>Aplicar preset</Button>
+                            <Button onClick={applyScript}>Apply preset</Button>
                         </div>
                     </div>
                 </DialogContent>
@@ -132,9 +132,9 @@ export const PresetDialogs = ({
             >
                 <DialogContent className="max-w-md">
                     <DialogHeader>
-                        <DialogTitle>Usar preset - Imágenes</DialogTitle>
+                        <DialogTitle>Use preset - Images</DialogTitle>
                         <DialogDescription>
-                            Ingresa el Job ID de un trabajo de imágenes existente
+                            Enter the Job ID of an existing images job
                         </DialogDescription>
                     </DialogHeader>
                     <div className="space-y-4">
@@ -142,13 +142,13 @@ export const PresetDialogs = ({
                             type="text"
                             value={imagesInput}
                             onChange={(e) => setImagesInput(e.target.value)}
-                            placeholder="ej: job_abc123xyz..."
+                            placeholder="e.g.: job_abc123xyz..."
                         />
                         <div className="flex gap-2 justify-end">
                             <Button variant="outline" onClick={handleClose}>
-                                Cancelar
+                                Cancel
                             </Button>
-                            <Button onClick={applyImages}>Aplicar preset</Button>
+                            <Button onClick={applyImages}>Apply preset</Button>
                         </div>
                     </div>
                 </DialogContent>
@@ -162,9 +162,9 @@ export const PresetDialogs = ({
             >
                 <DialogContent className="max-w-md">
                     <DialogHeader>
-                        <DialogTitle>Usar preset - Audio</DialogTitle>
+                        <DialogTitle>Use preset - Audio</DialogTitle>
                         <DialogDescription>
-                            Ingresa el Job ID de un trabajo de audio existente
+                            Enter the Job ID of an existing audio job
                         </DialogDescription>
                     </DialogHeader>
                     <div className="space-y-4">
@@ -172,13 +172,13 @@ export const PresetDialogs = ({
                             type="text"
                             value={audioInput}
                             onChange={(e) => setAudioInput(e.target.value)}
-                            placeholder="ej: job_abc123xyz..."
+                            placeholder="e.g.: job_abc123xyz..."
                         />
                         <div className="flex gap-2 justify-end">
                             <Button variant="outline" onClick={handleClose}>
-                                Cancelar
+                                Cancel
                             </Button>
-                            <Button onClick={applyAudio}>Aplicar preset</Button>
+                            <Button onClick={applyAudio}>Apply preset</Button>
                         </div>
                     </div>
                 </DialogContent>

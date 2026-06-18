@@ -13,19 +13,19 @@ export function validateStory(raw: string): StoryValidationResult {
   const length = story.length;
 
   if (length === 0) {
-    return { valid: false, error: 'Pegá el texto de tu historia para continuar.', length };
+    return { valid: false, error: 'Paste your story text to continue.', length };
   }
   if (length < STORY_MIN_LENGTH) {
     return {
       valid: false,
-      error: `Mínimo ${STORY_MIN_LENGTH} caracteres (faltan ${STORY_MIN_LENGTH - length}).`,
+      error: `Minimum ${STORY_MIN_LENGTH} characters (${STORY_MIN_LENGTH - length} more needed).`,
       length,
     };
   }
   if (length > STORY_MAX_LENGTH) {
     return {
       valid: false,
-      error: `Máximo ${STORY_MAX_LENGTH} caracteres (${length - STORY_MAX_LENGTH} de más).`,
+      error: `Maximum ${STORY_MAX_LENGTH} characters (${length - STORY_MAX_LENGTH} over limit).`,
       length,
     };
   }

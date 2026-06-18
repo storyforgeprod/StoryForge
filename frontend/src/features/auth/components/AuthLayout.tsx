@@ -1,14 +1,7 @@
 import type { ReactNode } from 'react';
 import { Moon, Sun } from 'lucide-react';
-import { StyleThumb, type StoryStyle } from '@/features/generation';
 import { Brand } from '@/components/layout/Brand';
 import { useTheme } from '@/app/providers/ThemeProvider';
-
-const SHOWCASE_SCENES: { style: StoryStyle; caption: string }[] = [
-  { style: 'bold-comic',   caption: 'Wait for it...' },
-  { style: 'soft-cartoon', caption: 'The reason' },
-  { style: 'storybook',    caption: 'Do this' },
-];
 
 type AuthLayoutProps = {
   children: ReactNode;
@@ -35,16 +28,6 @@ export const AuthLayout = ({ children }: AuthLayoutProps) => {
             deserves a<br />
             <span className="text-primary">spotlight.</span>
           </h2>
-          <div className="mt-8 flex gap-3">
-            {SHOWCASE_SCENES.map((scene, i) => (
-              <div
-                key={scene.caption}
-                className="relative aspect-[9/16] max-w-[104px] flex-1 overflow-hidden rounded-lg border border-border"
-              >
-                <StyleThumb style={scene.style} n={i} caption={scene.caption} className="h-full w-full" />
-              </div>
-            ))}
-          </div>
         </div>
         <p className="relative text-[13px] text-muted-foreground">
           <span className="font-semibold text-foreground">40,000+</span> creators making shorts faster.
@@ -56,7 +39,7 @@ export const AuthLayout = ({ children }: AuthLayoutProps) => {
         <button
           type="button"
           onClick={toggleTheme}
-          aria-label={theme === 'dark' ? 'Activar modo claro' : 'Activar modo oscuro'}
+          aria-label={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
           className="absolute right-6 top-5 grid h-9 w-9 place-items-center rounded-sm border border-border text-muted-foreground transition hover:border-bd2 hover:text-foreground"
         >
           {theme === 'dark' ? <Sun className="h-[17px] w-[17px]" /> : <Moon className="h-[17px] w-[17px]" />}
