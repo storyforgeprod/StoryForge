@@ -3,3 +3,4 @@
 
 export { HomePage } from './routes/HomePage';
 export { NotFoundPage } from './routes/NotFoundPage';
+export { LandingPage } from './routes/LandingPage';
