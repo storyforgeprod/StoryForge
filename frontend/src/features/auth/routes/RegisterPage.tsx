@@ -7,7 +7,6 @@ import { AlertCircle, ArrowRight } from 'lucide-react';
 import { useAuth } from '../providers/AuthProvider';
 import { AuthLayout } from '../components/AuthLayout';
 import { AuthTabs } from '../components/AuthTabs';
-import { AuthSocial } from '../components/AuthSocial';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Alert, AlertDescription } from '@/components/ui/alert';
@@ -135,7 +134,6 @@ export const RegisterPage = () => {
         </form>
       </Form>
 
-      <AuthSocial />
     </AuthLayout>
   );
 };
