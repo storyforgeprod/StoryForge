@@ -6,6 +6,7 @@ import {
 import type { LucideIcon } from 'lucide-react';
 import { useAuth } from '@/features/auth';
 import { useTheme } from '@/app/providers/ThemeProvider';
+import { Button } from '@/components/ui/button';
 import { Brand } from '@/components/layout/Brand';
 
 // ── Decorative Visuals ────────────────────────────────────────────────────────
@@ -163,14 +164,16 @@ export function LandingPage() {
             <a href="#pricing"      className="text-sm text-muted-foreground transition-colors hover:text-foreground">Pricing</a>
           </div>
           <div className="flex items-center gap-3">
-            <button
+            <Button
               type="button"
+              variant="ghost"
+              size="icon"
               onClick={toggleTheme}
               aria-label="Toggle theme"
-              className="rounded-lg p-2 text-muted-foreground transition-colors hover:bg-elev hover:text-foreground"
+              className="text-muted-foreground hover:text-foreground"
             >
               {theme === 'dark' ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
-            </button>
+            </Button>
             {isAuthenticated ? (
               <Link
                 to="/home"
