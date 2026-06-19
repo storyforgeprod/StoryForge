@@ -55,7 +55,7 @@ export const ProjectsPage = () => {
         )}
 
         {state.phase === "success" && state.projects.length > 0 && (
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="grid grid-cols-1 gap-4 items-start sm:grid-cols-2 lg:grid-cols-3">
             {state.projects.map((project) => (
               <ProjectCard
                 key={project.id}
